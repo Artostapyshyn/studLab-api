@@ -1,5 +1,5 @@
 package com.artostapyshyn.studLabApi.util;
-import com.artostapyshyn.studLabApi.service.UserDetailsServiceImpl;
+import com.artostapyshyn.studLabApi.service.impl.UserDetailsServiceImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,7 +30,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String tokenHeader = request.getHeader("Authorization");
-        if (!StringUtils.startsWith(tokenHeader, "Bearer ")) {
+        if (StringUtils.isBlank(tokenHeader) || !tokenHeader.startsWith("Bearer ")) {
             log.warn("JWT Token does not begin with Bearer String");
             chain.doFilter(request, response);
             return;
