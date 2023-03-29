@@ -2,15 +2,19 @@ package com.artostapyshyn.studLabApi.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "university")
+@Table(name = "universities")
 public class University {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

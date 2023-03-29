@@ -1,17 +1,19 @@
 package com.artostapyshyn.studLabApi.entity;
 
+import com.artostapyshyn.studLabApi.enums.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.ArrayList;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "student")
+@Table(name = "students")
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +26,7 @@ public class Student {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private String birthDate;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -38,4 +40,7 @@ public class Student {
     @JsonBackReference
     private University university;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
 }
