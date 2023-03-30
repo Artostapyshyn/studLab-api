@@ -13,9 +13,9 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
     @Override
-    public void sendVerificationCode(String toEmail, String code) {
+    public void sendVerificationCode(String toEmail, int code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("artostapyshyn@gmail.com");
+        message.setFrom("StudLabBot@gmail.com");
         message.setTo(toEmail);
         message.setSubject("Verification code");
         message.setText("Your verification code is: " + code);
