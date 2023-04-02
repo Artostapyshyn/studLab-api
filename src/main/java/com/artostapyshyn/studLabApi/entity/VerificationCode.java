@@ -22,8 +22,8 @@ public class VerificationCode {
     @Column(nullable = false)
     private int code;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    @Column(name = "student_id")
+    private Long studentId;
 
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;

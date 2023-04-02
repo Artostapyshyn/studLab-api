@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -77,61 +78,51 @@ public class AuthController {
             return ResponseEntity.badRequest().body("User already registered with this email");
         }
 
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
         Student student = new Student();
         student.setEmail(email);
         student.setEnabled(false);
         studentService.save(student);
 
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        emailService.sendVerificationCode(email, verificationCode);
         VerificationCode verification = new VerificationCode();
-        verification.setEmail(email);
         verification.setCode(verificationCode);
-        verification.setExpirationDate(verificationCodeService.generateCode(email).getExpirationDate());
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
+
+        verification.setStudentId(student.getId());
         verificationCodeService.save(verification);
+
         return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
     }
-
     @PostMapping("/verification")
     public ResponseEntity<String> verifyCode(@RequestBody VerificationCode verificationCode) {
-        String email = verificationCode.getEmail();
+        Long id = verificationCode.getStudentId();
         int code = verificationCode.getCode();
-        Student student = studentService.findByEmail(email);
+        Optional<Student> student = studentService.findById(id);
 
-        if (student == null) {
+        if (student.isEmpty()) {
             return new ResponseEntity<>("Student with provided email does not exist", HttpStatus.BAD_REQUEST);
         }
 
-        VerificationCode savedVerificationCode = verificationCodeService.findByEmail(email);
-        if (savedVerificationCode == null) {
+        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.get().getId());
+        if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
             return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
         }
 
-        LocalDateTime expirationTime = savedVerificationCode.getExpirationDate();
+        LocalDateTime expirationTime = verifCode.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
             return new ResponseEntity<>("Verification code has expired", HttpStatus.BAD_REQUEST);
         }
 
-        int savedCode = savedVerificationCode.getCode();
+        int savedCode = verifCode.get().getCode();
         if (savedCode != code) {
             return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
         }
 
-        student.setEnabled(true);
-        studentService.save(student);
+        student.get().setEnabled(true);
+        studentService.save(student.get());
         return new ResponseEntity<>("User successfully verified", HttpStatus.OK);
-    }
-
-    public boolean isValidCode(String email, int code) {
-        VerificationCode verificationCode = verificationCodeService.findByEmail(email);
-        if (verificationCode != null) {
-            int savedCode = verificationCode.getCode();
-            LocalDateTime expirationTime = verificationCode.getExpirationDate();
-            LocalDateTime currentTime = LocalDateTime.now();
-            return (savedCode == code) && currentTime.isBefore(expirationTime);
-        }
-        return false;
     }
 
     @PostMapping("/sign-up")

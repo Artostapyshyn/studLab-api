@@ -1,7 +1,9 @@
 package com.artostapyshyn.studLabApi.service.impl;
 
+import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.repository.VerificationCodeRepository;
+import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.VerificationCodeService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,21 +18,20 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final VerificationCodeRepository verificationCodeRepository;
 
+    private final StudentService studentService;
+
     public VerificationCode generateCode(String email) {
-        Optional<VerificationCode> verificationCodeOptional = Optional.ofNullable(verificationCodeRepository.findByEmail(email));
-        VerificationCode verificationCode;
-        if (verificationCodeOptional.isPresent()) {
-            verificationCode = verificationCodeOptional.get();
-        } else {
-            verificationCode = new VerificationCode();
-            verificationCode.setEmail(email);
-        }
-        Random random = new Random();
-        int code = random.nextInt(900000) + 100000;
-        verificationCode.setCode(code);
-        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(15);
-        verificationCode.setExpirationDate(expirationTime);
+        Student student = studentService.findByEmail(email);
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setCode(generateRandomCode());
+        verificationCode.setStudentId(student.getId());
+        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(15));
         return verificationCodeRepository.save(verificationCode);
+    }
+
+    private int generateRandomCode() {
+        Random random = new Random();
+        return random.nextInt(900000) + 100000;
     }
 
     @Override
@@ -39,7 +40,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     }
 
     @Override
-    public VerificationCode findByEmail(String email) {
-        return verificationCodeRepository.findByEmail(email);
+    public Optional<VerificationCode> findByStudentId(Long id) {
+        return verificationCodeRepository.findById(id);
     }
 }

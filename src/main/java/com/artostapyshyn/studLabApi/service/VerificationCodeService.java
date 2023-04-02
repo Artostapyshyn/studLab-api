@@ -2,9 +2,11 @@ package com.artostapyshyn.studLabApi.service;
 
 import com.artostapyshyn.studLabApi.entity.VerificationCode;
 
+import java.util.Optional;
+
 public interface VerificationCodeService {
     VerificationCode generateCode(String email);
 
     VerificationCode save(VerificationCode verificationCode);
-    VerificationCode findByEmail(String email);
+    Optional<VerificationCode> findByStudentId(Long id);
 }
