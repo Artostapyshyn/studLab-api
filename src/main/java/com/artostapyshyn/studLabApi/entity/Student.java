@@ -29,6 +29,16 @@ public class Student {
     @Column(name = "birth_date")
     private String birthDate;
 
+    @Column(name = "major")
+    private String major;
+
+    @Column(name = "course")
+    private String course;
+
+    @Lob
+    @Column(name = "student_photo")
+    private byte[] photo;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

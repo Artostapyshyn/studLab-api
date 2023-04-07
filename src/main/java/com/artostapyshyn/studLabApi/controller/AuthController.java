@@ -20,7 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -94,7 +96,8 @@ public class AuthController {
 
         return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
     }
-    @PostMapping("/verification")
+
+    @PostMapping("/verify")
     public ResponseEntity<String> verifyCode(@RequestBody VerificationCode verificationCode) {
         Long id = verificationCode.getStudentId();
         int code = verificationCode.getCode();
@@ -127,21 +130,37 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> saveUser(@RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName,
-                                      @RequestParam("email") String email, @RequestParam("password") String password) {
+                                      @RequestParam("email") String email, @RequestParam("password") String password,
+                                      @RequestParam("photo") MultipartFile photo) {
         Map<String, Object> responseMap = new HashMap<>();
 
-        Student student = new Student();
-        student.setFirstName(firstName);
-        student.setLastName(lastName);
-        student.setPassword(new BCryptPasswordEncoder().encode(password));
-        student.setRole(Role.ROLE_STUDENT);
-        studentService.save(student);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-        String token = jwtTokenUtil.generateToken(userDetails);
+        Student student = studentService.findByEmail(email);
+        if (student == null) {
+            responseMap.put("message", "Invalid email address");
+            return ResponseEntity.badRequest().body(responseMap);
+        }
 
-        responseMap.put("email", email);
-        responseMap.put("message", "Account created successfully");
-        responseMap.put("token", token);
+        if (student.isEnabled()) {
+            try {
+                student.setFirstName(firstName);
+                student.setLastName(lastName);
+                student.setPassword(new BCryptPasswordEncoder().encode(password));
+                student.setPhoto(photo.getBytes());
+                student.setRole(Role.ROLE_STUDENT);
+                studentService.save(student);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                String token = jwtTokenUtil.generateToken(userDetails);
+
+                responseMap.put("email", email);
+                responseMap.put("message", "Account created successfully");
+                responseMap.put("token", token);
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().body("Failed to register student: " + e.getMessage());
+            }
+        } else {
+            responseMap.put("message", "Student not verified");
+            return ResponseEntity.badRequest().body(responseMap);
+        }
         return ResponseEntity.ok(responseMap);
     }
 }
