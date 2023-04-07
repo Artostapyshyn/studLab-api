@@ -8,6 +8,9 @@ import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.VerificationCodeService;
 import com.artostapyshyn.studLabApi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studLabApi.util.JwtTokenUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -162,5 +165,25 @@ public class AuthController {
             return ResponseEntity.badRequest().body(responseMap);
         }
         return ResponseEntity.ok(responseMap);
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        deleteCookie(request, response, "access_token");
+        return "You have been successfully logged out!";
+    }
+
+    public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    cookie.setValue("");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
+            }
+        }
     }
 }
