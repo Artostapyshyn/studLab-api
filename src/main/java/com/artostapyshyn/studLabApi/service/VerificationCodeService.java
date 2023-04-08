@@ -2,6 +2,7 @@ package com.artostapyshyn.studLabApi.service;
 
 import com.artostapyshyn.studLabApi.entity.VerificationCode;
 
+
 import java.util.Optional;
 
 public interface VerificationCodeService {
@@ -9,4 +10,6 @@ public interface VerificationCodeService {
 
     VerificationCode save(VerificationCode verificationCode);
     Optional<VerificationCode> findByStudentId(Long id);
+
+    void deleteExpiredTokens();
 }

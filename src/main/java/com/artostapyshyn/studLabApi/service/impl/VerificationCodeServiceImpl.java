@@ -5,7 +5,9 @@ import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.repository.VerificationCodeRepository;
 import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.VerificationCodeService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,5 +44,12 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     @Override
     public Optional<VerificationCode> findByStudentId(Long id) {
         return verificationCodeRepository.findById(id);
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    @Transactional
+    @Override
+    public void deleteExpiredTokens() {
+        verificationCodeRepository.deleteExpiredTokens();
     }
 }
