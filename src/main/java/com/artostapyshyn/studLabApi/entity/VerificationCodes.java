@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "verification_code")
-public class VerificationCode {
+@Table(name = "verification_codes")
+public class VerificationCodes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +27,7 @@ public class VerificationCode {
 
     @Column(name = "student_email")
     private String email;
+
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
 }

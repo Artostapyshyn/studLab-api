@@ -1,11 +1,11 @@
 package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Student;
-import com.artostapyshyn.studLabApi.entity.VerificationCode;
+import com.artostapyshyn.studLabApi.entity.VerificationCodes;
 import com.artostapyshyn.studLabApi.enums.Role;
 import com.artostapyshyn.studLabApi.service.EmailService;
 import com.artostapyshyn.studLabApi.service.StudentService;
-import com.artostapyshyn.studLabApi.service.VerificationCodeService;
+import com.artostapyshyn.studLabApi.service.VerificationCodesService;
 import com.artostapyshyn.studLabApi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studLabApi.util.JwtTokenUtil;
 import jakarta.servlet.http.Cookie;
@@ -38,10 +38,15 @@ import java.util.Optional;
 public class AuthController {
 
     private final StudentService studentService;
-    private final VerificationCodeService verificationCodeService;
+
+    private final VerificationCodesService verificationCodesService;
+
     private final EmailService emailService;
+
     private final AuthenticationManager authenticationManager;
+
     private final UserDetailsServiceImpl userDetailsService;
+
     private final JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("/login")
@@ -88,29 +93,28 @@ public class AuthController {
         student.setEnabled(false);
         studentService.save(student);
 
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        int verificationCode = verificationCodesService.generateCode(email).getCode();
         emailService.sendVerificationCode(email, verificationCode);
-        VerificationCode verification = new VerificationCode();
+        VerificationCodes verification = new VerificationCodes();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-
-        verification.setStudentId(student.getId());
-        verificationCodeService.save(verification);
+        verification.setEmail(student.getEmail());
+        verificationCodesService.save(verification);
 
         return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verifyCode(@RequestBody VerificationCode verificationCode) {
-        Long id = verificationCode.getStudentId();
-        int code = verificationCode.getCode();
-        Optional<Student> student = studentService.findById(id);
+    public ResponseEntity<String> verifyCode(@RequestBody VerificationCodes verificationCodes) {
+        String email = verificationCodes.getEmail();
+        int code = verificationCodes.getCode();
+        Student student = studentService.findByEmail(email);
 
-        if (student.isEmpty()) {
+        if (student == null) {
             return new ResponseEntity<>("Student with provided email does not exist", HttpStatus.BAD_REQUEST);
         }
 
-        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.get().getId());
+        Optional<VerificationCodes> verifCode = verificationCodesService.findByStudentId(student.getId());
         if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
             return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
         }
@@ -126,8 +130,8 @@ public class AuthController {
             return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
         }
 
-        student.get().setEnabled(true);
-        studentService.save(student.get());
+        student.setEnabled(true);
+        studentService.save(student);
         return new ResponseEntity<>("User successfully verified", HttpStatus.OK);
     }
 
