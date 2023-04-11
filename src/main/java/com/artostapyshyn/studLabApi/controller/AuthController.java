@@ -31,6 +31,7 @@ import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+@CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
 @RestController
 @RequestMapping("api/v1/auth")
 @AllArgsConstructor
@@ -189,5 +190,10 @@ public class AuthController {
                 }
             }
         }
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "Test get method!";
     }
 }
