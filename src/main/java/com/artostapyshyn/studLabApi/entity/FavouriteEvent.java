@@ -15,7 +15,7 @@ public class FavouriteEvent {
     private Long id;
 
     @Column(name = "student_id", nullable = false)
-    private Long userId;
+    private Long studentId;
 
     @ManyToOne
     @JoinColumn(name = "event_id")

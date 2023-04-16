@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
+
     private final JwtRequestFilter jwtRequestFilter;
 
     @Bean
@@ -37,7 +39,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("api/v1/auth/*").permitAll()
-                .requestMatchers("api/v1/favourites/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("api/v1/favourites/*", "api/v1/events/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -55,5 +57,4 @@ public class SecurityConfig {
             AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
 }

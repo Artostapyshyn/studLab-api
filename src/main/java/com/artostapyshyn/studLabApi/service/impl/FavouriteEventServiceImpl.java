@@ -15,13 +15,13 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     private final FavouriteEventRepository favouriteEventRepository;
 
     @Override
-    public List<FavouriteEvent> findByUserId(Long id) {
-        return favouriteEventRepository.findByUserId(id);
+    public List<FavouriteEvent> findByStudentId(Long id) {
+        return favouriteEventRepository.findByStudentId(id);
     }
 
     @Override
-    public FavouriteEvent findByUserIdAndEventId(Long studentId, Long eventId) {
-        return favouriteEventRepository.findByUserIdAndEventId(studentId, eventId);
+    public FavouriteEvent findByStudentIdAndEventId(Long studentId, Long eventId) {
+        return favouriteEventRepository.findByStudentIdAndEventId(studentId, eventId);
     }
 
     @Override

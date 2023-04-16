@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface FavouriteEventRepository extends JpaRepository<FavouriteEvent, Long> {
-    List<FavouriteEvent> findByUserId(Long studentId);
+    List<FavouriteEvent> findByStudentId(Long studentId);
 
-    FavouriteEvent findByUserIdAndEventId(Long studentId, Long eventId);
+    FavouriteEvent findByStudentIdAndEventId(Long studentId, Long eventId);
 }

@@ -61,6 +61,7 @@ public class AuthController {
                 log.info("Logged In");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 String token = jwtTokenUtil.generateToken(userDetails);
+                log.info(token);
                 responseMap.put("message", "Logged In");
                 responseMap.put("token", "Bearer " + token);
                 return ResponseEntity.ok(responseMap);

@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface FavouriteEventService {
 
-    List<FavouriteEvent> findByUserId(Long userId);
+    List<FavouriteEvent> findByStudentId(Long userId);
 
-    FavouriteEvent findByUserIdAndEventId(Long userId, Long eventId);
+    FavouriteEvent findByStudentIdAndEventId(Long userId, Long eventId);
 
     FavouriteEvent save(FavouriteEvent favouriteEvent);
 
