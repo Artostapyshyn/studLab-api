@@ -1,7 +1,7 @@
 package com.artostapyshyn.studLabApi.service.impl;
 
 import com.artostapyshyn.studLabApi.entity.Student;
-import com.artostapyshyn.studLabApi.entity.VerificationCodes;
+import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.repository.VerificationCodesRepository;
 import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.VerificationCodesService;
@@ -22,13 +22,13 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
 
     private final StudentService studentService;
 
-    public VerificationCodes generateCode(String email) {
+    public VerificationCode generateCode(String email) {
         Student student = studentService.findByEmail(email);
-        VerificationCodes verificationCodes = new VerificationCodes();
-        verificationCodes.setCode(generateRandomCode());
-        verificationCodes.setStudentId(student.getId());
-        verificationCodes.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-        return verificationCodesRepository.save(verificationCodes);
+        VerificationCode verificationCode = new VerificationCode();
+        verificationCode.setCode(generateRandomCode());
+        verificationCode.setStudentId(student.getId());
+        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(15));
+        return verificationCodesRepository.save(verificationCode);
     }
 
     private int generateRandomCode() {
@@ -37,12 +37,12 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
     }
 
     @Override
-    public VerificationCodes save(VerificationCodes verificationCodes) {
-        return verificationCodesRepository.save(verificationCodes);
+    public VerificationCode save(VerificationCode verificationCode) {
+        return verificationCodesRepository.save(verificationCode);
     }
 
     @Override
-    public Optional<VerificationCodes> findByStudentId(Long id) {
+    public Optional<VerificationCode> findByStudentId(Long id) {
         return verificationCodesRepository.findById(id);
     }
 

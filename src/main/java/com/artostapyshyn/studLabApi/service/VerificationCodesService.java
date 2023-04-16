@@ -1,15 +1,15 @@
 package com.artostapyshyn.studLabApi.service;
 
-import com.artostapyshyn.studLabApi.entity.VerificationCodes;
+import com.artostapyshyn.studLabApi.entity.VerificationCode;
 
 
 import java.util.Optional;
 
 public interface VerificationCodesService {
-    VerificationCodes generateCode(String email);
+    VerificationCode generateCode(String email);
 
-    VerificationCodes save(VerificationCodes verificationCodes);
-    Optional<VerificationCodes> findByStudentId(Long id);
+    VerificationCode save(VerificationCode verificationCode);
+    Optional<VerificationCode> findByStudentId(Long id);
 
     void deleteExpiredTokens();
 }

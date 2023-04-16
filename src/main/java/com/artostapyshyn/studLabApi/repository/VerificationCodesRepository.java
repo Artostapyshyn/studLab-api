@@ -1,12 +1,12 @@
 package com.artostapyshyn.studLabApi.repository;
 
-import com.artostapyshyn.studLabApi.entity.VerificationCodes;
+import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface VerificationCodesRepository extends JpaRepository<VerificationCodes, Long> {
+public interface VerificationCodesRepository extends JpaRepository<VerificationCode, Long> {
     @Modifying
-    @Query("DELETE FROM VerificationCodes t WHERE t.expirationDate < NOW()")
+    @Query("DELETE FROM VerificationCode t WHERE t.expirationDate < NOW()")
     void deleteExpiredTokens();
 }

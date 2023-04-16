@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -44,6 +46,14 @@ public class Student {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "student_resumes")
+    @ElementCollection
+    private Set<byte[]> resumes;
+
+    @Column(name = "student_certificates")
+    @ElementCollection
+    private Set<byte[]> certificates;
 
     @Column(name = "enabled")
     private boolean enabled = true;
