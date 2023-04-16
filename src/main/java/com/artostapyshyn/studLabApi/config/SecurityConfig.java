@@ -1,5 +1,6 @@
 package com.artostapyshyn.studLabApi.config;
 
+import com.artostapyshyn.studLabApi.enums.Role;
 import com.artostapyshyn.studLabApi.util.JwtRequestFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("api/v1/auth/*").permitAll()
+                .requestMatchers("api/v1/favourites/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

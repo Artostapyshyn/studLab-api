@@ -1,6 +1,5 @@
 package com.artostapyshyn.studLabApi.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,19 +7,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "event_comments")
-public class Comment {
+@Table(name = "favourite_events")
+public class FavouriteEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "comment_text", nullable = false)
-    private String commentText;
+    @Column(name = "student_id", nullable = false)
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comments_id")
-    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(name = "event_id")
     private Event event;
 
 }

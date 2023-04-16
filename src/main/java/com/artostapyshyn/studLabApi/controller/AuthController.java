@@ -1,7 +1,7 @@
 package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Student;
-import com.artostapyshyn.studLabApi.entity.VerificationCodes;
+import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.enums.Role;
 import com.artostapyshyn.studLabApi.service.EmailService;
 import com.artostapyshyn.studLabApi.service.StudentService;
@@ -96,7 +96,7 @@ public class AuthController {
 
         int verificationCode = verificationCodesService.generateCode(email).getCode();
         emailService.sendVerificationCode(email, verificationCode);
-        VerificationCodes verification = new VerificationCodes();
+        VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
         verification.setEmail(student.getEmail());
@@ -106,16 +106,16 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<String> verifyCode(@RequestBody VerificationCodes verificationCodes) {
-        String email = verificationCodes.getEmail();
-        int code = verificationCodes.getCode();
+    public ResponseEntity<String> verifyCode(@RequestBody VerificationCode verificationCode) {
+        String email = verificationCode.getEmail();
+        int code = verificationCode.getCode();
         Student student = studentService.findByEmail(email);
 
         if (student == null) {
             return new ResponseEntity<>("Student with provided email does not exist", HttpStatus.BAD_REQUEST);
         }
 
-        Optional<VerificationCodes> verifCode = verificationCodesService.findByStudentId(student.getId());
+        Optional<VerificationCode> verifCode = verificationCodesService.findByStudentId(student.getId());
         if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
             return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
         }
@@ -190,10 +190,5 @@ public class AuthController {
                 }
             }
         }
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "Test get method!";
     }
 }
