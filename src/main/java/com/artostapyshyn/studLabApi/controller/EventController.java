@@ -1,9 +1,7 @@
 package com.artostapyshyn.studLabApi.controller;
 
-import com.artostapyshyn.studLabApi.entity.Event;
 import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -6,7 +6,6 @@ import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studLabApi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studLabApi.service.impl.StudentServiceImpl;
-import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
