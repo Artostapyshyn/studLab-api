@@ -24,6 +24,9 @@ public class University {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "domain", nullable = false)
+    private String domain;
+
     @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private Set<Student> students;

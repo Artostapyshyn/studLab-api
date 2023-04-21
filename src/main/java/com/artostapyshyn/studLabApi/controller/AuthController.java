@@ -1,10 +1,12 @@
 package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Student;
+import com.artostapyshyn.studLabApi.entity.University;
 import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.enums.Role;
 import com.artostapyshyn.studLabApi.service.EmailService;
 import com.artostapyshyn.studLabApi.service.StudentService;
+import com.artostapyshyn.studLabApi.service.UniversityService;
 import com.artostapyshyn.studLabApi.service.VerificationCodesService;
 import com.artostapyshyn.studLabApi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studLabApi.util.JwtTokenUtil;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -43,6 +46,8 @@ public class AuthController {
     private final VerificationCodesService verificationCodesService;
 
     private final EmailService emailService;
+
+    private final UniversityService universityService;
 
     private final AuthenticationManager authenticationManager;
 
@@ -100,10 +105,27 @@ public class AuthController {
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-        verification.setEmail(student.getEmail());
-        verificationCodesService.save(verification);
+        if(isValidEmailDomain(email, student)) {
+            verification.setEmail(student.getEmail());
+            verificationCodesService.save(verification);
+            return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
+        }
 
-        return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
+        return ResponseEntity.ok().body("Your email is not valid");
+    }
+
+    public boolean isValidEmailDomain(String email, Student student) {
+        String domain = Arrays.stream(email.split("@"))
+                .skip(1)
+                .findFirst()
+                .orElse("");
+
+        University university = universityService.findByDomain(domain);
+            if (university != null) {
+                student.setUniversity(university);
+                return true;
+            }
+            return false;
     }
 
     @PostMapping("/verify")
@@ -140,7 +162,8 @@ public class AuthController {
     @PostMapping("/sign-up")
     public ResponseEntity<?> saveUser(@RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName,
                                       @RequestParam("email") String email, @RequestParam("password") String password,
-                                      @RequestParam("photo") MultipartFile photo) {
+                                      @RequestParam("photo") MultipartFile photo, @RequestParam("major") String major,
+                                      @RequestParam("course") String course, @RequestParam("birth_date") String birthDate) {
         Map<String, Object> responseMap = new HashMap<>();
 
         Student student = studentService.findByEmail(email);
@@ -155,6 +178,9 @@ public class AuthController {
                 student.setLastName(lastName);
                 student.setPassword(new BCryptPasswordEncoder().encode(password));
                 student.setPhoto(photo.getBytes());
+                student.setMajor(major);
+                student.setCourse(course);
+                student.setBirthDate(birthDate);
                 student.setRole(Role.ROLE_STUDENT);
                 studentService.save(student);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
