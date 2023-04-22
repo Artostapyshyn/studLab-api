@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
 @Log4j2
 @RestController
 @RequestMapping("/api/v1/favourites")
@@ -49,7 +50,7 @@ public class FavouriteEventController {
     }
 
     @GetMapping
-    public List<Event> getFavouriteEventsByUserId(Authentication authentication) {
+    public List<Event> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);
         return favouriteEvents.stream()

@@ -1,6 +1,6 @@
 package com.artostapyshyn.studLabApi.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,8 +33,13 @@ public class Event {
     @Column(name = "event_photo")
     private byte[] eventPhoto;
 
+    @JsonBackReference("event-comments")
     @OneToMany(mappedBy = "event")
-    @JsonManagedReference
     private Set<Comment> eventComments;
+
+    public void addComment(Comment comment) {
+        eventComments.add(comment);
+        comment.setEvent(this);
+    }
 
 }

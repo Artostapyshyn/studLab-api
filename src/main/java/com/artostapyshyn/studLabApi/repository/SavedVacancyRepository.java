@@ -1,6 +1,5 @@
 package com.artostapyshyn.studLabApi.repository;
 
-import com.artostapyshyn.studLabApi.entity.FavouriteEvent;
 import com.artostapyshyn.studLabApi.entity.SavedVacancy;
 import org.springframework.data.jpa.repository.JpaRepository;
 

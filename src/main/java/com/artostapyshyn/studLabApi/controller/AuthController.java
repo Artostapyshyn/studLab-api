@@ -36,7 +36,7 @@ import java.util.Optional;
 
 @CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
 @RestController
-@RequestMapping("api/v1/auth")
+@RequestMapping("/api/v1/auth")
 @AllArgsConstructor
 @Log4j2
 public class AuthController {
