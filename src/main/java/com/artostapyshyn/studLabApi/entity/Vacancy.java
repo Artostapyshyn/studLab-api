@@ -11,7 +11,7 @@ import lombok.Setter;
 public class Vacancy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "vacancy_id", nullable = false)
     private Long id;
 
     @Column(name = "description", nullable = false)

@@ -1,6 +1,5 @@
 package com.artostapyshyn.studLabApi.repository;
 
-import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.entity.University;
 import org.springframework.data.jpa.repository.JpaRepository;
 
