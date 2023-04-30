@@ -2,6 +2,7 @@ package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    @Operation(summary = "Uplodad resume to personal account")
     @PostMapping("/resumes")
     public ResponseEntity<?> addResume(Authentication authentication, @RequestParam("file") MultipartFile file) throws IOException {
         Long studentId = getAuthStudentId(authentication);
@@ -39,6 +41,7 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Uplodad certificate to personal account")
     @PostMapping("/certificates")
     public ResponseEntity<?> addCertificate(Authentication authentication, @RequestParam("file") MultipartFile file) throws IOException {
         Long studentId = getAuthStudentId(authentication);

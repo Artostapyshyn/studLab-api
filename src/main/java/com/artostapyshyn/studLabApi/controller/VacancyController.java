@@ -1,6 +1,7 @@
 package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.service.VacancyService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ public class VacancyController {
 
     private final VacancyService vacancyService;
 
+    @Operation(summary = "Get all vacancies")
     @GetMapping
     public ResponseEntity<List<Object>> getAllVacancies(){
         List<Object> response = new ArrayList<>();

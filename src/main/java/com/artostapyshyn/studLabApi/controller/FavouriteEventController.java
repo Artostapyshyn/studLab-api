@@ -6,6 +6,7 @@ import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studLabApi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studLabApi.service.impl.StudentServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ public class FavouriteEventController {
 
     private final EventServiceImpl eventService;
 
+    @Operation(summary = "Add event to favourite")
     @PostMapping
     public FavouriteEvent addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
@@ -37,6 +39,7 @@ public class FavouriteEventController {
         return favouriteEventService.save(favouriteEvent);
     }
 
+    @Operation(summary = "Remove event from favourite")
     @DeleteMapping
     public void removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
         Long studentId = getAuthStudentId(authentication);
@@ -51,6 +54,7 @@ public class FavouriteEventController {
         return student.getId();
     }
 
+    @Operation(summary = "Get student favourite events")
     @GetMapping
     public List<Event> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);

@@ -27,6 +27,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,6 +57,7 @@ public class AuthController {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    @Operation(summary = "Login to student system")
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestParam("email") String email, @RequestParam("password") String password) {
         Map<String, Object> responseMap;
@@ -88,6 +91,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
 
@@ -128,6 +132,7 @@ public class AuthController {
             return false;
     }
 
+    @Operation(summary = "Verify student email")
     @PostMapping("/verify")
     public ResponseEntity<String> verifyCode(@RequestBody VerificationCode verificationCode) {
         String email = verificationCode.getEmail();
@@ -159,6 +164,7 @@ public class AuthController {
         return new ResponseEntity<>("User successfully verified", HttpStatus.OK);
     }
 
+    @Operation(summary = "Sign-up after verification")
     @PostMapping("/sign-up")
     public ResponseEntity<?> saveUser(@RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName,
                                       @RequestParam("email") String email, @RequestParam("password") String password,
@@ -199,6 +205,7 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
+    @Operation(summary = "Logout from account")
     @GetMapping("/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         deleteCookie(request, response, "access_token");

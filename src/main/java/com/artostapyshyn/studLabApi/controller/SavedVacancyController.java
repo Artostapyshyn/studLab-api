@@ -4,6 +4,7 @@ import com.artostapyshyn.studLabApi.entity.*;
 import com.artostapyshyn.studLabApi.service.SavedVacancyService;
 import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.VacancyService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class SavedVacancyController {
 
     private final VacancyService vacancyService;
 
+    @Operation(summary = "Save vacancy")
     @PostMapping
     public SavedVacancy saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
@@ -32,6 +34,7 @@ public class SavedVacancyController {
         return savedVacancyService.save(savedVacancy);
     }
 
+    @Operation(summary = "Remove vacancy from saved")
     @DeleteMapping
     public void removeSavedVacancy(Authentication authentication, @RequestParam("vacancyId") Long vacancyId) {
         Long studentId = getAuthStudentId(authentication);
@@ -45,6 +48,7 @@ public class SavedVacancyController {
         return student.getId();
     }
 
+    @Operation(summary = "Get student saved vacancies")
     @GetMapping
     public List<Vacancy> getSavedVacanciesByStudentId(Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);

@@ -6,6 +6,7 @@ import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.CommentService;
 import com.artostapyshyn.studLabApi.service.StudentService;
 import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class CommentController {
 
     private final StudentService studentService;
 
+    @Operation(summary = "Add comment to event")
     @PostMapping
     public ResponseEntity<?> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
         List<Object> response = new ArrayList<>();
@@ -54,6 +56,7 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Get all comments to event")
     @GetMapping
     public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         List<Object> response = new ArrayList<>();
