@@ -33,6 +33,7 @@ public class FavouriteEventController {
         FavouriteEvent favouriteEvent = new FavouriteEvent();
         favouriteEvent.setEvent(event);
         favouriteEvent.setStudentId(studentId);
+        favouriteEventService.addToFavorites(eventId);
         return favouriteEventService.save(favouriteEvent);
     }
 
@@ -41,6 +42,7 @@ public class FavouriteEventController {
         Long studentId = getAuthStudentId(authentication);
         FavouriteEvent favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
         favouriteEventService.delete(favouriteEvent);
+        favouriteEventService.removeFromFavorites(eventId);
     }
 
     private Long getAuthStudentId(Authentication authentication) {

@@ -27,4 +27,19 @@ public class EventServiceImpl implements EventService {
     public Event save(Event event) {
         return eventRepository.save(event);
     }
+
+    @Override
+    public List<Event> findPopularEvents() {
+        return eventRepository.findPopularEvents();
+    }
+
+    @Override
+    public List<Event> findAllOrderByDateAsc() {
+        return eventRepository.findAllOrderByDateAsc();
+    }
+
+    @Override
+    public List<Event> findAllOrderByCreationDateAsc() {
+        return eventRepository.findAllOrderByCreationDateAsc();
+    }
 }

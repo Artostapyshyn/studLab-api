@@ -13,4 +13,8 @@ public interface FavouriteEventService {
     FavouriteEvent save(FavouriteEvent favouriteEvent);
 
     void delete(FavouriteEvent favouriteEvent);
+
+    void removeFromFavorites(long eventId);
+
+    void addToFavorites(long eventId);
 }

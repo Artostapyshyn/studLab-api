@@ -10,4 +10,10 @@ public interface EventService {
     Event findEventById(Long id);
 
     Event save(Event event);
+
+    List<Event> findPopularEvents();
+
+    List<Event> findAllOrderByDateAsc();
+
+    List<Event> findAllOrderByCreationDateAsc();
 }

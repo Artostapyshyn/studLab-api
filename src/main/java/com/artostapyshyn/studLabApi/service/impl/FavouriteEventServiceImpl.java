@@ -1,6 +1,8 @@
 package com.artostapyshyn.studLabApi.service.impl;
 
+import com.artostapyshyn.studLabApi.entity.Event;
 import com.artostapyshyn.studLabApi.entity.FavouriteEvent;
+import com.artostapyshyn.studLabApi.repository.EventRepository;
 import com.artostapyshyn.studLabApi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studLabApi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
@@ -13,6 +15,8 @@ import java.util.List;
 public class FavouriteEventServiceImpl implements FavouriteEventService {
 
     private final FavouriteEventRepository favouriteEventRepository;
+
+    private final EventRepository eventRepository;
 
     @Override
     public List<FavouriteEvent> findByStudentId(Long id) {
@@ -32,5 +36,19 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     @Override
     public void delete(FavouriteEvent favouriteEvent) {
         favouriteEventRepository.delete(favouriteEvent);
+    }
+
+    @Override
+    public void removeFromFavorites(long eventId) {
+        Event event = eventRepository.findEventById(eventId);
+        event.setFavoritedCount(event.getFavoritedCount() - 1);
+        eventRepository.save(event);
+    }
+
+    @Override
+    public void addToFavorites(long eventId) {
+        Event event = eventRepository.findEventById(eventId);
+        event.setFavoritedCount(event.getFavoritedCount() + 1);
+        eventRepository.save(event);
     }
 }
