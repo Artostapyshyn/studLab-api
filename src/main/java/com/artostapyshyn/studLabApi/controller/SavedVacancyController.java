@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
 @RestController
@@ -27,9 +28,9 @@ public class SavedVacancyController {
     @PostMapping
     public SavedVacancy saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
-        Vacancy vacancy = vacancyService.findVacancyById(vacancyId);
+        Optional<Vacancy> vacancy = vacancyService.findVacancyById(vacancyId);
         SavedVacancy savedVacancy = new SavedVacancy();
-        savedVacancy.setVacancy(vacancy);
+        savedVacancy.setVacancy(vacancy.get());
         savedVacancy.setStudentId(studentId);
         return savedVacancyService.save(savedVacancy);
     }

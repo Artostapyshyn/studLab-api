@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("api/v1/auth/*").permitAll()
                 .requestMatchers("api/v1/vacancies/*", "api/v1/comments/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("api/v1/favourites/*", "api/v1/events/*", "api/v1/students/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
-                .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator").permitAll()
+                .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/*").permitAll()
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

@@ -20,7 +20,7 @@ public class Event {
     private Long id;
 
     @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")
-    @Column(name = "date_of_event")
+    @Column(name = "date_of_event", nullable = false)
     private LocalDateTime date;
 
     @Column(name = "venue", nullable = false)
@@ -33,7 +33,7 @@ public class Event {
     private String nameOfEvent;
 
     @Lob
-    @Column(name = "event_photo")
+    @Column(name = "event_photo", nullable = false)
     private byte[] eventPhoto;
 
     @Column(name = "favorited_count")

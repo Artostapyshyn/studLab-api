@@ -36,14 +36,14 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<?> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
         List<Object> response = new ArrayList<>();
-        Event event = eventService.findEventById(eventId);
-        if (event != null) {
+        Optional<Event> event = eventService.findEventById(eventId);
+        if (event.isPresent()) {
             Optional<Student> student = studentService.findById(getAuthStudentId(authentication));
             if(student.isPresent()) {
                 comment.setStudent(student.get());
-                event.addComment(comment);
+                event.get().addComment(comment);
                 commentService.save(comment);
-                eventService.save(event);
+                eventService.save(event.get());
                 response.add(comment);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             } else {
@@ -60,9 +60,9 @@ public class CommentController {
     @GetMapping
     public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         List<Object> response = new ArrayList<>();
-        Event event = eventService.findEventById(eventId);
-        if (event != null) {
-            Set<Comment> comments = event.getEventComments();
+        Optional<Event> event = eventService.findEventById(eventId);
+        if (event.isPresent()) {
+            Set<Comment> comments = event.get().getEventComments();
             response.add(comments);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {

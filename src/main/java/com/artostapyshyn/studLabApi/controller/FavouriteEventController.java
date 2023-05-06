@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
 @Log4j2
@@ -31,9 +32,9 @@ public class FavouriteEventController {
     @PostMapping
     public FavouriteEvent addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
-        Event event = eventService.findEventById(eventId);
+        Optional<Event> event = eventService.findEventById(eventId);
         FavouriteEvent favouriteEvent = new FavouriteEvent();
-        favouriteEvent.setEvent(event);
+        favouriteEvent.setEvent(event.get());
         favouriteEvent.setStudentId(studentId);
         favouriteEventService.addToFavorites(eventId);
         return favouriteEventService.save(favouriteEvent);
@@ -43,8 +44,8 @@ public class FavouriteEventController {
     @DeleteMapping
     public void removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
         Long studentId = getAuthStudentId(authentication);
-        FavouriteEvent favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
-        favouriteEventService.delete(favouriteEvent);
+        Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
+        favouriteEventService.delete(favouriteEvent.get());
         favouriteEventService.removeFromFavorites(eventId);
     }
 

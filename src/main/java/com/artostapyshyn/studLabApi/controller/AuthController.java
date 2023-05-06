@@ -23,13 +23,11 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,43 +164,30 @@ public class AuthController {
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping("/sign-up")
-    public ResponseEntity<?> saveUser(@RequestParam("first_name") String firstName, @RequestParam("last_name") String lastName,
-                                      @RequestParam("email") String email, @RequestParam("password") String password,
-                                      @RequestParam("photo") MultipartFile photo, @RequestParam("major") String major,
-                                      @RequestParam("course") String course, @RequestParam("birth_date") String birthDate) {
+    public ResponseEntity<?> saveUser(@RequestBody Student student, @RequestParam("image") MultipartFile image) {
         Map<String, Object> responseMap = new HashMap<>();
 
-        Student student = studentService.findByEmail(email);
-        if (student == null) {
-            responseMap.put("message", "Invalid email address");
-            return ResponseEntity.badRequest().body(responseMap);
-        }
-
-        if (student.isEnabled()) {
-            try {
-                student.setFirstName(firstName);
-                student.setLastName(lastName);
-                student.setPassword(new BCryptPasswordEncoder().encode(password));
-                student.setPhoto(photo.getBytes());
-                student.setMajor(major);
-                student.setCourse(course);
-                student.setBirthDate(birthDate);
+        studentService.findByEmail(student.getEmail());
+        if (student != null) {
+            if (student.isEnabled()) {
                 student.setRole(Role.ROLE_STUDENT);
                 studentService.save(student);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
                 String token = jwtTokenUtil.generateToken(userDetails);
 
-                responseMap.put("email", email);
+                responseMap.put("email", student.getEmail());
                 responseMap.put("message", "Account created successfully");
                 responseMap.put("token", token);
-            } catch (IOException e) {
-                return ResponseEntity.badRequest().body("Failed to register student: " + e.getMessage());
+            } else {
+                responseMap.put("message", "Student not verified");
+                return ResponseEntity.badRequest().body(responseMap);
             }
+            return ResponseEntity.ok(responseMap);
         } else {
-            responseMap.put("message", "Student not verified");
+            responseMap.put("message", "Error occurred while registering student");
             return ResponseEntity.badRequest().body(responseMap);
         }
-        return ResponseEntity.ok(responseMap);
+
     }
 
     @Operation(summary = "Logout from account")
