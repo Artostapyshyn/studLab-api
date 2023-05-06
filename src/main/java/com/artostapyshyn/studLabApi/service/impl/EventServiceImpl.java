@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -19,8 +20,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Event findEventById(Long id) {
-        return eventRepository.findEventById(id);
+    public Optional<Event> findEventById(Long id) {
+        return Optional.ofNullable(eventRepository.findEventById(id));
     }
 
     @Override
@@ -41,5 +42,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> findAllOrderByCreationDateAsc() {
         return eventRepository.findAllOrderByCreationDateAsc();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        eventRepository.deleteById(id);
     }
 }

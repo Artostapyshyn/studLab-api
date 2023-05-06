@@ -3,18 +3,19 @@ package com.artostapyshyn.studLabApi.service;
 import com.artostapyshyn.studLabApi.entity.FavouriteEvent;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FavouriteEventService {
 
     List<FavouriteEvent> findByStudentId(Long userId);
 
-    FavouriteEvent findByStudentIdAndEventId(Long userId, Long eventId);
+    Optional<FavouriteEvent> findByStudentIdAndEventId(Long userId, Long eventId);
 
     FavouriteEvent save(FavouriteEvent favouriteEvent);
 
     void delete(FavouriteEvent favouriteEvent);
 
-    void removeFromFavorites(long eventId);
+    void removeFromFavorites(Long eventId);
 
-    void addToFavorites(long eventId);
+    void addToFavorites(Long eventId);
 }

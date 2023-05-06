@@ -3,11 +3,12 @@ package com.artostapyshyn.studLabApi.service;
 import com.artostapyshyn.studLabApi.entity.Event;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventService {
     List<Event> findAll();
 
-    Event findEventById(Long id);
+    Optional<Event> findEventById(Long id);
 
     Event save(Event event);
 
@@ -16,4 +17,6 @@ public interface EventService {
     List<Event> findAllOrderByDateAsc();
 
     List<Event> findAllOrderByCreationDateAsc();
+
+    void deleteById(Long id);
 }

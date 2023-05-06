@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -19,12 +20,17 @@ public class VacancyServiceImpl implements VacancyService {
     }
 
     @Override
-    public Vacancy findVacancyById(Long id) {
-        return vacancyRepository.findVacancyById(id);
+    public Optional<Vacancy> findVacancyById(Long id) {
+        return Optional.ofNullable(vacancyRepository.findVacancyById(id));
     }
 
     @Override
     public Vacancy save(Vacancy vacancy) {
         return vacancyRepository.save(vacancy);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        vacancyRepository.deleteById(id);
     }
 }

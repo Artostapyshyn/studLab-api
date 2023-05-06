@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -24,8 +25,8 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     }
 
     @Override
-    public FavouriteEvent findByStudentIdAndEventId(Long studentId, Long eventId) {
-        return favouriteEventRepository.findByStudentIdAndEventId(studentId, eventId);
+    public Optional<FavouriteEvent> findByStudentIdAndEventId(Long studentId, Long eventId) {
+        return Optional.ofNullable(favouriteEventRepository.findByStudentIdAndEventId(studentId, eventId));
     }
 
     @Override
@@ -39,14 +40,14 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     }
 
     @Override
-    public void removeFromFavorites(long eventId) {
+    public void removeFromFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId);
         event.setFavoritedCount(event.getFavoritedCount() - 1);
         eventRepository.save(event);
     }
 
     @Override
-    public void addToFavorites(long eventId) {
+    public void addToFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId);
         event.setFavoritedCount(event.getFavoritedCount() + 1);
         eventRepository.save(event);
