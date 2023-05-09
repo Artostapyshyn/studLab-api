@@ -41,7 +41,7 @@ public class Student {
     @Column(name = "student_photo")
     private byte[] photo;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "password")
@@ -55,7 +55,7 @@ public class Student {
     @ElementCollection
     private Set<byte[]> certificates;
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,6 +64,6 @@ public class Student {
     private University university;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role;
 }

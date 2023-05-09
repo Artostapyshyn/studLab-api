@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.hibernate.annotations.ColumnDefault;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -19,9 +20,8 @@ public class Event {
     @Column(name = "event_id", nullable = false)
     private Long id;
 
-    @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")
     @Column(name = "date_of_event", nullable = false)
-    private LocalDateTime date;
+    private String date;
 
     @Column(name = "venue", nullable = false)
     private String venue;
@@ -37,11 +37,11 @@ public class Event {
     private byte[] eventPhoto;
 
     @Column(name = "favorited_count")
+    @ColumnDefault("0")
     private int favoritedCount;
 
-    @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm")
     @Column(name = "date_of_creation")
-    private LocalDateTime creationDate;
+    private Timestamp creationDate;
 
     @JsonBackReference("event-comments")
     @OneToMany(mappedBy = "event")
@@ -54,7 +54,7 @@ public class Event {
 
     @PrePersist
     private void init() {
-        creationDate = LocalDateTime.now();
+        creationDate = Timestamp.valueOf(LocalDateTime.now());
     }
 
 

@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,9 +94,9 @@ public class AuthController {
     @PostMapping("/join")
     public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
 
-        if (studentService.findByEmail(email) != null) {
-            return ResponseEntity.badRequest().body("User already registered with this email");
-        }
+         if (studentService.findByEmail(email) != null) {
+             return ResponseEntity.badRequest().body("User already registered with this email");
+         }
 
         Student student = new Student();
         student.setEmail(email);
@@ -107,13 +108,13 @@ public class AuthController {
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-        if(isValidEmailDomain(email, student)) {
+          if(isValidEmailDomain(email, student)) {
             verification.setEmail(student.getEmail());
             verificationCodesService.save(verification);
             return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
-        }
+          }
 
-        return ResponseEntity.ok().body("Your email is not valid");
+          return ResponseEntity.ok().body("Your email is not valid");
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
@@ -164,12 +165,17 @@ public class AuthController {
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping("/sign-up")
-    public ResponseEntity<?> saveUser(@RequestBody Student student, @RequestParam("image") MultipartFile image) {
+    public ResponseEntity<?> saveUser(@RequestPart("student") Student student, @RequestPart("image") MultipartFile image) throws IOException {
         Map<String, Object> responseMap = new HashMap<>();
 
-        studentService.findByEmail(student.getEmail());
-        if (student != null) {
+        Student existingStudent = studentService.findByEmail(student.getEmail());
+        if (existingStudent != null) {
+            student = existingStudent;
+        }
+
             if (student.isEnabled()) {
+                byte[] profileImage = image.getBytes();
+                student.setPhoto(profileImage);
                 student.setRole(Role.ROLE_STUDENT);
                 studentService.save(student);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
@@ -183,11 +189,6 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(responseMap);
             }
             return ResponseEntity.ok(responseMap);
-        } else {
-            responseMap.put("message", "Error occurred while registering student");
-            return ResponseEntity.badRequest().body(responseMap);
-        }
-
     }
 
     @Operation(summary = "Logout from account")

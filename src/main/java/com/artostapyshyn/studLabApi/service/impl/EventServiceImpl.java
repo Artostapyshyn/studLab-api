@@ -14,6 +14,7 @@ import java.util.Optional;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
+
     @Override
     public List<Event> findAll() {
         return eventRepository.findAll();
@@ -48,4 +49,5 @@ public class EventServiceImpl implements EventService {
     public void deleteById(Long id) {
         eventRepository.deleteById(id);
     }
+
 }

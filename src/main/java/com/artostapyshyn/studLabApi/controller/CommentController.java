@@ -4,8 +4,8 @@ import com.artostapyshyn.studLabApi.entity.Comment;
 import com.artostapyshyn.studLabApi.entity.Event;
 import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.CommentService;
+import com.artostapyshyn.studLabApi.service.EventService;
 import com.artostapyshyn.studLabApi.service.StudentService;
-import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -26,7 +26,7 @@ import java.util.Set;
 @RequestMapping("/api/v1/comments")
 public class CommentController {
 
-    private final EventServiceImpl eventService;
+    private final EventService eventService;
 
     private final CommentService commentService;
 
