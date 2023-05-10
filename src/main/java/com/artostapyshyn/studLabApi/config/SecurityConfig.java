@@ -35,12 +35,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http.cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("api/v1/auth/*").permitAll()
+                .requestMatchers("api/v1/auth/**").permitAll()
                 .requestMatchers("api/v1/vacancies/*", "api/v1/comments/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
-                .requestMatchers("api/v1/favourites/*", "api/v1/events/*", "api/v1/students/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
-                .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/*").permitAll()
+                .requestMatchers("api/v1/favourites/*", "api/v1/events/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("api/v1/students/personal-info/*", "api/v1/students/resumes/*", "api/v1/students/certificates/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

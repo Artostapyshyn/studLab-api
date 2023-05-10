@@ -23,6 +23,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,21 +80,21 @@ public class AuthController {
         } catch (DisabledException e) {
             e.printStackTrace();
             responseMap.put("message", "User is disabled");
-            return ResponseEntity.status(500).body(responseMap);
+            return ResponseEntity.internalServerError().body(responseMap);
         } catch (BadCredentialsException e) {
             responseMap.put("message", "Invalid Credentials");
             return ResponseEntity.status(401).body(responseMap);
         } catch (Exception e) {
             e.printStackTrace();
             responseMap.put("message", "Something went wrong");
-            return ResponseEntity.status(500).body(responseMap);
+            return ResponseEntity.internalServerError().body(responseMap);
         }
     }
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
-
+        Map<String, Boolean> response = new HashMap<>();
          if (studentService.findByEmail(email) != null) {
              return ResponseEntity.badRequest().body("User already registered with this email");
          }
@@ -101,6 +102,7 @@ public class AuthController {
         Student student = new Student();
         student.setEmail(email);
         student.setEnabled(false);
+        student.setRole(Role.ROLE_STUDENT);
         studentService.save(student);
 
         int verificationCode = verificationCodesService.generateCode(email).getCode();
@@ -108,13 +110,14 @@ public class AuthController {
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-          if(isValidEmailDomain(email, student)) {
-            verification.setEmail(student.getEmail());
-            verificationCodesService.save(verification);
-            return ResponseEntity.ok().body("Verification code has been sent to your email successfully");
-          }
-
-          return ResponseEntity.ok().body("Your email is not valid");
+            if(isValidEmailDomain(email, student)) {
+                verification.setEmail(student.getEmail());
+                verificationCodesService.save(verification);
+                response.put("sent", true);
+                return ResponseEntity.ok(response);
+            }
+          response.put("valid", false);
+          return ResponseEntity.badRequest().body(response);
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
@@ -144,39 +147,44 @@ public class AuthController {
 
         Optional<VerificationCode> verifCode = verificationCodesService.findByStudentId(student.getId());
         if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
-            return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Invalid verification code");
         }
 
         LocalDateTime expirationTime = verifCode.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
-            return new ResponseEntity<>("Verification code has expired", HttpStatus.BAD_REQUEST);
-        }
-
-        int savedCode = verifCode.get().getCode();
-        if (savedCode != code) {
-            return new ResponseEntity<>("Invalid verification code", HttpStatus.BAD_REQUEST);
+           return ResponseEntity.badRequest().body("Verification code has expired");
         }
 
         student.setEnabled(true);
         studentService.save(student);
-        return new ResponseEntity<>("User successfully verified", HttpStatus.OK);
+        return ResponseEntity.ok().body("User successfully verified");
     }
 
     @Operation(summary = "Sign-up after verification")
-    @PostMapping("/sign-up")
-    public ResponseEntity<?> saveUser(@RequestPart("student") Student student, @RequestPart("image") MultipartFile image) throws IOException {
+    @PostMapping(value = "/sign-up")
+    public ResponseEntity<?> saveUser(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName,
+                                      @RequestParam("email") String email, @RequestParam("password") String password,
+                                      @RequestParam("photo") MultipartFile photo, @RequestParam("major") String major,
+                                      @RequestParam("course") String course, @RequestParam("birthDate") String birthDate) throws IOException {
         Map<String, Object> responseMap = new HashMap<>();
 
-        Student existingStudent = studentService.findByEmail(student.getEmail());
-        if (existingStudent != null) {
-            student = existingStudent;
+        Student student = studentService.findByEmail(email);
+        if (student == null) {
+            responseMap.put("message", "Invalid email address");
+            return ResponseEntity.badRequest().body(responseMap);
         }
-
             if (student.isEnabled()) {
-                byte[] profileImage = image.getBytes();
+                byte[] profileImage = photo.getBytes();
+                student.setFirstName(firstName);
+                student.setLastName(lastName);
+                student.setPassword(new BCryptPasswordEncoder().encode(password));
+                student.setPhoto(photo.getBytes());
+                student.setPhotoFilename(photo.getOriginalFilename());
+                student.setMajor(major);
+                student.setCourse(course);
+                student.setBirthDate(birthDate);
                 student.setPhoto(profileImage);
-                student.setRole(Role.ROLE_STUDENT);
                 studentService.save(student);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
                 String token = jwtTokenUtil.generateToken(userDetails);
