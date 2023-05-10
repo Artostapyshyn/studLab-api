@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("api/v1/vacancies/*", "api/v1/comments/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("api/v1/favourites/*", "api/v1/events/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("api/v1/students/personal-info/*", "api/v1/students/resumes/*", "api/v1/students/certificates/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("api/v1/events/popular/**", "api/v1/events/newest/**", "api/v1/events/upcoming/**").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

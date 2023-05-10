@@ -45,7 +45,7 @@ public class CommentController {
                 commentService.save(comment);
                 eventService.save(event.get());
                 response.add(comment);
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                return ResponseEntity.ok().body(response);
             } else {
                 response.add("Student not found.");
                 return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

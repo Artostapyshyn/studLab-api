@@ -5,7 +5,6 @@ import com.artostapyshyn.studLabApi.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +29,7 @@ public class VacancyController {
         List<Object> response = new ArrayList<>();
         response.add(vacancyService.findAll());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Add a vacancy.")
