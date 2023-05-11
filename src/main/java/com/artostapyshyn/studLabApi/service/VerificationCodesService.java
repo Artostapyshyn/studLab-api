@@ -9,6 +9,7 @@ public interface VerificationCodesService {
     VerificationCode generateCode(String email);
 
     VerificationCode save(VerificationCode verificationCode);
+
     Optional<VerificationCode> findByStudentId(Long id);
 
     void deleteExpiredTokens();

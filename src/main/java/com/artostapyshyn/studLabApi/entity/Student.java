@@ -41,6 +41,9 @@ public class Student {
     @Column(name = "student_photo")
     private byte[] photo;
 
+    @Column(name = "student_photo_filename")
+    private String photoFilename;
+
     @Column(name = "email", unique = true)
     private String email;
 
@@ -51,9 +54,17 @@ public class Student {
     @ElementCollection
     private Set<byte[]> resumes;
 
+    @Column(name = "student_resume_filenames")
+    @ElementCollection
+    private Set<String> resumeFilenames;
+
     @Column(name = "student_certificates")
     @ElementCollection
     private Set<byte[]> certificates;
+
+    @Column(name = "student_certificates_filenames")
+    @ElementCollection
+    private Set<String> certificatesFilenames;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;

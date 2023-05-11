@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @AllArgsConstructor
@@ -45,7 +45,7 @@ public class CommentController {
                 commentService.save(comment);
                 eventService.save(event.get());
                 response.add(comment);
-                return new ResponseEntity<>(response, HttpStatus.OK);
+                return ResponseEntity.ok().body(response);
             } else {
                 response.add("Student not found.");
                 return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);

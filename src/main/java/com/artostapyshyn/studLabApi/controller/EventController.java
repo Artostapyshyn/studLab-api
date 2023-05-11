@@ -5,7 +5,6 @@ import com.artostapyshyn.studLabApi.service.impl.EventServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @AllArgsConstructor
@@ -32,11 +31,11 @@ public class EventController {
     }
 
     @Operation(summary = "Sort events by popularity")
-    @GetMapping("/popularity")
+    @GetMapping("/popular")
     public ResponseEntity<List<Event>> getEventsByPopularity() {
         List<Event> events = eventService.findPopularEvents();
         log.info("Listing events by popularity");
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        return ResponseEntity.ok().body(events);
     }
 
     @Operation(summary = "Sort events by creation date")
@@ -44,7 +43,7 @@ public class EventController {
     public ResponseEntity<List<Event>> getEventsByNewestDate() {
         List<Event> events = eventService.findAllOrderByCreationDateAsc();
         log.info("Listing newest events");
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        return ResponseEntity.ok().body(events);
     }
 
     @Operation(summary = "Get upcoming events")

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@CrossOrigin(origins = "https://stud-lab-api.onrender.com", maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @RequestMapping("/api/v1/favourites")
