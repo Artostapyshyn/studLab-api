@@ -2,17 +2,15 @@ package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.entity.University;
+import com.artostapyshyn.studLabApi.entity.UserSession;
 import com.artostapyshyn.studLabApi.entity.VerificationCode;
 import com.artostapyshyn.studLabApi.enums.Role;
-import com.artostapyshyn.studLabApi.service.EmailService;
-import com.artostapyshyn.studLabApi.service.StudentService;
-import com.artostapyshyn.studLabApi.service.UniversityService;
-import com.artostapyshyn.studLabApi.service.VerificationCodesService;
+import com.artostapyshyn.studLabApi.service.*;
 import com.artostapyshyn.studLabApi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studLabApi.util.JwtTokenUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -25,16 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin(maxAge = 3600)
 @RestController
@@ -57,21 +48,35 @@ public class AuthController {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    private final UserSessionService userSessionService;
+
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestParam("email") String email, @RequestParam("password") String password) {
+    public ResponseEntity<?> loginUser(@RequestBody Student student) {
         Map<String, Object> responseMap;
         responseMap = new HashMap<>();
         try {
             Authentication auth;
-            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
             if (auth.isAuthenticated()) {
                 log.info("Logged In");
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
                 String token = jwtTokenUtil.generateToken(userDetails);
                 log.info(token);
+
                 responseMap.put("message", "Logged In");
                 responseMap.put("token", "Bearer " + token);
+
+                String sessionId = UUID.randomUUID().toString();
+                Optional<UserSession> existingSession = userSessionService.findBySessionId(sessionId);
+                if (existingSession.isPresent()) {
+                    userSessionService.delete(existingSession.get());
+                }
+                UserSession userSession = new UserSession();
+                userSession.setSessionId(sessionId);
+                userSession.setUserEmail(userDetails.getUsername());
+                userSessionService.save(userSession);
+                responseMap.put("sessionId", sessionId);
                 return ResponseEntity.ok(responseMap);
             } else {
                 responseMap.put("message", "Invalid Credentials");
@@ -91,33 +96,47 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Check session")
+    @GetMapping("/checkSession")
+    public ResponseEntity<?> checkSession(@RequestParam("sessionId") String sessionId) {
+        Map<String, Object> responseMap = new HashMap<>();
+        Optional<UserSession> userSessionOptional = userSessionService.findBySessionId(sessionId);
+
+        if (userSessionOptional.isPresent()) {
+            responseMap.put("message", "Session is valid");
+            return ResponseEntity.ok(responseMap);
+        } else {
+            responseMap.put("message", "Session is not valid");
+            return ResponseEntity.status(401).body(responseMap);
+        }
+    }
+
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
-    public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
+    public ResponseEntity<?> verifyEmail(@RequestBody Student student) {
         Map<String, Boolean> response = new HashMap<>();
-         if (studentService.findByEmail(email) != null) {
-             return ResponseEntity.badRequest().body("User already registered with this email");
-         }
+        if (studentService.findByEmail(student.getEmail()) != null) {
+            return ResponseEntity.badRequest().body("User already registered with this email");
+        }
 
-        Student student = new Student();
-        student.setEmail(email);
+        student.setEmail(student.getEmail());
         student.setEnabled(false);
         student.setRole(Role.ROLE_STUDENT);
         studentService.save(student);
 
-        int verificationCode = verificationCodesService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
+        int verificationCode = verificationCodesService.generateCode(student.getEmail()).getCode();
+        emailService.sendVerificationCode(student.getEmail(), verificationCode);
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(15));
-            if(isValidEmailDomain(email, student)) {
-                verification.setEmail(student.getEmail());
-                verificationCodesService.save(verification);
-                response.put("sent", true);
-                return ResponseEntity.ok(response);
-            }
-          response.put("valid", false);
-          return ResponseEntity.badRequest().body(response);
+        if (isValidEmailDomain(student.getEmail(), student)) {
+            verification.setEmail(student.getEmail());
+            verificationCodesService.save(verification);
+            response.put("sent", true);
+            return ResponseEntity.ok(response);
+        }
+        response.put("valid", false);
+        return ResponseEntity.badRequest().body(response);
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
@@ -127,11 +146,11 @@ public class AuthController {
                 .orElse("");
 
         University university = universityService.findByDomain(domain);
-            if (university != null) {
-                student.setUniversity(university);
-                return true;
-            }
-            return false;
+        if (university != null) {
+            student.setUniversity(university);
+            return true;
+        }
+        return false;
     }
 
     @Operation(summary = "Verify student email")
@@ -153,7 +172,7 @@ public class AuthController {
         LocalDateTime expirationTime = verifCode.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
-           return ResponseEntity.badRequest().body("Verification code has expired");
+            return ResponseEntity.badRequest().body("Verification code has expired");
         }
 
         student.setEnabled(true);
@@ -163,60 +182,73 @@ public class AuthController {
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
-    public ResponseEntity<?> saveUser(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName,
-                                      @RequestParam("email") String email, @RequestParam("password") String password,
-                                      @RequestParam("photo") MultipartFile photo, @RequestParam("major") String major,
-                                      @RequestParam("course") String course, @RequestParam("birthDate") String birthDate) throws IOException {
+    public ResponseEntity<?> saveUser(@RequestBody Student student) {
         Map<String, Object> responseMap = new HashMap<>();
 
-        Student student = studentService.findByEmail(email);
-        if (student == null) {
+        String email = student.getEmail();
+        Student existingStudent = studentService.findByEmail(email);
+        if (existingStudent == null) {
             responseMap.put("message", "Invalid email address");
             return ResponseEntity.badRequest().body(responseMap);
         }
-            if (student.isEnabled()) {
-                byte[] profileImage = photo.getBytes();
-                student.setFirstName(firstName);
-                student.setLastName(lastName);
-                student.setPassword(new BCryptPasswordEncoder().encode(password));
-                student.setPhoto(photo.getBytes());
-                student.setPhotoFilename(photo.getOriginalFilename());
-                student.setMajor(major);
-                student.setCourse(course);
-                student.setBirthDate(birthDate);
-                student.setPhoto(profileImage);
-                studentService.save(student);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-                String token = jwtTokenUtil.generateToken(userDetails);
+        if (existingStudent.isEnabled()) {
+            existingStudent.setFirstName(student.getFirstName());
+            existingStudent.setLastName(student.getLastName());
 
-                responseMap.put("email", student.getEmail());
-                responseMap.put("message", "Account created successfully");
-                responseMap.put("token", token);
-            } else {
-                responseMap.put("message", "Student not verified");
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String encodedPassword = passwordEncoder.encode(student.getPassword());
+            existingStudent.setPassword(encodedPassword);
+
+            if (existingStudent.getPassword() == null) {
+                responseMap.put("error", "Password cannot be null");
                 return ResponseEntity.badRequest().body(responseMap);
             }
-            return ResponseEntity.ok(responseMap);
+
+            existingStudent.setMajor(student.getMajor());
+            existingStudent.setCourse(student.getCourse());
+            existingStudent.setBirthDate(student.getBirthDate());
+
+            byte[] imageBytes = student.getPhotoBytes();
+            existingStudent.setPhotoFilename(student.getPhotoFilename());
+            existingStudent.setPhotoBytes(imageBytes);
+
+            studentService.save(existingStudent);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
+            String token = jwtTokenUtil.generateToken(userDetails);
+
+            responseMap.put("email", student.getEmail());
+            responseMap.put("message", "Account created successfully");
+            responseMap.put("token", token);
+        } else {
+            responseMap.put("message", "Student not verified");
+            return ResponseEntity.badRequest().body(responseMap);
+        }
+        return ResponseEntity.ok(responseMap);
+
     }
 
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
-        deleteCookie(request, response, "access_token");
+    public String logout(HttpServletRequest request) {
+        getSessionId(request);
+        Optional<UserSession> userSession = userSessionService.findBySessionId(getSessionId(request));
+        if (userSession.isPresent()) {
+            userSessionService.delete(userSession.get());
+        }
         return "You have been successfully logged out!";
     }
 
-    public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
+    private String getSessionId(HttpServletRequest request) {
+        String sessionId = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
-                    cookie.setValue("");
-                    cookie.setPath("/");
-                    cookie.setMaxAge(0);
-                    response.addCookie(cookie);
+                if (cookie.getName().equals("JSESSIONID")) {
+                    sessionId = cookie.getValue();
+                    break;
                 }
             }
         }
+        return sessionId;
     }
 }

@@ -37,9 +37,9 @@ public class Student {
     @Column(name = "course")
     private String course;
 
-    @Lob
+    @Basic(fetch=FetchType.LAZY)
     @Column(name = "student_photo")
-    private byte[] photo;
+    private byte[] photoBytes;
 
     @Column(name = "student_photo_filename")
     private String photoFilename;
