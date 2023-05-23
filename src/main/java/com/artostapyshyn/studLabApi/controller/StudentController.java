@@ -18,7 +18,7 @@ import java.util.*;
 @Log4j2
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/students")
+@RequestMapping("/api/v1/student")
 public class StudentController {
 
     private final StudentService studentService;
@@ -87,7 +87,7 @@ public class StudentController {
     }
 
     @Operation(summary = "Download file from personal account")
-    @GetMapping("/download")
+    @GetMapping("/downloadFile")
     public ResponseEntity<?> downloadFile(Authentication authentication, @RequestParam("fileName") String filename) {
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);

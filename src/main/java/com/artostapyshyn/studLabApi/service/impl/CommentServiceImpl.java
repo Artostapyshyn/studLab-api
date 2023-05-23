@@ -5,6 +5,7 @@ import com.artostapyshyn.studLabApi.entity.Reply;
 import com.artostapyshyn.studLabApi.repository.CommentRepository;
 import com.artostapyshyn.studLabApi.repository.ReplyRepository;
 import com.artostapyshyn.studLabApi.service.CommentService;
+import com.artostapyshyn.studLabApi.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
@@ -13,11 +14,13 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class CommentServcieImpl implements CommentService {
+public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
 
     private final ReplyRepository replyRepository;
+
+    private final MessageService messageService;
 
     @Override
     public Comment save(Comment comment) {
@@ -37,5 +40,10 @@ public class CommentServcieImpl implements CommentService {
 
         commentRepository.save(parentComment);
         replyRepository.save(reply);
+
+        Long studentId = parentComment.getStudent().getId();
+        messageService.addMessageToStudent(studentId);
+        messageService.updateNewMessageStatus(studentId, true);
     }
+
 }

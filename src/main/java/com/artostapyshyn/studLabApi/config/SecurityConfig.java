@@ -39,14 +39,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("api/v1/auth/**").permitAll()
                 .requestMatchers("api/v1/vacancies/*", "api/v1/comments/reply/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
-                .requestMatchers("api/v1/favourites/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
-                .requestMatchers("api/v1/students/personal-info/*", "api/v1/students/resumes/*", "api/v1/students/certificates/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("api/v1/favourites/*", "api/v1/messages/mark-as-read/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
+                .requestMatchers("api/v1/student/personal-info/*", "api/v1/student/resumes/*", "api/v1/student/certificates/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("api/v1/events/popular/*", "api/v1/events/newest/*", "api/v1/events/upcoming/*").hasAnyRole(Role.ROLE_STUDENT.getAuthority(), Role.ROLE_ADMIN.getAuthority())
                 .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.csrf().disable().build();
     }
 
