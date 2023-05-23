@@ -6,7 +6,6 @@ import com.artostapyshyn.studLabApi.service.UserSessionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Optional;
 
 @Service

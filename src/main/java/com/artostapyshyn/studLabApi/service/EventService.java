@@ -14,9 +14,9 @@ public interface EventService {
 
     List<Event> findPopularEvents();
 
-    List<Event> findAllOrderByDateAsc();
+    List<Event> findAllEventsByDateDesc();
 
-    List<Event> findAllOrderByCreationDateAsc();
+    List<Event> findAllEventsByCreationDateDesc();
 
     void deleteById(Long id);
 }

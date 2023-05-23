@@ -29,7 +29,7 @@ public class FavouriteEventController {
     private final EventServiceImpl eventService;
 
     @Operation(summary = "Add event to favourite")
-    @PostMapping
+    @PostMapping("/add-to-favorites")
     public FavouriteEvent addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
         Optional<Event> event = eventService.findEventById(eventId);
@@ -41,7 +41,7 @@ public class FavouriteEventController {
     }
 
     @Operation(summary = "Remove event from favourite")
-    @DeleteMapping
+    @DeleteMapping("/remove")
     public void removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
         Long studentId = getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
@@ -56,7 +56,7 @@ public class FavouriteEventController {
     }
 
     @Operation(summary = "Get student favourite events")
-    @GetMapping
+    @GetMapping("/getFavourite")
     public List<Event> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);

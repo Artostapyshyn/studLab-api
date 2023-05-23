@@ -9,12 +9,12 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long> {
     Event findEventById(Long id);
 
-    @Query("SELECT e FROM Event e LEFT JOIN e.favoritedCount u GROUP BY e.id ORDER BY COUNT(u) DESC")
+    @Query("SELECT e FROM Event e ORDER BY e.favoritedCount DESC")
     List<Event> findPopularEvents();
 
-    @Query("SELECT e FROM Event e ORDER BY e.date ASC")
-    List<Event> findAllOrderByDateAsc();
+    @Query("SELECT e FROM Event e ORDER BY e.date DESC")
+    List<Event> findAllEventsByDateDesc();
 
-    @Query("SELECT e FROM Event e ORDER BY e.creationDate ASC")
-    List<Event> findAllOrderByCreationDateAsc();
+    @Query("SELECT e FROM Event e ORDER BY e.creationDate DESC")
+    List<Event> findAllEventsByCreationDateDesc();
 }

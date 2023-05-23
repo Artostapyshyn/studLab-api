@@ -2,6 +2,7 @@ package com.artostapyshyn.studLabApi.controller;
 
 import com.artostapyshyn.studLabApi.entity.Comment;
 import com.artostapyshyn.studLabApi.entity.Event;
+import com.artostapyshyn.studLabApi.entity.Reply;
 import com.artostapyshyn.studLabApi.entity.Student;
 import com.artostapyshyn.studLabApi.service.CommentService;
 import com.artostapyshyn.studLabApi.service.EventService;
@@ -14,10 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @CrossOrigin(maxAge = 3600)
 @Log4j2
@@ -33,7 +31,7 @@ public class CommentController {
     private final StudentService studentService;
 
     @Operation(summary = "Add comment to event")
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<?> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
@@ -56,18 +54,26 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Reply to comment")
+    @PostMapping("/reply")
+    public ResponseEntity<?> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
+        Map<String, Boolean> responseMap = new HashMap<>();
+        commentService.addReplyToComment(reply, commentId);
+        responseMap.put("replied", true);
+        return ResponseEntity.ok(responseMap);
+    }
+
     @Operation(summary = "Get all comments to event")
-    @GetMapping
-    public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
-        List<Object> response = new ArrayList<>();
+    @GetMapping("/all")
+    public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
             Set<Comment> comments = event.get().getEventComments();
-            response.add(comments);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            List<Comment> commentList = new ArrayList<>(comments);
+            return ResponseEntity.ok(commentList);
         } else {
-            response.add("Event not found.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            String errorMessage = "Event not found.";
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
         }
     }
 

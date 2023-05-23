@@ -23,7 +23,7 @@ public class EventController {
     private final EventServiceImpl eventService;
 
     @Operation(summary = "Get all events")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Event>> getAllEvents() {
         List<Event> events = eventService.findAll();
         log.info("Listing all events");
@@ -41,7 +41,7 @@ public class EventController {
     @Operation(summary = "Sort events by creation date")
     @GetMapping("/newest")
     public ResponseEntity<List<Event>> getEventsByNewestDate() {
-        List<Event> events = eventService.findAllOrderByCreationDateAsc();
+        List<Event> events = eventService.findAllEventsByCreationDateDesc();
         log.info("Listing newest events");
         return ResponseEntity.ok().body(events);
     }
@@ -49,7 +49,7 @@ public class EventController {
     @Operation(summary = "Get upcoming events")
     @GetMapping("/upcoming")
     public ResponseEntity<List<Event>> getUpcomingEvents()  {
-        List<Event> events = eventService.findAllOrderByDateAsc();
+        List<Event> events = eventService.findAllEventsByDateDesc();
         log.info("Listing upcoming events");
         return ResponseEntity.ok(events);
     }

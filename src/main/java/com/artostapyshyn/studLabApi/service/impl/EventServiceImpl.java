@@ -36,13 +36,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> findAllOrderByDateAsc() {
-        return eventRepository.findAllOrderByDateAsc();
+    public List<Event> findAllEventsByDateDesc() {
+        return eventRepository.findAllEventsByDateDesc();
     }
 
     @Override
-    public List<Event> findAllOrderByCreationDateAsc() {
-        return eventRepository.findAllOrderByCreationDateAsc();
+    public List<Event> findAllEventsByCreationDateDesc() {
+        return eventRepository.findAllEventsByCreationDateDesc();
     }
 
     @Override

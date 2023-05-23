@@ -2,12 +2,15 @@ package com.artostapyshyn.studLabApi.entity;
 
 import com.artostapyshyn.studLabApi.enums.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -66,8 +69,19 @@ public class Student {
     @ElementCollection
     private Set<String> certificatesFilenames;
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Message> messages;
+
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
+
+    @Column(name = "has_new_messages")
+    private Boolean hasNewMessages;
+
+    @JsonIgnore
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student"})
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id")

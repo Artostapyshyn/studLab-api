@@ -24,7 +24,7 @@ public class VacancyController {
     private final VacancyService vacancyService;
 
     @Operation(summary = "Get all vacancies")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Object>> getAllVacancies(){
         List<Object> response = new ArrayList<>();
         response.add(vacancyService.findAll());
