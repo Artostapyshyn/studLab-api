@@ -35,9 +35,9 @@ public class Event {
     @Column(name = "event_photo", nullable = false)
     private byte[] eventPhoto;
 
-    @Column(name = "favorited_count")
+    @Column(name = "favorite_count")
     @ColumnDefault("0")
-    private int favoritedCount;
+    private int favoriteCount;
 
     @Column(name = "date_of_creation")
     private Timestamp creationDate;
