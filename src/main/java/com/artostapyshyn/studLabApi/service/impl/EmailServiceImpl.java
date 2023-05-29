@@ -15,10 +15,10 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendVerificationCode(String toEmail, int code) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("StudLabBot@gmail.com");
+        message.setFrom("studlabbot@gmail.com");
         message.setTo(toEmail);
-        message.setSubject("Verification code");
-        message.setText("Your verification code is: " + code);
+        message.setSubject("Підтвердження реєстрації");
+        message.setText("Верифікаційни код: " + code);
         mailSender.send(message);
     }
 }

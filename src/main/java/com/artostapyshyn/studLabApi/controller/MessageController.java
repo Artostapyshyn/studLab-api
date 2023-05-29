@@ -29,7 +29,7 @@ public class MessageController {
     @Operation(summary = "Mark messages as read")
     @PostMapping("/mark-as-read")
     public ResponseEntity<?> markAllMessagesAsRead(@RequestParam Long studentId) {
-        Map<String, String> responseMap = new HashMap<>();
+        Map<String, Object> responseMap = new HashMap<>();
         messageService.updateNewMessageStatus(studentId, false);
         responseMap.put("status", "marked-as-read");
         return ResponseEntity.ok().body(responseMap);

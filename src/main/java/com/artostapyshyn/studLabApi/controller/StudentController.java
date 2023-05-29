@@ -41,7 +41,7 @@ public class StudentController {
     @Operation(summary = "Uplodad resume to personal account")
     @PostMapping("/resumes")
     public ResponseEntity<?> addResume(Authentication authentication, @RequestParam("resume") MultipartFile file) throws IOException {
-        Map<String, Boolean> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
         if (student.isPresent()) {
@@ -65,7 +65,7 @@ public class StudentController {
     @Operation(summary = "Uplodad certificate to personal account")
     @PostMapping("/certificates")
     public ResponseEntity<?> addCertificate(Authentication authentication, @RequestParam("certificate") MultipartFile file) throws IOException {
-        Map<String, Boolean> responseMap = new HashMap<>();
+        Map<String, Object> responseMap = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
         if (student.isPresent()) {

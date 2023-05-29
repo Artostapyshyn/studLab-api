@@ -61,7 +61,7 @@ public class AuthController {
             if (auth.isAuthenticated()) {
                 log.info("Logged In");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-                String token = jwtTokenUtil.generateToken(userDetails);
+                String token = jwtTokenUtil.generateToken(userDetails, student.getId());
                 log.info(token);
 
                 responseMap.put("message", "Logged In");
@@ -114,7 +114,7 @@ public class AuthController {
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<?> verifyEmail(@RequestBody Student student) {
-        Map<String, Boolean> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         if (studentService.findByEmail(student.getEmail()) != null) {
             return ResponseEntity.badRequest().body("User already registered with this email");
         }
@@ -133,6 +133,8 @@ public class AuthController {
             verification.setEmail(student.getEmail());
             verificationCodesService.save(verification);
             response.put("sent", true);
+
+            log.info("Verification code sent to - " + student.getEmail());
             return ResponseEntity.ok(response);
         }
         response.put("valid", false);
@@ -214,10 +216,11 @@ public class AuthController {
 
             studentService.save(existingStudent);
             UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-            String token = jwtTokenUtil.generateToken(userDetails);
+            String token = jwtTokenUtil.generateToken(userDetails, student.getId());
 
             responseMap.put("email", student.getEmail());
             responseMap.put("message", "Account created successfully");
+            log.info("Account registered with email - " + student.getEmail());
             responseMap.put("token", token);
         } else {
             responseMap.put("message", "Student not verified");
