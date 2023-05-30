@@ -30,4 +30,7 @@ public class VerificationCode {
 
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
+
+    @Column(name = "last_sent_time")
+    private LocalDateTime lastSentTime;
 }

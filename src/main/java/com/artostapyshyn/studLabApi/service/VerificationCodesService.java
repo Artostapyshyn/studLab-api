@@ -12,5 +12,7 @@ public interface VerificationCodesService {
 
     Optional<VerificationCode> findByStudentId(Long id);
 
+    VerificationCode findByEmail(String email);
+
     void deleteExpiredTokens();
 }

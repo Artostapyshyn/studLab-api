@@ -24,10 +24,13 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
 
     public VerificationCode generateCode(String email) {
         Student student = studentService.findByEmail(email);
+        int verificationCodeValue = generateRandomCode();
         VerificationCode verificationCode = new VerificationCode();
-        verificationCode.setCode(generateRandomCode());
+        verificationCode.setCode(verificationCodeValue);
         verificationCode.setStudentId(student.getId());
-        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(15));
+        verificationCode.setEmail(email);
+        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(5));
+        verificationCode.setLastSentTime(LocalDateTime.now());
         return verificationCodesRepository.save(verificationCode);
     }
 
@@ -43,7 +46,12 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
 
     @Override
     public Optional<VerificationCode> findByStudentId(Long id) {
-        return verificationCodesRepository.findById(id);
+        return verificationCodesRepository.findByStudentId(id);
+    }
+
+    @Override
+    public VerificationCode findByEmail(String email) {
+        return verificationCodesRepository.findByEmail(email);
     }
 
     @Scheduled(fixedRate = 3600000)
