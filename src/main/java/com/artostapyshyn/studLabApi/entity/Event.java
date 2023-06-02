@@ -31,6 +31,9 @@ public class Event {
     @Column(name = "name_of_event", nullable = false)
     private String nameOfEvent;
 
+    @Column(name = "event_type", nullable = false)
+    private String eventType;
+
     @Basic(fetch=FetchType.LAZY)
     @Column(name = "event_photo", nullable = false)
     private byte[] eventPhoto;
