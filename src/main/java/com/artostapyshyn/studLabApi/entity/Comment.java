@@ -1,7 +1,7 @@
 package com.artostapyshyn.studLabApi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +21,7 @@ public class Comment {
     @Column(name = "comment_text", nullable = false)
     private String commentText;
 
-    @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<Reply> replies;
 
@@ -33,4 +33,5 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private Student student;
+
 }

@@ -41,15 +41,15 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
 
     @Override
     public void removeFromFavorites(Long eventId) {
-        Event event = eventRepository.findEventById(eventId);
-        event.setFavoriteCount(event.getFavoriteCount() - 1);
-        eventRepository.save(event);
+        Optional<Event> event = eventRepository.findEventById(eventId);
+        event.get().setFavoriteCount(event.get().getFavoriteCount() - 1);
+        eventRepository.save(event.get());
     }
 
     @Override
     public void addToFavorites(Long eventId) {
-        Event event = eventRepository.findEventById(eventId);
-        event.setFavoriteCount(event.getFavoriteCount() + 1);
-        eventRepository.save(event);
+        Optional<Event> event = eventRepository.findEventById(eventId);
+        event.get().setFavoriteCount(event.get().getFavoriteCount() + 1);
+        eventRepository.save(event.get());
     }
 }

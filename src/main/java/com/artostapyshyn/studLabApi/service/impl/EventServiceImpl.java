@@ -22,7 +22,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Optional<Event> findEventById(Long id) {
-        return Optional.ofNullable(eventRepository.findEventById(id));
+        return eventRepository.findEventById(id);
     }
 
     @Override

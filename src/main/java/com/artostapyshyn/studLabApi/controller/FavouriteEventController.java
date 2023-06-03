@@ -9,10 +9,13 @@ import com.artostapyshyn.studLabApi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @CrossOrigin(maxAge = 3600)
@@ -30,23 +33,35 @@ public class FavouriteEventController {
 
     @Operation(summary = "Add event to favourite")
     @PostMapping("/add-to-favorites")
-    public FavouriteEvent addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+    public Object addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+        Map<String, String> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Event> event = eventService.findEventById(eventId);
-        FavouriteEvent favouriteEvent = new FavouriteEvent();
-        favouriteEvent.setEvent(event.get());
-        favouriteEvent.setStudentId(studentId);
-        favouriteEventService.addToFavorites(eventId);
-        return favouriteEventService.save(favouriteEvent);
+        if (event.isPresent()) {
+            FavouriteEvent favouriteEvent = new FavouriteEvent();
+            favouriteEvent.setEvent(event.get());
+            favouriteEvent.setStudentId(studentId);
+            favouriteEventService.addToFavorites(eventId);
+            return favouriteEventService.save(favouriteEvent);
+        }
+        response.put("error", "Event not found");
+        return ResponseEntity.badRequest().body(response);
     }
 
     @Operation(summary = "Remove event from favourite")
     @DeleteMapping("/remove")
-    public void removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
+    public ResponseEntity<?> removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
+        Map<String, String> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
-        favouriteEventService.delete(favouriteEvent.get());
-        favouriteEventService.removeFromFavorites(eventId);
+        if (favouriteEvent.isPresent()) {
+            favouriteEventService.delete(favouriteEvent.get());
+            favouriteEventService.removeFromFavorites(eventId);
+            response.put("status", "deleted");
+            return ResponseEntity.ok().body(response);
+        }
+        response.put("error", "Event not found");
+        return ResponseEntity.badRequest().body(response);
     }
 
     private Long getAuthStudentId(Authentication authentication) {

@@ -1,5 +1,6 @@
 package com.artostapyshyn.studLabApi.entity;
 
+import com.artostapyshyn.studLabApi.enums.EventType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,8 +32,9 @@ public class Event {
     @Column(name = "name_of_event", nullable = false)
     private String nameOfEvent;
 
-    @Column(name = "event_type", nullable = false)
-    private String eventType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type")
+    private EventType eventType;
 
     @Basic(fetch=FetchType.LAZY)
     @Column(name = "event_photo", nullable = false)
@@ -43,7 +45,7 @@ public class Event {
     private int favoriteCount;
 
     @Column(name = "date_of_creation")
-    private Timestamp creationDate;
+    private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "eventId")
     private Set<Comment> eventComments;
@@ -55,6 +57,6 @@ public class Event {
 
     @PrePersist
     private void init() {
-        creationDate = Timestamp.valueOf(LocalDateTime.now());
+        creationDate = LocalDateTime.now();
     }
 }

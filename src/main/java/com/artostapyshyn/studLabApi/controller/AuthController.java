@@ -119,16 +119,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        student.setEnabled(false);
-        student.setRole(Role.ROLE_STUDENT);
-        studentService.save(student);
-
-        VerificationCode existingCode = verificationCodesService.findByEmail(email);
-        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-            return handleResendCodeError(response, "Verification code has already been sent.");
-        }
-
         if (isValidEmailDomain(email, student)) {
+            student.setEnabled(false);
+            student.setRole(Role.ROLE_STUDENT);
+            studentService.save(student);
+
+            VerificationCode existingCode = verificationCodesService.findByEmail(email);
+            if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
+                return handleResendCodeError(response, "Verification code has already been sent.");
+            }
+
             int verificationCode = verificationCodesService.generateCode(email).getCode();
             emailService.sendVerificationCode(email, verificationCode);
 
@@ -276,11 +276,19 @@ public class AuthController {
 
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        getSessionId(request);
-        Optional<UserSession> userSession = userSessionService.findBySessionId(getSessionId(request));
-        userSession.ifPresent(userSessionService::delete);
-        return "You have been successfully logged out!";
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        Map<String, Object> responseMap = new HashMap<>();
+        String sessionId = getSessionId(request);
+        System.out.println(sessionId);
+        Optional<UserSession> userSession = userSessionService.findBySessionId(sessionId);
+        if (userSession.isPresent()) {
+            userSessionService.delete(userSession.get());
+            responseMap.put("message","Student logged out successfully");
+            return ResponseEntity.ok(responseMap);
+        } else {
+            responseMap.put("message","User session not found");
+            return ResponseEntity.badRequest().body(responseMap);
+        }
     }
 
     private String getSessionId(HttpServletRequest request) {
