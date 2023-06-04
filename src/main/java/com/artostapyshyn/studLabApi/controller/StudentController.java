@@ -38,6 +38,14 @@ public class StudentController {
         }
     }
 
+    @Operation(summary = "Get all students")
+    @GetMapping("/all")
+    public ResponseEntity<List<Student>> getAllStudents() {
+        List<Student> students = studentService.findAll();
+        log.info("Listing all students");
+        return ResponseEntity.ok(students);
+    }
+
     @Operation(summary = "Uplodad resume to personal account")
     @PostMapping("/resumes")
     public ResponseEntity<?> addResume(Authentication authentication, @RequestParam("resume") MultipartFile file) throws IOException {
@@ -132,4 +140,40 @@ public class StudentController {
         Student student = studentService.findByEmail(studentEmail);
         return student.getId();
     }
+
+    @Operation(summary = "Edit student account.")
+    @PutMapping("/edit")
+    public ResponseEntity<?> editEvent(@RequestBody Student student, Authentication authentication) {
+        Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
+
+        if (optionalStudent.isPresent()) {
+            Student existingStudent = optionalStudent.get();
+            updateStudent(existingStudent, student);
+            studentService.save(existingStudent);
+            return ResponseEntity.ok(existingStudent);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private void updateStudent(Student existingStudent, Student updatedStudent) {
+        Optional.ofNullable(updatedStudent.getFirstName()).ifPresent(existingStudent::setFirstName);
+        Optional.ofNullable(updatedStudent.getLastName()).ifPresent(existingStudent::setLastName);
+        Optional.ofNullable(updatedStudent.getEmail()).ifPresent(existingStudent::setEmail);
+        Optional.ofNullable(updatedStudent.getPassword()).ifPresent(existingStudent::setPassword);
+        Optional.ofNullable(updatedStudent.getBirthDate()).ifPresent(existingStudent::setBirthDate);
+        Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
+        Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);
+        Optional.ofNullable(updatedStudent.getPhotoBytes()).ifPresent(existingStudent::setPhotoBytes);
+        Optional.ofNullable(updatedStudent.getPhotoFilename()).ifPresent(existingStudent::setPhotoFilename);
+    }
+
+    @Operation(summary = "Delete student account")
+    @DeleteMapping("/delete-account")
+    public ResponseEntity<?> deleteStudent(Authentication authentication) {
+        Long studentIdToDelete = getAuthStudentId(authentication);
+        studentService.deleteById(studentIdToDelete);
+        return ResponseEntity.noContent().build();
+    }
+
 }

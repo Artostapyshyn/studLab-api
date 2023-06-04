@@ -11,6 +11,7 @@ import com.artostapyshyn.studLabApi.util.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public class AuthController {
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody Student student) {
+    public ResponseEntity<?> loginUser(@RequestBody Student student, HttpServletResponse response) {
         Map<String, Object> responseMap;
         responseMap = new HashMap<>();
         try {
@@ -73,6 +74,13 @@ public class AuthController {
                 userSession.setSessionId(sessionId);
                 userSession.setUserEmail(userDetails.getUsername());
                 userSessionService.save(userSession);
+
+                Cookie cookie = new Cookie("JSESSIONID", sessionId);
+                cookie.setPath("/");
+                cookie.setHttpOnly(true);
+                cookie.setMaxAge(86400);
+                response.addCookie(cookie);
+
                 responseMap.put("sessionId", sessionId);
                 return ResponseEntity.ok(responseMap);
             } else {
@@ -114,7 +122,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
 
-        if (studentService.findByEmail(email) != null && student.isEnabled()) {
+        if (studentService.findByEmail(email) != null) {
             response.put("error", "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
@@ -277,16 +285,19 @@ public class AuthController {
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
-        Map<String, Object> responseMap = new HashMap<>();
         String sessionId = getSessionId(request);
-        System.out.println(sessionId);
         Optional<UserSession> userSession = userSessionService.findBySessionId(sessionId);
+        Map<String, Object> responseMap = new HashMap<>();
+
         if (userSession.isPresent()) {
             userSessionService.delete(userSession.get());
-            responseMap.put("message","Student logged out successfully");
+
+            responseMap.put("message", "Logged out successfully");
+            responseMap.put("userSession", null);
+
             return ResponseEntity.ok(responseMap);
         } else {
-            responseMap.put("message","User session not found");
+            responseMap.put("message", "User session not found");
             return ResponseEntity.badRequest().body(responseMap);
         }
     }
@@ -304,4 +315,5 @@ public class AuthController {
         }
         return sessionId;
     }
+
 }
