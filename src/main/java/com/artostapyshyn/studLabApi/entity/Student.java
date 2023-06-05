@@ -44,9 +44,6 @@ public class Student {
     @Column(name = "student_photo")
     private byte[] photoBytes;
 
-    @Column(name = "student_photo_filename")
-    private String photoFilename;
-
     @Column(name = "email", unique = true)
     private String email;
 

@@ -264,7 +264,6 @@ public class AuthController {
             existingStudent.setBirthDate(student.getBirthDate());
 
             byte[] imageBytes = student.getPhotoBytes();
-            existingStudent.setPhotoFilename(student.getPhotoFilename());
             existingStudent.setPhotoBytes(imageBytes);
 
             studentService.save(existingStudent);

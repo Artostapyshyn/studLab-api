@@ -29,9 +29,9 @@ public class SavedVacancyController {
     @PostMapping("/save")
     public SavedVacancy saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
         Long studentId = getAuthStudentId(authentication);
-        Optional<Vacancy> vacancy = vacancyService.findVacancyById(vacancyId);
+        Optional<Vacancy> optionalVacancy = vacancyService.findVacancyById(vacancyId);
         SavedVacancy savedVacancy = new SavedVacancy();
-        savedVacancy.setVacancy(vacancy.get());
+        savedVacancy.setVacancy(optionalVacancy.get());
         savedVacancy.setStudentId(studentId);
         return savedVacancyService.save(savedVacancy);
     }

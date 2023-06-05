@@ -224,7 +224,6 @@ public class StudentController {
         Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
         Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);
         Optional.ofNullable(updatedStudent.getPhotoBytes()).ifPresent(existingStudent::setPhotoBytes);
-        Optional.ofNullable(updatedStudent.getPhotoFilename()).ifPresent(existingStudent::setPhotoFilename);
     }
 
     @Operation(summary = "Delete student account")

@@ -36,9 +36,10 @@ public class CommentController {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
-            Optional<Student> student = studentService.findById(getAuthStudentId(authentication));
-            if(student.isPresent()) {
-                comment.setStudent(student.get());
+            Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
+            if(optionalStudent.isPresent()) {
+                Student student = optionalStudent.get();
+                comment.setStudent(student);
                 event.get().addComment(comment);
                 commentService.save(comment);
                 eventService.save(event.get());
@@ -66,9 +67,10 @@ public class CommentController {
     @Operation(summary = "Get all comments to event")
     @GetMapping("/all")
     public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
-        Optional<Event> event = eventService.findEventById(eventId);
-        if (event.isPresent()) {
-            Set<Comment> comments = event.get().getEventComments();
+        Optional<Event> optionalEvent = eventService.findEventById(eventId);
+        if (optionalEvent.isPresent()) {
+            Event event = optionalEvent.get();
+            Set<Comment> comments = event.getEventComments();
             List<Comment> commentList = new ArrayList<>(comments);
             return ResponseEntity.ok(commentList);
         } else {
