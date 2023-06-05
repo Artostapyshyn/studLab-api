@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -20,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,12 +102,16 @@ public class AuthController {
             return ResponseEntity.ok(responseMap);
         }
 
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        try {
+            String email = jwtTokenUtil.getUsernameFromToken(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        if (jwtTokenUtil.validateToken(token, userDetails)) {
-            responseMap.put("message", "User is logged in");
-        } else {
+            if (jwtTokenUtil.validateToken(token, userDetails)) {
+                responseMap.put("message", "User is logged in");
+            } else {
+                responseMap.put("message", "User is not logged in");
+            }
+        } catch (ExpiredJwtException | UsernameNotFoundException e) {
             responseMap.put("message", "User is not logged in");
         }
 
@@ -116,7 +122,7 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("TOKEN_NAME")) {
+                if (cookie.getName().equals("JSESSIONID")) {
                     return cookie.getValue();
                 }
             }
@@ -335,7 +341,7 @@ public class AuthController {
                 }
             }
         }
-        Cookie tokenCookie = new Cookie("TOKEN_NAME", "");
+        Cookie tokenCookie = new Cookie("JSESSIONID", "");
         tokenCookie.setMaxAge(0);
         tokenCookie.setPath("/");
         response.addCookie(tokenCookie);
