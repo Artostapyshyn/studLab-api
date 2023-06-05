@@ -16,10 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 
 @Configuration
 @EnableWebSecurity
@@ -38,15 +34,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("api/v1/auth/**").permitAll()
-                .requestMatchers("api/v1/vacancies/*", "api/v1/comments/reply/*").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
-                .requestMatchers("api/v1/favourites/add-to-favorites/*", "api/v1/messages/mark-as-read/*").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
-                .requestMatchers("api/v1/student/personal-info/*", "api/v1/student/resumes/*", "api/v1/student/certificates/*").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
-                .requestMatchers("api/v1/events/popular/*", "api/v1/events/add/*","api/v1/events/newest/*", "api/v1/events/upcoming/*").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
-                .requestMatchers("/swagger-ui/**","/v3/api-docs/**", "/actuator/**").permitAll()
+                .requestMatchers("api/v1/**").permitAll()
+                .requestMatchers("api/v1/vacancies/**", "api/v1/comments/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
+                .requestMatchers("api/v1/favourites/**", "api/v1/messages/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
+                .requestMatchers("api/v1/student/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
+                .requestMatchers("api/v1/events/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR", "ROLE_UNIVERSITY_REPRESENTATIVE")
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -62,18 +57,5 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*");
-        configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }
