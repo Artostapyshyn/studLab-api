@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -45,8 +47,6 @@ public class AuthController {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    private final UserSessionService userSessionService;
-
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student, HttpServletResponse response) {
@@ -64,21 +64,12 @@ public class AuthController {
                 responseMap.put("message", "Logged In");
                 responseMap.put("token", token);
 
-                String sessionId = UUID.randomUUID().toString();
-                Optional<UserSession> existingSession = userSessionService.findBySessionId(sessionId);
-                existingSession.ifPresent(userSessionService::delete);
-                UserSession userSession = new UserSession();
-                userSession.setSessionId(sessionId);
-                userSession.setUserEmail(userDetails.getUsername());
-                userSessionService.save(userSession);
-
-                Cookie cookie = new Cookie("JSESSIONID", sessionId);
+                Cookie cookie = new Cookie("JSESSIONID", token);
                 cookie.setPath("/");
                 cookie.setHttpOnly(true);
                 cookie.setMaxAge(86400);
                 response.addCookie(cookie);
 
-                responseMap.put("sessionId", sessionId);
                 return ResponseEntity.ok(responseMap);
             } else {
                 responseMap.put("message", "Invalid Credentials");
@@ -98,20 +89,41 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Check session")
-    @GetMapping("/checkSession")
-    public ResponseEntity<Map<String, Object>> checkSession(@RequestParam("sessionId") String sessionId) {
+    @Operation(summary = "Check user login status")
+    @GetMapping("/login-status")
+    public ResponseEntity<Map<String, Object>> checkLoginStatus(HttpServletRequest request) {
+        String token = getTokenFromRequest(request);
         Map<String, Object> responseMap = new HashMap<>();
-        Optional<UserSession> userSessionOptional = userSessionService.findBySessionId(sessionId);
 
-        if (userSessionOptional.isPresent()) {
-            responseMap.put("message", "Session is valid");
+        if (token == null) {
+            responseMap.put("message", "User is not logged in");
             return ResponseEntity.ok(responseMap);
-        } else {
-            responseMap.put("message", "Session is not valid");
-            return ResponseEntity.status(401).body(responseMap);
         }
+
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (jwtTokenUtil.validateToken(token, userDetails)) {
+            responseMap.put("message", "User is logged in");
+        } else {
+            responseMap.put("message", "User is not logged in");
+        }
+
+        return ResponseEntity.ok(responseMap);
     }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("TOKEN_NAME")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
@@ -278,7 +290,7 @@ public class AuthController {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             String encodedPassword = passwordEncoder.encode(student.getPassword());
             existingStudent.setPassword(encodedPassword);
-
+            existingStudent.setHasNewMessages(false);
             existingStudent.setMajor(student.getMajor());
 
             byte[] imageBytes = student.getPhotoBytes();
@@ -297,7 +309,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(responseMap);
         }
         return ResponseEntity.ok(responseMap);
-
     }
 
     private boolean checkStudent(Student student) {
@@ -309,36 +320,36 @@ public class AuthController {
 
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
-        String sessionId = getSessionId(request);
-        Optional<UserSession> userSession = userSessionService.findBySessionId(sessionId);
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();
 
-        if (userSession.isPresent()) {
-            userSessionService.delete(userSession.get());
-
-            responseMap.put("message", "Logged out successfully");
-            responseMap.put("userSession", null);
-
-            return ResponseEntity.ok(responseMap);
-        } else {
-            responseMap.put("message", "User session not found");
-            return ResponseEntity.badRequest().body(responseMap);
-        }
-    }
-
-    private String getSessionId(HttpServletRequest request) {
-        String sessionId = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("JSESSIONID")) {
-                    sessionId = cookie.getValue();
+                    cookie.setValue("");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
                     break;
                 }
             }
         }
-        return sessionId;
-    }
+        Cookie tokenCookie = new Cookie("TOKEN_NAME", "");
+        tokenCookie.setMaxAge(0);
+        tokenCookie.setPath("/");
+        response.addCookie(tokenCookie);
 
+        try {
+            request.logout();
+        } catch (ServletException e) {
+            responseMap.put("message", "Something went wrong while logging out");
+            return ResponseEntity.internalServerError().body(responseMap);
+        }
+
+        SecurityContextHolder.clearContext();
+        responseMap.put("message", "Logged out successfully");
+
+        return ResponseEntity.ok(responseMap);
+    }
 }
