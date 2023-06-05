@@ -51,19 +51,20 @@ public class StudentController {
     public ResponseEntity<?> addResume(Authentication authentication, @RequestParam("resume") MultipartFile file) throws IOException {
         Map<String, Object> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
-        Optional<Student> student = studentService.findById(studentId);
-        if (student.isPresent()) {
+        Optional<Student> studentOptional = studentService.findById(studentId);
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
             byte[] resumeBytes = file.getBytes();
-            Set<byte[]> resumes = student.get().getResumes();
+            Set<byte[]> resumes = student.getResumes();
             resumes.add(resumeBytes);
-            student.get().setResumes(resumes);
+            student.setResumes(resumes);
 
-            Set<String> resumeFilenames = student.get().getResumeFilenames();
+            Set<String> resumeFilenames = student.getResumeFilenames();
             resumeFilenames.add(file.getOriginalFilename());
-            student.get().setResumeFilenames(resumeFilenames);
+            student.setResumeFilenames(resumeFilenames);
 
-            studentService.save(student.get());
-            response.put("resume added", true);
+            studentService.save(student);
+            response.put("message", "Resume added");
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
@@ -75,23 +76,81 @@ public class StudentController {
     public ResponseEntity<?> addCertificate(Authentication authentication, @RequestParam("certificate") MultipartFile file) throws IOException {
         Map<String, Object> responseMap = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
-        Optional<Student> student = studentService.findById(studentId);
-        if (student.isPresent()) {
+        Optional<Student> studentOptional = studentService.findById(studentId);
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
             byte[] certificateBytes = file.getBytes();
-            Set<byte[]> certificates = student.get().getCertificates();
+            Set<byte[]> certificates = student.getCertificates();
             certificates.add(certificateBytes);
-            student.get().setCertificates(certificates);
+            student.setCertificates(certificates);
 
-            Set<String> certificatesFilenames = student.get().getCertificatesFilenames();
+            Set<String> certificatesFilenames = student.getCertificatesFilenames();
             certificatesFilenames.add(file.getOriginalFilename());
-            student.get().setCertificatesFilenames(certificatesFilenames);
+            student.setCertificatesFilenames(certificatesFilenames);
 
-            studentService.save(student.get());
-            responseMap.put("certificate added", true);
+            studentService.save(student);
+            responseMap.put("message", "Certificate added");
             return ResponseEntity.ok(responseMap);
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @Operation(summary = "Delete resume from personal account")
+    @DeleteMapping("/delete-resume")
+    public ResponseEntity<?> deleteResume(Authentication authentication, @RequestParam("resumeId") int resumeId) {
+        Map<String, Object> response = new HashMap<>();
+        Long studentId = getAuthStudentId(authentication);
+        Optional<Student> studentOptional = studentService.findById(studentId);
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
+            Set<byte[]> resumes = student.getResumes();
+
+            int index = resumeId - 1;
+
+            if (index >= 0 && index < resumes.size()) {
+                Iterator<byte[]> iterator = resumes.iterator();
+                for (int i = 0; i < index; i++) {
+                    iterator.next();
+                }
+                iterator.remove();
+                studentService.save(student);
+                response.put("message", "Resume deleted");
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Delete certificate from personal account")
+    @DeleteMapping("/delete-certificate")
+    public ResponseEntity<?> deleteCertificate(Authentication authentication, @RequestParam("certificateId") int certificateId) {
+        Map<String, Object> response = new HashMap<>();
+        Long studentId = getAuthStudentId(authentication);
+        Optional<Student> studentOptional = studentService.findById(studentId);
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
+            Set<byte[]> certificates = student.getCertificates();
+
+            int index = certificateId - 1;
+
+            if (index >= 0 && index < certificates.size()) {
+                Iterator<byte[]> iterator = certificates.iterator();
+                for (int i = 0; i < index; i++) {
+                    iterator.next();
+                }
+                iterator.remove();
+
+                studentService.save(student);
+                response.put("message", "Certificate deleted");
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @Operation(summary = "Download file from personal account")

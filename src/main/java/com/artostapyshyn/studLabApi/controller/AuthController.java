@@ -142,7 +142,7 @@ public class AuthController {
 
             VerificationCode verification = new VerificationCode();
             verification.setCode(verificationCode);
-            verification.setExpirationDate(LocalDateTime.now().plusMinutes(5));
+            verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
             verification.setEmail(email);
 
             response.put("message", "Email sent successfully");
@@ -176,7 +176,7 @@ public class AuthController {
 
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(5));
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
         verification.setEmail(email);
 
         response.put("message", "Verification code sent successfully");
@@ -231,6 +231,7 @@ public class AuthController {
         student.setEnabled(true);
         studentService.save(student);
         response.put("message", "User successfully verified");
+        log.info("User successfully verified with email - " + email);
         return ResponseEntity.ok(response);
     }
 
