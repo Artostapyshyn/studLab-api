@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
-@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @AllArgsConstructor

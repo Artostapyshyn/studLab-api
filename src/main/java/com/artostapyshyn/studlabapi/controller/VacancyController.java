@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Log4j2
-@CrossOrigin(maxAge = 3600)
 @RestController
 @RequestMapping("/api/v1/vacancies")
 @AllArgsConstructor

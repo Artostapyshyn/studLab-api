@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @AllArgsConstructor

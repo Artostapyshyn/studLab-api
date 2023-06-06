@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@CrossOrigin(maxAge = 3600)
 @Log4j2
 @RestController
 @RequestMapping("/api/v1/favourites")
