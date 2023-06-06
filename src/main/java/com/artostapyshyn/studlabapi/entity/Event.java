@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -48,6 +49,9 @@ public class Event {
 
     @OneToMany(mappedBy = "eventId")
     private Set<Comment> eventComments;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Complaint> complaints;
 
     public void addComment(Comment comment) {
         eventComments.add(comment);

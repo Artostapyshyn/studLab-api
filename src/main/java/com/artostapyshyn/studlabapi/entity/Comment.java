@@ -25,6 +25,9 @@ public class Comment {
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<Reply> replies;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Complaint> complaints;
+
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @Column(name = "event_id", nullable = false)
     private Long eventId;

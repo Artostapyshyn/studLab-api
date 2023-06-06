@@ -31,6 +31,7 @@ public class StudentController {
         Optional<Student> student = studentService.findById(studentId);
         if (student.isPresent()) {
             response.add(student);
+            log.info("Getting" + student.get().getEmail() + " profile");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.add("Student not found.");
