@@ -65,12 +65,6 @@ public class AuthController {
                 responseMap.put("message", "Logged In");
                 responseMap.put("token", token);
 
-                Cookie cookie = new Cookie("JSESSIONID", token);
-                cookie.setPath("/");
-                cookie.setHttpOnly(true);
-                cookie.setMaxAge(86400);
-                response.addCookie(cookie);
-
                 return ResponseEntity.ok(responseMap);
             } else {
                 responseMap.put("message", "Invalid Credentials");
@@ -121,14 +115,11 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("JSESSIONID")) {
-                    return cookie.getValue();
-                }
+                return cookie.getValue();
             }
         }
         return null;
     }
-
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
@@ -261,8 +252,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        if (checkedStudent.isEnabled()) {
-            response.put("message", "Student is verified");
+        if (checkedStudent.isEnabled() && student.getPassword() != null) {
+            response.put("message", "Student is verified and signed-in");
             log.info("Checking verification status for student - " + email);
         } else {
             response.put("message", "Student is not verified");
@@ -331,20 +322,14 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("JSESSIONID")) {
-                    cookie.setValue("");
-                    cookie.setPath("/");
-                    cookie.setMaxAge(0);
-                    response.addCookie(cookie);
-                    break;
-                }
+                String cookieValue = cookie.getValue();
+                cookie.setValue("");
+                cookie.setPath("/");
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+                break;
             }
         }
-        Cookie tokenCookie = new Cookie("JSESSIONID", "");
-        tokenCookie.setMaxAge(0);
-        tokenCookie.setPath("/");
-        response.addCookie(tokenCookie);
-
         try {
             request.logout();
         } catch (ServletException e) {

@@ -28,9 +28,15 @@ public class StudentController {
         List<Object> response = new ArrayList<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
+
+        if(authentication == null){
+            response.add("Student not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
         if (student.isPresent()) {
             response.add(student);
-            log.info("Getting" + student.get().getEmail() + " profile");
+            log.info("Getting " + student.get().getEmail() + " profile");
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.add("Student not found.");
