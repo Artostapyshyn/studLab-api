@@ -82,9 +82,6 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Complaint> complaints;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "university_id")
     @JsonBackReference

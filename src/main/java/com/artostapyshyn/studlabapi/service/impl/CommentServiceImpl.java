@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -45,5 +46,11 @@ public class CommentServiceImpl implements CommentService {
         messageService.addMessageToStudent(studentId);
         messageService.updateNewMessageStatus(studentId, true);
     }
+
+    @Override
+    public Optional<Comment> findById(Long id) {
+        return commentRepository.findById(id);
+    }
+
 
 }

@@ -50,7 +50,7 @@ public class AuthController {
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student) {
         Map<String, Object> responseMap;
         responseMap = new HashMap<>();
         try {

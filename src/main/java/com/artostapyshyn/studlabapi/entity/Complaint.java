@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.artostapyshyn.studlabapi.enums.ComplaintType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,21 +19,17 @@ public class Complaint {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id")
-    private Student student;
+    @Column(name = "studentId")
+    private Long studentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
+    @Column(name = "commentId")
+    private Long commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @Column(name = "eventId")
+    private Long eventId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vacancy_id")
-    private Vacancy vacancy;
+    @Column(name = "vacancyId")
+    private Long vacancyId;
 
     @Column(name = "status")
     private String status;
@@ -40,6 +37,7 @@ public class Complaint {
     @Column(name = "complaint_text")
     private  String complaintText;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private String type;
+    private ComplaintType type;
 }
