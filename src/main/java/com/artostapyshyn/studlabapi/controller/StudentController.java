@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,11 +29,6 @@ public class StudentController {
         List<Object> response = new ArrayList<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
-
-        if(authentication == null){
-            response.add("Student not found.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
 
         if (student.isPresent()) {
             response.add(student);
@@ -224,8 +220,10 @@ public class StudentController {
     private void updateStudent(Student existingStudent, Student updatedStudent) {
         Optional.ofNullable(updatedStudent.getFirstName()).ifPresent(existingStudent::setFirstName);
         Optional.ofNullable(updatedStudent.getLastName()).ifPresent(existingStudent::setLastName);
-        Optional.ofNullable(updatedStudent.getEmail()).ifPresent(existingStudent::setEmail);
-        Optional.ofNullable(updatedStudent.getPassword()).ifPresent(existingStudent::setPassword);
+        if (updatedStudent.getPassword() != null) {
+            String hashedPassword = new BCryptPasswordEncoder().encode(updatedStudent.getPassword());
+            existingStudent.setPassword(hashedPassword);
+        }
         Optional.ofNullable(updatedStudent.getBirthDate()).ifPresent(existingStudent::setBirthDate);
         Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
         Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);

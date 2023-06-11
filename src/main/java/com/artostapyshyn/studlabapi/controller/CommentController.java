@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Log4j2
@@ -36,21 +37,27 @@ public class CommentController {
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
             Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
-            if(optionalStudent.isPresent()) {
+            if (optionalStudent.isPresent()) {
                 Student student = optionalStudent.get();
-                comment.setStudent(student);
-                event.get().addComment(comment);
-                commentService.save(comment);
-                eventService.save(event.get());
-                response.add(comment);
-                return ResponseEntity.ok().body(response);
+                if (student.isCanWriteComments() && (student.getBlockedUntil() == null
+                        || LocalDateTime.now().isAfter(student.getBlockedUntil()))) {
+                    comment.setStudent(student);
+                    event.get().addComment(comment);
+                    commentService.save(comment);
+                    eventService.save(event.get());
+                    response.add(comment);
+                    return ResponseEntity.ok().body(response);
+                } else {
+                    response.add("Student is blocked from adding comments.");
+                    return ResponseEntity.badRequest().body(response);
+                }
             } else {
                 response.add("Student not found.");
-                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
         } else {
             response.add("Event not found.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
@@ -75,6 +82,23 @@ public class CommentController {
         } else {
             String errorMessage = "Event not found.";
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+        }
+    }
+
+    @Operation(summary = "Delete comment by student")
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteCommentByStudent(@RequestParam("commentId") Long commentId, Authentication authentication) {
+        Optional<Comment> optionalComment = commentService.findById(commentId);
+        if (optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            if (comment.getStudent().getId().equals(getAuthStudentId(authentication))) {
+                commentService.delete(comment);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of the comment.");
+            }
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 

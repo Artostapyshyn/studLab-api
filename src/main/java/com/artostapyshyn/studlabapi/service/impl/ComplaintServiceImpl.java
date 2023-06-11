@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,19 +21,16 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     private final CommentService commentService;
 
-    private final VacancyService vacancyService;
-
-    private final EventService eventService;
-
     private final StudentService studentService;
 
     @Override
     @Scheduled(fixedDelay = 120000)
-    public void processProfilePhotoComplaints() {
+    public void processStudentProfileComplaints() {
         List<Complaint> complaints = complaintRepository.findAll();
         for (Complaint complaint : complaints) {
             Optional<Student> student = studentService.findById(complaint.getStudentId());
-            if (student.isPresent() && student.get().getPhotoBytes() == null) {
+            if ((student.isPresent() && student.get().getPhotoBytes() == null)
+                    || (student.get().getFirstName() == null || student.get().getLastName() == null)) {
                 complaint.setStatus("Виконано");
                 complaintRepository.save(complaint);
             }
@@ -45,50 +43,26 @@ public class ComplaintServiceImpl implements ComplaintService {
         List<Complaint> complaints = complaintRepository.findAll();
         for (Complaint complaint : complaints) {
             Optional<Comment> comment = commentService.findById(complaint.getCommentId());
-            if (comment.isEmpty()) {
+            if (comment.isEmpty() || !comment.get().getStudent().isCanWriteComments()) {
                 complaint.setStatus("Закрито");
                 complaintRepository.save(complaint);
             }
-        }
-    }
 
-    @Override
-    @Scheduled(fixedDelay = 120000)
-    public void processEventComplaints() {
-        List<Complaint> complaints = complaintRepository.findAll();
-        for (Complaint complaint : complaints) {
-            Optional<Event> event = eventService.findEventById(complaint.getEventId());
-            if (event.isEmpty()) {
-                complaint.setStatus("Закрито");
-                complaintRepository.save(complaint);
-            }
-        }
-    }
-
-    @Override
-    @Scheduled(fixedDelay = 120000)
-    public void processVacancyComplaints() {
-        List<Complaint> complaints = complaintRepository.findAll();
-        for (Complaint complaint : complaints) {
-            Optional<Vacancy> vacancy = vacancyService.findVacancyById(complaint.getVacancyId());
-            if (vacancy.isEmpty()) {
-                complaint.setStatus("Закрито");
-                complaintRepository.save(complaint);
-            }
+            Long studentId = complaint.getStudentId();
+            Student student = studentService.findById(studentId)
+                    .orElseThrow(() -> new NotFoundException("Student not found."));
+            student.setCanWriteComments(false);
+            LocalDateTime blockedUntil = LocalDateTime.now().plusHours(24);
+            student.setBlockedUntil(blockedUntil);
+            studentService.save(student);
         }
     }
 
     @Override
     public Complaint saveComplaint(Complaint complaint) {
         Complaint savedComplaint = new Complaint();
-        savedComplaint.setComplaintText(complaint.getComplaintText());
+        savedComplaint.setComplaintReason(complaint.getComplaintReason());
         savedComplaint.setStatus("Відкритий");
-        if (complaint.getEventId() != null) {
-            Event event = eventService.findEventById(complaint.getEventId())
-                    .orElseThrow(() -> new NotFoundException("Event not found with ID: " + complaint.getEventId()));
-            savedComplaint.setEventId(event.getId());
-            savedComplaint.setType(ComplaintType.EVENT_COMPLAINT);
-        }
 
         if (complaint.getCommentId() != null) {
             Comment comment = commentService.findById(complaint.getCommentId())
@@ -97,18 +71,11 @@ public class ComplaintServiceImpl implements ComplaintService {
             savedComplaint.setType(ComplaintType.COMMENT_COMPLAINT);
         }
 
-        if (complaint.getVacancyId() != null) {
-            Vacancy vacancy = vacancyService.findVacancyById(complaint.getVacancyId())
-                    .orElseThrow(() -> new NotFoundException("Vacancy not found with ID: " + complaint.getVacancyId()));
-            savedComplaint.setVacancyId(vacancy.getId());
-            savedComplaint.setType(ComplaintType.VACANCY_COMPLAINT);
-        }
-
         if (complaint.getStudentId() != null) {
             Student student = studentService.findById(complaint.getStudentId())
                     .orElseThrow(() -> new NotFoundException("Student not found with ID: " + complaint.getStudentId()));
             savedComplaint.setStudentId(student.getId());
-            savedComplaint.setType(ComplaintType.PROFILE_PHOTO_COMPLAINT);
+            savedComplaint.setType(ComplaintType.STUDENT_PROFILE_COMPLAINT);
         }
         return complaintRepository.save(savedComplaint);
     }

@@ -52,5 +52,10 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findById(id);
     }
 
+    @Override
+    public void delete(Comment comment) {
+        commentRepository.delete(comment);
+    }
+
 
 }

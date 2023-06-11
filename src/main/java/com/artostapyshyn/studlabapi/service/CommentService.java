@@ -12,4 +12,6 @@ public interface CommentService {
     void addReplyToComment(Reply reply, Long parentId);
 
     Optional<Comment> findById(Long id);
+
+    void delete(Comment comment);
 }

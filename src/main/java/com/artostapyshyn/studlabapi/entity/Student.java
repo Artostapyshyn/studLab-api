@@ -6,11 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -76,6 +74,12 @@ public class Student {
 
     @Column(name = "has_new_messages")
     private Boolean hasNewMessages;
+
+    @Column(name = "can_write_comments", nullable = false)
+    private boolean canWriteComments = true;
+
+    @Column(name = "blocked_until")
+    private LocalDateTime blockedUntil;
 
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student"})

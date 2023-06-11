@@ -7,13 +7,9 @@ import java.util.Optional;
 
 public interface ComplaintService {
 
-    void processProfilePhotoComplaints();
+    void processStudentProfileComplaints();
 
     void processCommentComplaints();
-
-    void processEventComplaints();
-
-    void processVacancyComplaints();
 
     Complaint save(Complaint complaint);
 

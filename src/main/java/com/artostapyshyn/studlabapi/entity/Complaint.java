@@ -25,17 +25,11 @@ public class Complaint {
     @Column(name = "commentId")
     private Long commentId;
 
-    @Column(name = "eventId")
-    private Long eventId;
-
-    @Column(name = "vacancyId")
-    private Long vacancyId;
-
     @Column(name = "status")
     private String status;
 
-    @Column(name = "complaint_text")
-    private  String complaintText;
+    @Column(name = "complaint_reason")
+    private  String complaintReason;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
