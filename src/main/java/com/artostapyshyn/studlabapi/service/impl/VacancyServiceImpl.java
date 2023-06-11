@@ -14,6 +14,7 @@ import java.util.Optional;
 public class VacancyServiceImpl implements VacancyService {
 
     private final VacancyRepository vacancyRepository;
+
     @Override
     public List<Vacancy> findAll() {
         return vacancyRepository.findAll();

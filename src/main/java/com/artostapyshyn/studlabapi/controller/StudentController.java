@@ -32,7 +32,21 @@ public class StudentController {
 
         if (student.isPresent()) {
             response.add(student);
-            log.info("Getting " + student.get().getEmail() + " profile");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.add("Student not found.");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Operation(summary = "Get personal information")
+    @PostMapping("/profile")
+    public ResponseEntity<?> getProfile(@RequestBody Student student) {
+        List<Object> response = new ArrayList<>();
+        Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
+
+        if (existingStudent != null) {
+            response.add(existingStudent);
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
             response.add("Student not found.");
@@ -42,10 +56,18 @@ public class StudentController {
 
     @Operation(summary = "Get all students")
     @GetMapping("/all")
-    public ResponseEntity<List<Student>> getAllStudents() {
+    public ResponseEntity<?> getAllStudents() {
+        List<Map<String, String>> studentData = new ArrayList<>();
         List<Student> students = studentService.findAll();
+        for (Student student : students) {
+            Map<String, String> data = new HashMap<>();
+            data.put("firstName", student.getFirstName());
+            data.put("lastName", student.getLastName());
+            studentData.add(data);
+        }
+
         log.info("Listing all students");
-        return ResponseEntity.ok(students);
+        return ResponseEntity.ok(studentData);
     }
 
     @Operation(summary = "Uplodad resume to personal account")
@@ -73,7 +95,7 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Uplodad certificate to personal account")
+    @Operation(summary = "Upload certificate to personal account")
     @PostMapping("/certificates")
     public ResponseEntity<?> addCertificate(Authentication authentication, @RequestParam("certificate") MultipartFile file) throws IOException {
         Map<String, Object> responseMap = new HashMap<>();
@@ -155,47 +177,6 @@ public class StudentController {
         return ResponseEntity.notFound().build();
     }
 
-    @Operation(summary = "Download file from personal account")
-    @GetMapping("/downloadFile")
-    public ResponseEntity<?> downloadFile(Authentication authentication, @RequestParam("fileName") String filename) {
-        Long studentId = getAuthStudentId(authentication);
-        Optional<Student> student = studentService.findById(studentId);
-        if (student.isPresent()) {
-            byte[] fileBytes = null;
-            Set<byte[]> files = null;
-            Set<String> fileNames = null;
-
-            if (student.get().getResumeFilenames().contains(filename)) {
-                files = student.get().getResumes();
-                fileNames = student.get().getResumeFilenames();
-            } else if (student.get().getCertificatesFilenames().contains(filename)) {
-                files = student.get().getCertificates();
-                fileNames = student.get().getCertificatesFilenames();
-            }
-
-            if (files != null && fileNames != null) {
-                Iterator<byte[]> iterator = files.iterator();
-                Iterator<String> nameIterator = fileNames.iterator();
-                while (iterator.hasNext() && nameIterator.hasNext()) {
-                    byte[] file = iterator.next();
-                    String name = nameIterator.next();
-                    if (name.equals(filename)) {
-                        fileBytes = file;
-                        break;
-                    }
-                }
-            }
-
-            if (fileBytes != null) {
-                return ResponseEntity.ok().body(Base64.getEncoder().encodeToString(fileBytes));
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     private Long getAuthStudentId(Authentication authentication) {
         String studentEmail = authentication.getName();
         Student student = studentService.findByEmail(studentEmail);
@@ -237,5 +218,4 @@ public class StudentController {
         studentService.deleteById(studentIdToDelete);
         return ResponseEntity.noContent().build();
     }
-
 }

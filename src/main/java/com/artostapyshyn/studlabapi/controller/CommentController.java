@@ -66,7 +66,7 @@ public class CommentController {
     public ResponseEntity<?> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
-        responseMap.put("replied", true);
+        responseMap.put("status", "Replied");
         return ResponseEntity.ok(responseMap);
     }
 

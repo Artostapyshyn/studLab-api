@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.enums.EventType;
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +25,6 @@ public class EventController {
     @GetMapping("/all")
     public ResponseEntity<List<Event>> getAllEvents() {
         List<Event> events = eventService.findAll();
-        log.info("Listing all events");
         return ResponseEntity.ok(events);
     }
 
@@ -64,20 +62,11 @@ public class EventController {
     public ResponseEntity<?> addEvent(@RequestBody Event event, Authentication authentication) {
         Map<String, String> response = new HashMap<>();
 
-        boolean isUniversityRepresentative = hasRole(authentication, Role.ROLE_UNIVERSITY_REPRESENTATIVE.getAuthority());
         boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
         boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
 
-        if (isAdmin) {
+        if (isAdmin || isModerator) {
             event.setEventType(event.getEventType());
-        } else if (isModerator) {
-            if (event.getEventType() != EventType.GENERAL_EVENT && event.getEventType() != EventType.PARTNER_EVENT) {
-                response.put("message", "You can't add university event");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(response);
-            }
-        } else if (isUniversityRepresentative) {
-            event.setEventType(EventType.UNIVERSITY_EVENT);
         } else {
             response.put("message", "Forbidden");
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -97,20 +86,16 @@ public class EventController {
         Map<String, String> response = new HashMap<>();
 
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
-        boolean isUniversityRepresentative = hasRole(authentication, Role.ROLE_UNIVERSITY_REPRESENTATIVE.getAuthority());
         boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
         boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
 
         if (editedEvent.isPresent()) {
             Event existingEvent = editedEvent.get();
 
-            if (isAdmin || (isUniversityRepresentative && existingEvent.getEventType() == EventType.UNIVERSITY_EVENT) ||
-                    (isModerator && (existingEvent.getEventType() == EventType.GENERAL_EVENT || existingEvent.getEventType() == EventType.PARTNER_EVENT))) {
-
+            if (isAdmin || isModerator) {
                 updateEvent(existingEvent, event);
                 eventService.save(existingEvent);
                 return ResponseEntity.ok(existingEvent);
-
             } else {
                 response.put("message", "Forbidden");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -138,27 +123,10 @@ public class EventController {
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
             Event event = existingEvent.get();
-            boolean isUniversityRepresentative = hasRole(authentication, Role.ROLE_UNIVERSITY_REPRESENTATIVE.getAuthority());
             boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
             boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
 
-            if (isAdmin) {
-                eventService.deleteById(eventId);
-                return ResponseEntity.ok().build();
-            } else if (isUniversityRepresentative) {
-                if (event.getEventType() != EventType.UNIVERSITY_EVENT) {
-                    response.put("message", "You're not a university representative");
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(response);
-                }
-                eventService.deleteById(eventId);
-                return ResponseEntity.ok().build();
-            } else if (isModerator) {
-                if (event.getEventType() != EventType.GENERAL_EVENT && event.getEventType() != EventType.PARTNER_EVENT) {
-                    response.put("message", "You're not a moderator");
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                            .body(response);
-                }
+            if (isAdmin || isModerator) {
                 eventService.deleteById(eventId);
                 return ResponseEntity.ok().build();
             } else {
