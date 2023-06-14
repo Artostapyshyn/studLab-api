@@ -25,7 +25,7 @@ public class StudentController {
 
     @Operation(summary = "Get personal information")
     @GetMapping("/personal-info")
-    public ResponseEntity<?> getPersonalInfo(Authentication authentication) {
+    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
@@ -56,7 +56,7 @@ public class StudentController {
 
     @Operation(summary = "Get all students")
     @GetMapping("/all")
-    public ResponseEntity<?> getAllStudents() {
+    public ResponseEntity<List<Map<String, String>>> getAllStudents() {
         List<Map<String, String>> studentData = new ArrayList<>();
         List<Student> students = studentService.findAll();
         for (Student student : students) {
@@ -72,7 +72,7 @@ public class StudentController {
 
     @Operation(summary = "Uplodad resume to personal account")
     @PostMapping("/resumes")
-    public ResponseEntity<?> addResume(Authentication authentication, @RequestParam("resume") MultipartFile file) throws IOException {
+    public ResponseEntity<Map<String, Object>> addResume(Authentication authentication, @RequestParam("resume") MultipartFile file) throws IOException {
         Map<String, Object> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> studentOptional = studentService.findById(studentId);
@@ -97,7 +97,7 @@ public class StudentController {
 
     @Operation(summary = "Upload certificate to personal account")
     @PostMapping("/certificates")
-    public ResponseEntity<?> addCertificate(Authentication authentication, @RequestParam("certificate") MultipartFile file) throws IOException {
+    public ResponseEntity<Map<String, Object>> addCertificate(Authentication authentication, @RequestParam("certificate") MultipartFile file) throws IOException {
         Map<String, Object> responseMap = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> studentOptional = studentService.findById(studentId);
@@ -122,7 +122,7 @@ public class StudentController {
 
     @Operation(summary = "Delete resume from personal account")
     @DeleteMapping("/delete-resume")
-    public ResponseEntity<?> deleteResume(Authentication authentication, @RequestParam("resumeId") int resumeId) {
+    public ResponseEntity<Map<String, Object>> deleteResume(Authentication authentication, @RequestParam("resumeId") int resumeId) {
         Map<String, Object> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> studentOptional = studentService.findById(studentId);
@@ -150,7 +150,7 @@ public class StudentController {
 
     @Operation(summary = "Delete certificate from personal account")
     @DeleteMapping("/delete-certificate")
-    public ResponseEntity<?> deleteCertificate(Authentication authentication, @RequestParam("certificateId") int certificateId) {
+    public ResponseEntity<Map<String, Object>> deleteCertificate(Authentication authentication, @RequestParam("certificateId") int certificateId) {
         Map<String, Object> response = new HashMap<>();
         Long studentId = getAuthStudentId(authentication);
         Optional<Student> studentOptional = studentService.findById(studentId);
@@ -185,7 +185,7 @@ public class StudentController {
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
-    public ResponseEntity<?> editEvent(@RequestBody Student student, Authentication authentication) {
+    public ResponseEntity<Student> editEvent(@RequestBody Student student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
 
         if (optionalStudent.isPresent()) {
@@ -213,7 +213,7 @@ public class StudentController {
 
     @Operation(summary = "Delete student account")
     @DeleteMapping("/delete-account")
-    public ResponseEntity<?> deleteStudent(Authentication authentication) {
+    public ResponseEntity<Void> deleteStudent(Authentication authentication) {
         Long studentIdToDelete = getAuthStudentId(authentication);
         studentService.deleteById(studentIdToDelete);
         return ResponseEntity.noContent().build();

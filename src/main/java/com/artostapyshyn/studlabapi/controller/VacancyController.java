@@ -34,7 +34,7 @@ public class VacancyController {
     @Operation(summary = "Add a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
-    public ResponseEntity<?> addVacancy(@RequestBody Vacancy vacancy, @RequestParam("image") MultipartFile image) {
+    public ResponseEntity<Vacancy> addVacancy(@RequestBody Vacancy vacancy, @RequestParam("image") MultipartFile image) {
         Vacancy savedVacancy = vacancyService.save(vacancy);
         log.info("New vacancy added with id - " + savedVacancy.getId());
         return ResponseEntity.ok(savedVacancy);
@@ -43,7 +43,7 @@ public class VacancyController {
     @Operation(summary = "Edit a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/edit")
-    public ResponseEntity<?> addVacancy(@RequestParam("vacancyId") Long vacancyId, @RequestParam Vacancy vacancy) {
+    public ResponseEntity<Vacancy> addVacancy(@RequestParam("vacancyId") Long vacancyId, @RequestParam Vacancy vacancy) {
         Optional<Vacancy> optionalVacancy = vacancyService.findVacancyById(vacancyId);
         if (optionalVacancy.isPresent()) {
             Vacancy existingVacancy = optionalVacancy.get();
@@ -63,7 +63,7 @@ public class VacancyController {
     @Operation(summary = "Delete vacancy by id.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping ("/delete")
-    public ResponseEntity<?> deleteVacancy(@RequestParam("vacancyId") Long vacancyId) {
+    public ResponseEntity<Void> deleteVacancy(@RequestParam("vacancyId") Long vacancyId) {
         Optional<Vacancy> vacancy = vacancyService.findVacancyById(vacancyId);
         if (vacancy.isPresent()) {
             vacancyService.deleteById(vacancyId);

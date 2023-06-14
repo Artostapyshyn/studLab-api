@@ -32,7 +32,7 @@ public class CommentController {
 
     @Operation(summary = "Add comment to event")
     @PostMapping("/add")
-    public ResponseEntity<?> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
+    public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
@@ -63,7 +63,7 @@ public class CommentController {
 
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
-    public ResponseEntity<?> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
+    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
         responseMap.put("status", "Replied");
@@ -72,7 +72,7 @@ public class CommentController {
 
     @Operation(summary = "Get all comments to event")
     @GetMapping("/all")
-    public ResponseEntity<?> getCommentsForEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+    public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
         if (optionalEvent.isPresent()) {
             Event event = optionalEvent.get();
@@ -80,8 +80,7 @@ public class CommentController {
             List<Comment> commentList = new ArrayList<>(comments);
             return ResponseEntity.ok(commentList);
         } else {
-            String errorMessage = "Event not found.";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

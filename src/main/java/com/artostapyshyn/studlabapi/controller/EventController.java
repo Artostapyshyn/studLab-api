@@ -1,14 +1,12 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -52,55 +50,35 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    private boolean hasRole(Authentication authentication, String roleName) {
-        return authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals(roleName));
-    }
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add an event.")
     @PostMapping("/add")
-    public ResponseEntity<?> addEvent(@RequestBody Event event, Authentication authentication) {
-        Map<String, String> response = new HashMap<>();
-
-        boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
-        boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
-
-        if (isAdmin || isModerator) {
-            event.setEventType(event.getEventType());
-        } else {
-            response.put("message", "Forbidden");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(response);
-        }
-
+    public ResponseEntity<Event> addEvent(@RequestBody Event event) {
+        event.setEventType(event.getEventType());
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
-        Event savedEvent = eventService.save(event);
-        log.info("New event added with id - " + savedEvent.getId());
-        return ResponseEntity.ok(savedEvent);
+
+        try {
+            Event savedEvent = eventService.save(event);
+            log.info("New event added with id - " + savedEvent.getId());
+            return ResponseEntity.ok(savedEvent);
+        } catch (Exception e) {
+            log.info("Error adding event");
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit an event.")
     @PutMapping("/edit")
-    public ResponseEntity<?> editEvent(@RequestBody Event event, Authentication authentication) {
-        Map<String, String> response = new HashMap<>();
-
+    public ResponseEntity<Event> editEvent(@RequestBody Event event) {
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
-        boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
-        boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
 
         if (editedEvent.isPresent()) {
             Event existingEvent = editedEvent.get();
-
-            if (isAdmin || isModerator) {
-                updateEvent(existingEvent, event);
-                eventService.save(existingEvent);
-                return ResponseEntity.ok(existingEvent);
-            } else {
-                response.put("message", "Forbidden");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(response);
-            }
+            updateEvent(existingEvent, event);
+            eventService.save(existingEvent);
+            return ResponseEntity.ok(existingEvent);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -115,25 +93,15 @@ public class EventController {
         Optional.ofNullable(updatedEvent.getEventType()).ifPresent(existingEvent::setEventType);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Delete an event by id.")
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Void> deleteEvent(@RequestParam("eventId") Long eventId) {
 
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
-            Event event = existingEvent.get();
-            boolean isModerator = hasRole(authentication, Role.ROLE_MODERATOR.getAuthority());
-            boolean isAdmin = hasRole(authentication, Role.ROLE_ADMIN.getAuthority());
-
-            if (isAdmin || isModerator) {
-                eventService.deleteById(eventId);
-                return ResponseEntity.ok().build();
-            } else {
-                response.put("message", "Forbidden");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(response);
-            }
+            eventService.deleteById(eventId);
+            return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
         }

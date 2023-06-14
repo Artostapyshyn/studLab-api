@@ -32,7 +32,7 @@ public class MessageController {
 
     @Operation(summary = "Mark messages as read")
     @PostMapping("/mark-as-read")
-    public ResponseEntity<?> markAllMessagesAsRead(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> markAllMessagesAsRead(Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
         messageService.updateNewMessageStatus(getAuthStudentId(authentication), false);
         responseMap.put("status", "marked-as-read");

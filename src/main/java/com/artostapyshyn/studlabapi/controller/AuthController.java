@@ -123,7 +123,7 @@ public class AuthController {
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
-    public ResponseEntity<?> verifyEmail(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
 
@@ -160,7 +160,7 @@ public class AuthController {
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<?> resendVerificationCode(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
         VerificationCode existingCode = verificationCodesService.findByEmail(email);
@@ -188,7 +188,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    private ResponseEntity<?> handleResendCodeError(Map<String, Object> response, String errorMessage) {
+    private ResponseEntity<Map<String, Object>> handleResendCodeError(Map<String, Object> response, String errorMessage) {
         response.put("error", errorMessage);
         return ResponseEntity.badRequest().body(response);
     }
@@ -288,7 +288,7 @@ public class AuthController {
             existingStudent.setPassword(encodedPassword);
             existingStudent.setHasNewMessages(false);
             existingStudent.setMajor(student.getMajor());
-
+            existingStudent.setCourse(student.getCourse());
             byte[] imageBytes = student.getPhotoBytes();
             existingStudent.setPhotoBytes(imageBytes);
 
