@@ -1,6 +1,5 @@
 package com.artostapyshyn.studlabapi.entity;
 
-import com.artostapyshyn.studlabapi.enums.ComplaintType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,19 +18,27 @@ public class Complaint {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "studentId")
+    @Column(name = "student_Id", nullable = false)
     private Long studentId;
 
-    @Column(name = "commentId")
+    @Column(name = "comment_Id", nullable = false)
     private Long commentId;
 
     @Column(name = "status")
     private String status;
 
-    @Column(name = "complaint_reason")
-    private  String complaintReason;
+    @Column(name = "complaint_reason", nullable = false)
+    private String complaintReason;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private ComplaintType type;
+    @Column(name = "block_user")
+    private boolean blockUser;
+
+    @Column(name = "block_duration")
+    private String blockDuration;
+
+    @Column(name = "delete_comment")
+    private boolean deleteComment;
+
+    @Column(name = "close_complaint")
+    private boolean closeComplaint;
 }

@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Log4j2
@@ -39,18 +38,12 @@ public class CommentController {
             Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
             if (optionalStudent.isPresent()) {
                 Student student = optionalStudent.get();
-                if (student.isCanWriteComments() && (student.getBlockedUntil() == null
-                        || LocalDateTime.now().isAfter(student.getBlockedUntil()))) {
                     comment.setStudent(student);
                     event.get().addComment(comment);
                     commentService.save(comment);
                     eventService.save(event.get());
                     response.add(comment);
                     return ResponseEntity.ok().body(response);
-                } else {
-                    response.add("Student is blocked from adding comments.");
-                    return ResponseEntity.badRequest().body(response);
-                }
             } else {
                 response.add("Student not found.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);

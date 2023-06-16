@@ -54,22 +54,33 @@ public class AuthController {
         Map<String, Object> responseMap;
         responseMap = new HashMap<>();
         try {
-            Authentication auth;
-            auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
-            if (auth.isAuthenticated()) {
-                log.info("Logged In");
-                UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-                String token = jwtTokenUtil.generateToken(userDetails, student.getId());
-                log.info(token);
+            Student foundStudent = studentService.findByEmail(student.getEmail());
 
-                responseMap.put("message", "Logged In");
-                responseMap.put("token", token);
+            if (foundStudent != null) {
 
-                return ResponseEntity.ok(responseMap);
-            } else {
-                responseMap.put("message", "Invalid Credentials");
-                return ResponseEntity.status(401).body(responseMap);
+                if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
+                    responseMap.put("message", "User is blocked.");
+                    return ResponseEntity.status(401).body(responseMap);
+                }
+
+                Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
+
+                if (auth.isAuthenticated()) {
+                    log.info("Logged In");
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
+
+                    String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+                    log.info(token);
+
+                    responseMap.put("message", "Logged In");
+                    responseMap.put("token", token);
+
+                    return ResponseEntity.ok(responseMap);
+                }
             }
+
+            responseMap.put("message", "Invalid Credentials");
+            return ResponseEntity.status(401).body(responseMap);
         } catch (DisabledException e) {
             e.printStackTrace();
             responseMap.put("message", "User is disabled");

@@ -75,9 +75,6 @@ public class Student {
     @Column(name = "has_new_messages")
     private Boolean hasNewMessages;
 
-    @Column(name = "can_write_comments", nullable = false)
-    private boolean canWriteComments = true;
-
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 

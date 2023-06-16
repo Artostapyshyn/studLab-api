@@ -1,14 +1,11 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Complaint;
-import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
-import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -24,13 +21,6 @@ public class ComplaintController {
 
     private final ComplaintService complaintService;
 
-    private final StudentService studentService;
-
-    @PostMapping("/add")
-    public Complaint saveComplaint(@RequestBody Complaint complaint) {
-        return complaintService.saveComplaint(complaint);
-    }
-
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/all")
     public ResponseEntity<List<Complaint>> getAllComplaints() {
@@ -39,10 +29,43 @@ public class ComplaintController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @GetMapping("/closed")
+    public ResponseEntity<List<Complaint>> getAllClosedComplaints() {
+        List<Complaint> complaints = complaintService.findClosedComplaints();
+        return ResponseEntity.ok(complaints);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<Complaint> saveComplaint(@RequestBody Complaint complaint) {
+        if (complaint == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Complaint savedComplaint = complaintService.saveComplaint(complaint);
+        if (savedComplaint == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        return ResponseEntity.ok(savedComplaint);
+    }
+
+    @PostMapping("/process")
+    public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody Complaint complaint) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (complaint == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        complaintService.processComplaints(complaint);
+        response.put("status", "Processed successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping("/remove")
-    public ResponseEntity<?> removeComplaints(Authentication authentication, @RequestParam("complaintId") Long complaintId) {
+    public ResponseEntity<?> removeComplaints(@RequestParam("complaintId") Long complaintId) {
         Map<String, String> response = new HashMap<>();
-        Long studentId = getAuthStudentId(authentication);
         Optional<Complaint> complaint = complaintService.findById(complaintId);
         if (complaint.isPresent()) {
             complaintService.delete(complaint.get());
@@ -52,11 +75,4 @@ public class ComplaintController {
         response.put("error", "Complaint not found not found");
         return ResponseEntity.badRequest().body(response);
     }
-
-    private Long getAuthStudentId(Authentication authentication) {
-        String studentEmail = authentication.getName();
-        Student student = studentService.findByEmail(studentEmail);
-        return student.getId();
-    }
-
 }
