@@ -302,6 +302,7 @@ public class AuthController {
             existingStudent.setCourse(student.getCourse());
             byte[] imageBytes = student.getPhotoBytes();
             existingStudent.setPhotoBytes(imageBytes);
+            existingStudent.setRegistrationDate(LocalDateTime.now());
 
             studentService.save(existingStudent);
             UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());

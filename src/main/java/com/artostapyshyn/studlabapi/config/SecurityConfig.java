@@ -42,7 +42,8 @@ public class SecurityConfig {
                 .requestMatchers("api/v1/favourites/**", "api/v1/messages/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
                 .requestMatchers("api/v1/student/**", "api/v1/complaints/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
                 .requestMatchers("api/v1/events/**", "api/v1/course/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").hasAnyRole("ROLE_ADMIN")
+                .requestMatchers("api/v1/statistic/**").hasAnyRole("ROLE_ADMIN")
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

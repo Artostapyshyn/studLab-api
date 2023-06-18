@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.UniversityService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -23,5 +24,10 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public University findByDomain(String domain) {
         return universityRepository.findByDomain(domain);
+    }
+
+    @Override
+    public List<University> findAll() {
+        return universityRepository.findAll().stream().toList();
     }
 }

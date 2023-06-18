@@ -12,6 +12,8 @@ public interface EventService {
 
     Event save(Event event);
 
+    int getCreatedEventCount();
+
     List<Event> findPopularEvents();
 
     List<Event> findAllEventsByDateDesc();

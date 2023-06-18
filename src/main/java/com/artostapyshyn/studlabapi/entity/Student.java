@@ -78,6 +78,9 @@ public class Student {
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate;
+
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student"})
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

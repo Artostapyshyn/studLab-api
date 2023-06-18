@@ -3,17 +3,23 @@ package com.artostapyshyn.studlabapi.service.impl;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-@AllArgsConstructor
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
+
+    private AtomicInteger createdEventCount;
+
+    public EventServiceImpl(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+        this.createdEventCount = new AtomicInteger(0);
+    }
 
     @Override
     public List<Event> findAll() {
@@ -27,7 +33,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Event save(Event event) {
+        createdEventCount.incrementAndGet();
         return eventRepository.save(event);
+    }
+
+    public int getCreatedEventCount() {
+        return createdEventCount.get();
     }
 
     @Override
