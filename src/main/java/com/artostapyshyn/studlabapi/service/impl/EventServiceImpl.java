@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,11 +48,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Cacheable("eventsByDateDesc")
     public List<Event> findAllEventsByDateDesc() {
         return eventRepository.findAllEventsByDateDesc();
     }
 
     @Override
+    @Cacheable("eventsByCreationDateDesc")
     public List<Event> findAllEventsByCreationDateDesc() {
         return eventRepository.findAllEventsByCreationDateDesc();
     }

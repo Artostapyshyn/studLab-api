@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,11 +16,13 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
 
     @Override
+    @Cacheable("studentsById")
     public Optional<Student> findById(Long id) {
         return studentRepository.findById(id);
     }
 
     @Override
+    @Cacheable("studentsByEmail")
     public Student findByEmail(String email) {
         return studentRepository.findByEmail(email);
     }
@@ -50,6 +53,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Cacheable("registrationData")
     public Map<String, Integer> getRegistrationData() {
         List<Student> students = studentRepository.findAll();
 

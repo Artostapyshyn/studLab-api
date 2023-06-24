@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Cacheable
 @Table(name = "replies")
 public class Reply {
     @Id

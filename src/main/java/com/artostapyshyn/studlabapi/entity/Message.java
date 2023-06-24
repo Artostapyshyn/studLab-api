@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
+@Cacheable
 @Table(name = "messages")
 public class Message {
     @Id

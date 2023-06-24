@@ -17,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Cacheable
 @Table(name = "students")
 public class Student {
     @Id

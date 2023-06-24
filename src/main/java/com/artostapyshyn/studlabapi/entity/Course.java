@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Cacheable
 @Table(name = "courses")
 public class Course {
     @Id

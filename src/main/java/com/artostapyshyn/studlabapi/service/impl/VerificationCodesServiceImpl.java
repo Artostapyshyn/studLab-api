@@ -54,7 +54,7 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
         return verificationCodesRepository.findByEmail(email);
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 90000000)
     @Transactional
     @Override
     public void deleteExpiredTokens() {

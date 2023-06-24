@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Cacheable
 @Table(name = "complaints")
 public class Complaint {
     @Id

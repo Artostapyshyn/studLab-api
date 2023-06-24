@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Cacheable
 @Table(name = "verification_codes")
 public class VerificationCode {
     @Id

@@ -2,7 +2,9 @@ package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.EventType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -11,7 +13,10 @@ import java.util.Set;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
+@Cacheable
 @Table(name = "events")
 public class Event {
     @Id

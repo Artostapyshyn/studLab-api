@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,27 +60,18 @@ public class AuthController {
             }
 
             Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
-
-            if (!auth.isAuthenticated()) {
-                responseMap.put("message", "Invalid Credentials");
-                return ResponseEntity.status(401).body(responseMap);
-            }
-
-            log.info("Logged In");
-            UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-
-            String token = jwtTokenUtil.generateToken(userDetails, student.getId());
-            log.info(token);
-
-            responseMap.put("message", "Logged In");
-            responseMap.put("token", token);
-
-            return ResponseEntity.ok(responseMap);
-        } catch (Exception e) {
-            e.printStackTrace();
-            responseMap.put("message", "Something went wrong");
-            return ResponseEntity.internalServerError().body(responseMap);
+        } catch (BadCredentialsException e) {
+            responseMap.put("message", "Invalid Credentials");
+            return ResponseEntity.status(401).body(responseMap);
         }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
+
+        String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+        log.info(token);
+
+        responseMap.put("message", "Logged In");
+        responseMap.put("token", token);
+        return ResponseEntity.ok(responseMap);
     }
 
     @Operation(summary = "Check user login status")

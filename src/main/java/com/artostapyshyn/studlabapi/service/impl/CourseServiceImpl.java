@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Course;
 import com.artostapyshyn.studlabapi.repository.CourseRepository;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Cacheable("coursesByCreationDate")
     public List<Course> findAllCoursesByCreationDateDesc() {
         return courseRepository.findAllCoursesByCreationDateDesc().stream().toList();
     }

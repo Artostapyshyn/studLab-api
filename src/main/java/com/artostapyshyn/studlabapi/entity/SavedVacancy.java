@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Cacheable
 @Table(name = "saved_vacancies")
 public class SavedVacancy {
     @Id

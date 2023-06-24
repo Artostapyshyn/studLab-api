@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@Cacheable
 @Table(name = "event_comments")
 public class Comment {
     @Id
