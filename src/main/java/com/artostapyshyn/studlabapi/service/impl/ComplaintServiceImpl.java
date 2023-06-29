@@ -2,8 +2,12 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.repository.ComplaintRepository;
-import com.artostapyshyn.studlabapi.service.*;
+import com.artostapyshyn.studlabapi.service.CommentService;
+import com.artostapyshyn.studlabapi.service.ComplaintService;
+import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -16,14 +20,11 @@ import java.util.Optional;
 public class ComplaintServiceImpl implements ComplaintService {
 
     private final ComplaintRepository complaintRepository;
-
     private final CommentService commentService;
-
     private final StudentService studentService;
 
     @Override
     public void processComplaints(Complaint complaint) {
-
         studentService.findById(complaint.getStudentId())
                 .ifPresent(student -> commentService.findById(complaint.getCommentId())
                         .ifPresent(comment -> handleComplaint(student, comment, complaint)));
@@ -48,6 +49,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    @CacheEvict(value = "complaintById", key = "#complaint.id")
     public Complaint saveComplaint(Complaint complaint) {
         Complaint savedComplaint = new Complaint();
         savedComplaint.setComplaintReason(complaint.getComplaintReason());
@@ -82,17 +84,18 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    @Cacheable(value = "complaintById", key = "#id")
     public Optional<Complaint> findById(Long id) {
         return complaintRepository.findById(id);
     }
 
     @Override
     public List<Complaint> findAll() {
-        return complaintRepository.findAll().stream().toList();
+        return complaintRepository.findAll();
     }
 
     @Override
     public List<Complaint> findClosedComplaints() {
-        return complaintRepository.findClosedComplaints().stream().toList();
+        return complaintRepository.findClosedComplaints();
     }
 }

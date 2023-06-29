@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VerificationCodesService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
 
     private final StudentService studentService;
 
+    @Cacheable("verificationCodesByEmail")
     public VerificationCode generateCode(String email) {
         Student student = studentService.findByEmail(email);
         int verificationCodeValue = generateRandomCode();

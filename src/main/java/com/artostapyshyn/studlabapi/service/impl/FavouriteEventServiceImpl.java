@@ -6,6 +6,8 @@ import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,15 +18,16 @@ import java.util.Optional;
 public class FavouriteEventServiceImpl implements FavouriteEventService {
 
     private final FavouriteEventRepository favouriteEventRepository;
-
     private final EventRepository eventRepository;
 
     @Override
+    @Cacheable(value = "favouriteEventsByStudentId", key = "#id")
     public List<FavouriteEvent> findByStudentId(Long id) {
         return favouriteEventRepository.findByStudentId(id);
     }
 
     @Override
+    @Cacheable(value = "favouriteEventByStudentIdAndEventId", key = "{#studentId, #eventId}")
     public Optional<FavouriteEvent> findByStudentIdAndEventId(Long studentId, Long eventId) {
         return Optional.ofNullable(favouriteEventRepository.findByStudentIdAndEventId(studentId, eventId));
     }

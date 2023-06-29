@@ -1,13 +1,17 @@
 package com.artostapyshyn.studlabapi.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Cacheable
+@Entity
 @Table(name = "saved_vacancies")
 public class SavedVacancy {
     @Id

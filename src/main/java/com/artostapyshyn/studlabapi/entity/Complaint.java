@@ -10,8 +10,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Cacheable
+@Entity
 @Table(name = "complaints")
 public class Complaint {
     @Id

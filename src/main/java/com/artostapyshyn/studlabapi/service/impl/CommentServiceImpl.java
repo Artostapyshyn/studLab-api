@@ -18,9 +18,7 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-
     private final ReplyRepository replyRepository;
-
     private final MessageService messageService;
 
     @Override
@@ -56,6 +54,4 @@ public class CommentServiceImpl implements CommentService {
     public void delete(Comment comment) {
         commentRepository.delete(comment);
     }
-
-
 }

@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Cacheable
+@Entity
 @Table(name = "courses")
 public class Course {
     @Id

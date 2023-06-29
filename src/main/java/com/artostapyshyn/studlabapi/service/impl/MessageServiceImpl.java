@@ -35,15 +35,15 @@ public class MessageServiceImpl implements MessageService {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
 
-            Message message = new Message();
-            message.setContent("Вам надійшла відповідь на ваш коментар.");
-            message.setSentTime(LocalDateTime.now());
-            message.setStudent(student);
+        Message message = new Message();
+        message.setContent("Вам надійшла відповідь на ваш коментар.");
+        message.setSentTime(LocalDateTime.now());
+        message.setStudent(student);
 
-            student.getMessages().add(message);
+        student.getMessages().add(message);
 
-            studentService.save(student);
-            updateNewMessageStatus(studentId, true);
+        studentService.save(student);
+        updateNewMessageStatus(studentId, true);
     }
 
     @Override
@@ -53,7 +53,5 @@ public class MessageServiceImpl implements MessageService {
 
         student.setHasNewMessages(hasNewMessages);
         studentService.save(student);
-
     }
-
 }

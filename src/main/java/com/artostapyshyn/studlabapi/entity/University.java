@@ -13,8 +13,8 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Cacheable
+@Entity
 @Table(name = "universities")
 public class University {
     @Id

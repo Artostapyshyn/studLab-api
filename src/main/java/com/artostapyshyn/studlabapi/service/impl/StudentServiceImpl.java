@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @CacheEvict("studentsByEmail")
     public Student save(Student student) {
         return studentRepository.save(student);
     }
