@@ -79,7 +79,6 @@ public class CourseController {
     @Operation(summary = "Delete course by id.")
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteCourse(@RequestParam("courseId") Long courseId) {
-
         Optional<Course> existingCourse = courseService.findById(courseId);
         if (existingCourse.isPresent()) {
             courseService.deleteById(courseId);

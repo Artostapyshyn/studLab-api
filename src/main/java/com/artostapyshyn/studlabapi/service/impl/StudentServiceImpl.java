@@ -29,7 +29,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @CacheEvict("studentsByEmail")
+    @CacheEvict("studentsSave")
     public Student save(Student student) {
         return studentRepository.save(student);
     }

@@ -6,8 +6,6 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 
@@ -49,7 +47,6 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    @CacheEvict(value = "complaintById", key = "#complaint.id")
     public Complaint saveComplaint(Complaint complaint) {
         Complaint savedComplaint = new Complaint();
         savedComplaint.setComplaintReason(complaint.getComplaintReason());
@@ -84,7 +81,6 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    @Cacheable(value = "complaintById", key = "#id")
     public Optional<Complaint> findById(Long id) {
         return complaintRepository.findById(id);
     }

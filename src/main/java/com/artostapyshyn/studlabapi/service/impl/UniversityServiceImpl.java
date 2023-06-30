@@ -28,6 +28,6 @@ public class UniversityServiceImpl implements UniversityService {
 
     @Override
     public List<University> findAll() {
-        return universityRepository.findAll().stream().toList();
+        return universityRepository.findAll();
     }
 }

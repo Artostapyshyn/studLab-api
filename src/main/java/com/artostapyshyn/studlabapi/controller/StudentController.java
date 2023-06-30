@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.webjars.NotFoundException;
 
 import java.io.IOException;
 import java.util.*;
@@ -42,12 +41,11 @@ public class StudentController {
 
     @Operation(summary = "Find student by id")
     @GetMapping("/find-by-id")
-    public ResponseEntity<List<Object>> getStudentById(@RequestParam("studentId") Long id) {
+    public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
         List<Object> response = new ArrayList<>();
-        Student student = studentService.findById(id)
-                .orElseThrow(() -> new NotFoundException("Student no found"));
+        Optional<Student> student = studentService.findById(id);
         response.add(student);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Get personal information")

@@ -9,12 +9,3 @@ ALTER TABLE students
 
 ALTER TABLE complaints
     ADD complaint_reason VARCHAR(255);
-
-ALTER TABLE complaints
-    DROP COLUMN complaint_text;
-
-ALTER TABLE complaints
-    DROP COLUMN event_id;
-
-ALTER TABLE complaints
-    DROP COLUMN vacancy_id;

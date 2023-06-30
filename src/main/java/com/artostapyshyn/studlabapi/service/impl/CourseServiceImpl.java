@@ -18,7 +18,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<Course> findAll() {
-        return courseRepository.findAll().stream().toList();
+        return courseRepository.findAll();
     }
 
     @Override
@@ -39,6 +39,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Cacheable("coursesByCreationDate")
     public List<Course> findAllCoursesByCreationDateDesc() {
-        return courseRepository.findAllCoursesByCreationDateDesc().stream().toList();
+        return courseRepository.findAllCoursesByCreationDateDesc();
     }
 }
