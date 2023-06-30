@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Cacheable
 @Entity
 @Table(name = "event_comments")
 public class Comment {

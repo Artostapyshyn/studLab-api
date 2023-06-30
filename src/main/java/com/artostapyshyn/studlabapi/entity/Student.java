@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,19 +54,23 @@ public class Student {
 
     @Column(name = "student_resumes")
     @ElementCollection
-    private Set<byte[]> resumes;
+    @CollectionTable(name = "student_resumes")
+    private Set<String> resumes = new HashSet<>();
 
     @Column(name = "student_resume_filenames")
     @ElementCollection
-    private Set<String> resumeFilenames;
+    @CollectionTable(name = "student_resume_filenames")
+    private Set<String> resumeFilenames = new HashSet<>();
 
     @Column(name = "student_certificates")
     @ElementCollection
-    private Set<byte[]> certificates;
+    @CollectionTable(name = "student_certificates")
+    private Set<String> certificates = new HashSet<>();
 
     @Column(name = "student_certificates_filenames")
     @ElementCollection
-    private Set<String> certificatesFilenames;
+    @CollectionTable(name = "student_certificates_filenames")
+    private Set<String> certificatesFilenames = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> messages;
