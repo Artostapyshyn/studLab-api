@@ -29,6 +29,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@CrossOrigin(origins = "https://stud-lab.vercel.app")
 @AllArgsConstructor
 @Log4j2
 public class AuthController {

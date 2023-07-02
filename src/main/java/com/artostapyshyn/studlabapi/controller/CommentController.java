@@ -19,8 +19,9 @@ import java.util.*;
 
 @Log4j2
 @RestController
-@AllArgsConstructor
 @RequestMapping("/api/v1/comments")
+@AllArgsConstructor
+@CrossOrigin(origins = "https://stud-lab.vercel.app")
 public class CommentController {
 
     private final EventService eventService;

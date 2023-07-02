@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class Comment {
 
     @Column(name = "comment_text", nullable = false)
     private String commentText;
+
+    @Column(name = "comment_likes")
+    @ColumnDefault("0")
+    private int likes;
 
     @JsonBackReference
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)

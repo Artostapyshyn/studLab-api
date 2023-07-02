@@ -16,6 +16,7 @@ import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/slider")
+@CrossOrigin(origins = "https://stud-lab.vercel.app")
 public class SliderController {
 
     private final SliderService sliderService;

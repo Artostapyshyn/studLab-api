@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/savedVacancies")
+@CrossOrigin(origins = "https://stud-lab.vercel.app")
 @AllArgsConstructor
 public class SavedVacancyController {
 
