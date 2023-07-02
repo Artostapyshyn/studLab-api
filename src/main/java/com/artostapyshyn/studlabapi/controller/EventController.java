@@ -15,7 +15,7 @@ import java.util.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/events")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 public class EventController {
 
     private final EventService eventService;

@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/complaints")
 @AllArgsConstructor
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 @Log4j2
 public class ComplaintController {
 

@@ -21,7 +21,7 @@ import java.util.Optional;
 @Log4j2
 @RestController
 @RequestMapping("/api/v1/favourites")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class FavouriteEventController {
 

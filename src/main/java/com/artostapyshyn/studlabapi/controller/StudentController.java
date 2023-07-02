@@ -19,7 +19,7 @@ import java.util.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/student")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 public class StudentController {
 
     private final StudentService studentService;

@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/statistic")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @Log4j2
 public class StatisticController {

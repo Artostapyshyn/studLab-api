@@ -21,7 +21,7 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1/comments")
 @AllArgsConstructor
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 public class CommentController {
 
     private final EventService eventService;

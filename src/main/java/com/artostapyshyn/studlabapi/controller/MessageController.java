@@ -18,7 +18,7 @@ import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/messages")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 public class MessageController {
 
     private final MessageService messageService;

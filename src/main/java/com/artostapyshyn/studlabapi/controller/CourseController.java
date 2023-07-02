@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/course")
-@CrossOrigin(origins = "https://stud-lab.vercel.app")
+@CrossOrigin(origins = "*")
 public class CourseController {
 
     private final CourseService courseService;
