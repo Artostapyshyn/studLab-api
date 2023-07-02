@@ -60,13 +60,13 @@ public class CommentController {
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
-        responseMap.put("status", "Replied");
+        responseMap.put("message", "Replied successfully");
         return ResponseEntity.ok(responseMap);
     }
 
     @Operation(summary = "Get all comments to event")
     @GetMapping("/all")
-    public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+    public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
         if (optionalEvent.isPresent()) {
             Event event = optionalEvent.get();
@@ -76,6 +76,40 @@ public class CommentController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @Operation(summary = "Like comment")
+    @PostMapping("/like-comment")
+    public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId) {
+        Map<String, Object> responseMap = new HashMap<>();
+        Optional<Comment> optionalComment = commentService.findById(commentId);
+        if (optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            comment.setLikes(comment.getLikes() + 1);
+            commentService.save(comment);
+            responseMap.put("message", "Liked successfully");
+            return ResponseEntity.ok().body(responseMap);
+        }
+        responseMap.put("message", "Comment not found");
+        return ResponseEntity.badRequest().body(responseMap);
+    }
+
+    @Operation(summary = "Unlike comment")
+    @PostMapping("/unlike-comment")
+    public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId) {
+        Map<String, Object> responseMap = new HashMap<>();
+        Optional<Comment> optionalComment = commentService.findById(commentId);
+        if (optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            if (comment.getLikes() > 0) {
+                comment.setLikes(comment.getLikes() - 1);
+                commentService.save(comment);
+            }
+            responseMap.put("message", "Unliked successfully");
+            return ResponseEntity.ok().body(responseMap);
+        }
+        responseMap.put("message", "Comment not found");
+        return ResponseEntity.badRequest().body(responseMap);
     }
 
     @Operation(summary = "Delete comment by student")

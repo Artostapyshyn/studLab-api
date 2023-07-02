@@ -21,7 +21,7 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    @Operation(summary = "Get all events")
+    @Operation(summary = "Get all courses")
     @GetMapping("/all")
     public ResponseEntity<List<Course>> getAllEvents() {
         List<Course> courses = courseService.findAll();
@@ -77,7 +77,7 @@ public class CourseController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Delete course by id.")
+    @Operation(summary = "Delete a course by id.")
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteCourse(@RequestParam("courseId") Long courseId) {
         Optional<Course> existingCourse = courseService.findById(courseId);

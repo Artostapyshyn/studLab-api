@@ -98,7 +98,6 @@ public class EventController {
     @Operation(summary = "Delete an event by id.")
     @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteEvent(@RequestParam("eventId") Long eventId) {
-
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
             eventService.deleteById(eventId);

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -40,10 +41,21 @@ public class MessageController {
         return ResponseEntity.ok().body(responseMap);
     }
 
+    @Operation(summary = "Delete message by id")
+    @DeleteMapping("/delete-by-id")
+    public ResponseEntity<Void> deleteMessage(@RequestParam("messageId") Long messageId) {
+        Optional<Message> optionalMessage = messageService.findById(messageId);
+        if (optionalMessage.isPresent()) {
+            messageService.deleteById(messageId);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private Long getAuthStudentId(Authentication authentication) {
         String studentEmail = authentication.getName();
         Student student = studentService.findByEmail(studentEmail);
         return student.getId();
     }
-
 }

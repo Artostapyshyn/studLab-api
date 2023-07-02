@@ -11,6 +11,7 @@ import org.webjars.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +24,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message save(Message message) {
         return messageRepository.save(message);
+    }
+
+    @Override
+    public Optional<Message> findById(Long id) {
+        return messageRepository.findById(id);
     }
 
     @Override
@@ -44,6 +50,11 @@ public class MessageServiceImpl implements MessageService {
 
         studentService.save(student);
         updateNewMessageStatus(studentId, true);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        messageRepository.deleteById(id);
     }
 
     @Override
