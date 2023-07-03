@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 
 import java.util.*;
 
@@ -78,14 +79,21 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Like comment")
     @PostMapping("/like-comment")
-    public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId) {
+    public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId, Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
+            Long currentUserId = getAuthStudentId(authentication);
+            if (comment.getLikedBy().stream().anyMatch(student -> student.getId().equals(currentUserId))) {
+                responseMap.put("message", "Comment already liked by the user");
+                return ResponseEntity.badRequest().body(responseMap);
+            }
+
             comment.setLikes(comment.getLikes() + 1);
+            Student currentUser = studentService.findById(currentUserId).orElseThrow(() -> new NotFoundException("Student not found"));
+            comment.getLikedBy().add(currentUser);
             commentService.save(comment);
             responseMap.put("message", "Liked successfully");
             return ResponseEntity.ok().body(responseMap);
@@ -94,17 +102,22 @@ public class CommentController {
         return ResponseEntity.badRequest().body(responseMap);
     }
 
-    @Operation(summary = "Unlike comment")
     @PostMapping("/unlike-comment")
-    public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId) {
+    public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId, Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
-            if (comment.getLikes() > 0) {
-                comment.setLikes(comment.getLikes() - 1);
-                commentService.save(comment);
+            Long currentUserId = getAuthStudentId(authentication);
+            Student currentUser = studentService.findById(currentUserId).orElseThrow(() -> new NotFoundException("Student not found"));
+            boolean removed = comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId));
+            if (!removed) {
+                responseMap.put("message", "Comment not liked by the user");
+                return ResponseEntity.badRequest().body(responseMap);
             }
+
+            comment.setLikes(Math.max(comment.getLikes() - 1, 0));
+            commentService.save(comment);
             responseMap.put("message", "Unliked successfully");
             return ResponseEntity.ok().body(responseMap);
         }
