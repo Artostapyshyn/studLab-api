@@ -16,4 +16,6 @@ public interface CourseService {
     void deleteById(Long id);
 
     List<Course> findAllCoursesByCreationDateDesc();
+
+    void updateCourse(Course existingCourse, Course updatedCourse);
 }

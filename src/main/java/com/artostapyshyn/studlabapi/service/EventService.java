@@ -21,4 +21,6 @@ public interface EventService {
     List<Event> findAllEventsByCreationDateDesc();
 
     void deleteById(Long id);
+
+    void updateEvent(Event existingEvent, Event updatedEvent);
 }

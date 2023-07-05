@@ -41,4 +41,12 @@ public class CourseServiceImpl implements CourseService {
     public List<Course> findAllCoursesByCreationDateDesc() {
         return courseRepository.findAllCoursesByCreationDateDesc();
     }
+
+    @Override
+    public void updateCourse(Course existingCourse, Course updatedCourse) {
+        Optional.ofNullable(updatedCourse.getCourseLink()).ifPresent(existingCourse::setCourseLink);
+        Optional.ofNullable(updatedCourse.getCourseDescription()).ifPresent(existingCourse::setCourseDescription);
+        Optional.ofNullable(updatedCourse.getCourseName()).ifPresent(existingCourse::setCourseName);
+        Optional.ofNullable(updatedCourse.getCoursePhoto()).ifPresent(existingCourse::setCoursePhoto);
+    }
 }

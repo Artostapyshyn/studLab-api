@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Message;
-import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +27,7 @@ public class MessageController {
     @Operation(summary = "Get all messages by student id")
     @GetMapping("/all")
     public ResponseEntity<List<Message>> getAllMessages(Authentication authentication) {
-        List<Message> messages = messageService.findAllMessagesByStudentId(getAuthStudentId(authentication));
+        List<Message> messages = messageService.findAllMessagesByStudentId(studentService.getAuthStudentId(authentication));
         return ResponseEntity.ok().body(messages.stream().toList());
     }
 
@@ -36,7 +35,7 @@ public class MessageController {
     @PostMapping("/mark-as-read")
     public ResponseEntity<Map<String, Object>> markAllMessagesAsRead(Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
-        messageService.updateNewMessageStatus(getAuthStudentId(authentication), false);
+        messageService.updateNewMessageStatus(studentService.getAuthStudentId(authentication), false);
         responseMap.put("status", "marked-as-read");
         return ResponseEntity.ok().body(responseMap);
     }
@@ -51,11 +50,5 @@ public class MessageController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private Long getAuthStudentId(Authentication authentication) {
-        String studentEmail = authentication.getName();
-        Student student = studentService.findByEmail(studentEmail);
-        return student.getId();
     }
 }

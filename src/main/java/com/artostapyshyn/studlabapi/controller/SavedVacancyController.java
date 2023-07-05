@@ -28,7 +28,7 @@ public class SavedVacancyController {
     @Operation(summary = "Save vacancy")
     @PostMapping("/save")
     public SavedVacancy saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
-        Long studentId = getAuthStudentId(authentication);
+        Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Vacancy> optionalVacancy = vacancyService.findVacancyById(vacancyId);
         SavedVacancy savedVacancy = new SavedVacancy();
         savedVacancy.setVacancy(optionalVacancy.get());
@@ -39,22 +39,16 @@ public class SavedVacancyController {
     @Operation(summary = "Remove vacancy from saved")
     @DeleteMapping("/remove")
     public ResponseEntity<?> removeSavedVacancy(Authentication authentication, @RequestParam("vacancyId") Long vacancyId) {
-        Long studentId = getAuthStudentId(authentication);
+        Long studentId = studentService.getAuthStudentId(authentication);
         SavedVacancy savedVacancy = savedVacancyService.findByStudentIdAndVacancyId(studentId, vacancyId);
         savedVacancyService.delete(savedVacancy);
         return ResponseEntity.ok("Removed successfully");
     }
 
-    private Long getAuthStudentId(Authentication authentication) {
-        String studentEmail = authentication.getName();
-        Student student = studentService.findByEmail(studentEmail);
-        return student.getId();
-    }
-
     @Operation(summary = "Get student saved vacancies")
     @GetMapping("/saved")
     public List<Vacancy> getSavedVacanciesByStudentId(Authentication authentication) {
-        Long studentId = getAuthStudentId(authentication);
+        Long studentId = studentService.getAuthStudentId(authentication);
         List<SavedVacancy> savedVacancies = savedVacancyService.findByStudentId(studentId);
         return savedVacancies.stream()
                 .map(SavedVacancy::getVacancy)

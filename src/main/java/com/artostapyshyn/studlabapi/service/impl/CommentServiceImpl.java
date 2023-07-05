@@ -18,7 +18,9 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
+
     private final ReplyRepository replyRepository;
+
     private final MessageService messageService;
 
     @Override

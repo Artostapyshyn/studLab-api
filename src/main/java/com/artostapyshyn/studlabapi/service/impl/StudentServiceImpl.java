@@ -6,6 +6,8 @@ import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -81,5 +83,28 @@ public class StudentServiceImpl implements StudentService {
         registrationData.put("грудень", monthlyRegistrations[11]);
 
         return registrationData;
+    }
+
+    @Override
+    public Long getAuthStudentId(Authentication authentication) {
+        String studentEmail = authentication.getName();
+        Student student = studentRepository.findByEmail(studentEmail);
+        return student.getId();
+    }
+
+    @Override
+    public void updateStudent(Student existingStudent, Student updatedStudent) {
+        Optional.ofNullable(updatedStudent.getFirstName()).ifPresent(existingStudent::setFirstName);
+        Optional.ofNullable(updatedStudent.getLastName()).ifPresent(existingStudent::setLastName);
+
+        if (updatedStudent.getPassword() != null) {
+            String hashedPassword = new BCryptPasswordEncoder().encode(updatedStudent.getPassword());
+            existingStudent.setPassword(hashedPassword);
+        }
+
+        Optional.ofNullable(updatedStudent.getBirthDate()).ifPresent(existingStudent::setBirthDate);
+        Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
+        Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);
+        Optional.ofNullable(updatedStudent.getPhotoBytes()).ifPresent(existingStudent::setPhotoBytes);
     }
 }

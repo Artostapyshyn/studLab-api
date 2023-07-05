@@ -33,11 +33,12 @@ public class CommentController {
 
     @Operation(summary = "Add comment to event")
     @PostMapping("/add")
-    public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId, @RequestBody Comment comment, Authentication authentication) {
+    public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
+                                                          @RequestBody Comment comment, Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
-            Optional<Student> optionalStudent = studentService.findById(getAuthStudentId(authentication));
+            Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
             if (optionalStudent.isPresent()) {
                 Student student = optionalStudent.get();
                     comment.setStudent(student);
@@ -85,7 +86,7 @@ public class CommentController {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
-            Long currentUserId = getAuthStudentId(authentication);
+            Long currentUserId = studentService.getAuthStudentId(authentication);
             if (comment.getLikedBy().stream().anyMatch(student -> student.getId().equals(currentUserId))) {
                 responseMap.put("message", "Comment already liked by the user");
                 return ResponseEntity.badRequest().body(responseMap);
@@ -108,7 +109,7 @@ public class CommentController {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
-            Long currentUserId = getAuthStudentId(authentication);
+            Long currentUserId = studentService.getAuthStudentId(authentication);
             Student currentUser = studentService.findById(currentUserId).orElseThrow(() -> new NotFoundException("Student not found"));
             boolean removed = comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId));
             if (!removed) {
@@ -131,7 +132,7 @@ public class CommentController {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
-            if (comment.getStudent().getId().equals(getAuthStudentId(authentication))) {
+            if (comment.getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
                 commentService.delete(comment);
                 return ResponseEntity.ok().build();
             } else {
@@ -140,11 +141,5 @@ public class CommentController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private Long getAuthStudentId(Authentication authentication) {
-        String studentEmail = authentication.getName();
-        Student student = studentService.findByEmail(studentEmail);
-        return student.getId();
     }
 }

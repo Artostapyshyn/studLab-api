@@ -77,21 +77,12 @@ public class EventController {
 
         if (editedEvent.isPresent()) {
             Event existingEvent = editedEvent.get();
-            updateEvent(existingEvent, event);
+            eventService.updateEvent(existingEvent, event);
             eventService.save(existingEvent);
             return ResponseEntity.ok(existingEvent);
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private void updateEvent(Event existingEvent, Event updatedEvent) {
-        Optional.ofNullable(updatedEvent.getVenue()).ifPresent(existingEvent::setVenue);
-        Optional.ofNullable(updatedEvent.getDate()).ifPresent(existingEvent::setDate);
-        Optional.ofNullable(updatedEvent.getDescription()).ifPresent(existingEvent::setDescription);
-        Optional.ofNullable(updatedEvent.getNameOfEvent()).ifPresent(existingEvent::setNameOfEvent);
-        Optional.ofNullable(updatedEvent.getEventPhoto()).ifPresent(existingEvent::setEventPhoto);
-        Optional.ofNullable(updatedEvent.getEventType()).ifPresent(existingEvent::setEventType);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")

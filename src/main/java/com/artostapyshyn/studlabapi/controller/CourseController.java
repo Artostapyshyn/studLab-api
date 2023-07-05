@@ -61,19 +61,12 @@ public class CourseController {
 
         if (editedCourse.isPresent()) {
             Course existingCourse = editedCourse.get();
-            updateCourse(existingCourse, course);
+            courseService.updateCourse(existingCourse, course);
             courseService.save(existingCourse);
             return ResponseEntity.ok(existingCourse);
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    private void updateCourse(Course existingCourse, Course updatedCourse) {
-        Optional.ofNullable(updatedCourse.getCourseLink()).ifPresent(existingCourse::setCourseLink);
-        Optional.ofNullable(updatedCourse.getCourseDescription()).ifPresent(existingCourse::setCourseDescription);
-        Optional.ofNullable(updatedCourse.getCourseName()).ifPresent(existingCourse::setCourseName);
-        Optional.ofNullable(updatedCourse.getCoursePhoto()).ifPresent(existingCourse::setCoursePhoto);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")

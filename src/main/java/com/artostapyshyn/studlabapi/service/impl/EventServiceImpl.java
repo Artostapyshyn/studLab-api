@@ -65,4 +65,14 @@ public class EventServiceImpl implements EventService {
     public void deleteById(Long id) {
         eventRepository.deleteById(id);
     }
+
+    @Override
+    public void updateEvent(Event existingEvent, Event updatedEvent) {
+        Optional.ofNullable(updatedEvent.getVenue()).ifPresent(existingEvent::setVenue);
+        Optional.ofNullable(updatedEvent.getDate()).ifPresent(existingEvent::setDate);
+        Optional.ofNullable(updatedEvent.getDescription()).ifPresent(existingEvent::setDescription);
+        Optional.ofNullable(updatedEvent.getNameOfEvent()).ifPresent(existingEvent::setNameOfEvent);
+        Optional.ofNullable(updatedEvent.getEventPhoto()).ifPresent(existingEvent::setEventPhoto);
+        Optional.ofNullable(updatedEvent.getEventType()).ifPresent(existingEvent::setEventType);
+    }
 }
