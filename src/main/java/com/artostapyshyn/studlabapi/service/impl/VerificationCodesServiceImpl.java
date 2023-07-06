@@ -2,7 +2,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.entity.VerificationCode;
-import com.artostapyshyn.studlabapi.repository.VerificationCodesRepository;
+import com.artostapyshyn.studlabapi.repository.VerificationCodeRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VerificationCodesService;
 import jakarta.transaction.Transactional;
@@ -18,7 +18,7 @@ import java.util.Random;
 @AllArgsConstructor
 public class VerificationCodesServiceImpl implements VerificationCodesService {
 
-    private final VerificationCodesRepository verificationCodesRepository;
+    private final VerificationCodeRepository verificationCodeRepository;
 
     private final StudentService studentService;
 
@@ -31,7 +31,7 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
         verificationCode.setEmail(email);
         verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(1));
         verificationCode.setLastSentTime(LocalDateTime.now());
-        return verificationCodesRepository.save(verificationCode);
+        return verificationCodeRepository.save(verificationCode);
     }
 
     private int generateRandomCode() {
@@ -41,23 +41,23 @@ public class VerificationCodesServiceImpl implements VerificationCodesService {
 
     @Override
     public VerificationCode save(VerificationCode verificationCode) {
-        return verificationCodesRepository.save(verificationCode);
+        return verificationCodeRepository.save(verificationCode);
     }
 
     @Override
     public Optional<VerificationCode> findByStudentId(Long id) {
-        return verificationCodesRepository.findByStudentId(id);
+        return verificationCodeRepository.findByStudentId(id);
     }
 
     @Override
     public VerificationCode findByEmail(String email) {
-        return verificationCodesRepository.findByEmail(email);
+        return verificationCodeRepository.findByEmail(email);
     }
 
     @Scheduled(fixedRate = 90000000)
     @Transactional
     @Override
     public void deleteExpiredTokens() {
-        verificationCodesRepository.deleteExpiredTokens();
+        verificationCodeRepository.deleteExpiredTokens();
     }
 }

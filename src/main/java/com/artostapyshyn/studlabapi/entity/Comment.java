@@ -41,7 +41,7 @@ public class Comment {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonIdentityReference(alwaysAsId = true)
     @JsonProperty("likedBy")
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
             name = "comment_likes",
             joinColumns = @JoinColumn(name = "comment_id"),

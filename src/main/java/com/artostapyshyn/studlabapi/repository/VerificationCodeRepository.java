@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface VerificationCodesRepository extends JpaRepository<VerificationCode, Long> {
+public interface VerificationCodeRepository extends JpaRepository<VerificationCode, Long> {
     @Modifying
     @Query("DELETE FROM VerificationCode t WHERE t.expirationDate < CURRENT DATE")
     void deleteExpiredTokens();
