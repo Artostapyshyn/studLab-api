@@ -29,7 +29,6 @@ public class SliderController {
         return slider.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Get all slider images.")
     @GetMapping("/all")
     public ResponseEntity<List<Slider>> getAllSliderImages() {

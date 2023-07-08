@@ -4,7 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.entity.VerificationCode;
 import com.artostapyshyn.studlabapi.repository.VerificationCodeRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
-import com.artostapyshyn.studlabapi.service.VerificationCodesService;
+import com.artostapyshyn.studlabapi.service.VerificationCodeService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +16,7 @@ import java.util.Random;
 
 @Service
 @AllArgsConstructor
-public class VerificationCodesServiceImpl implements VerificationCodesService {
+public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final VerificationCodeRepository verificationCodeRepository;
 

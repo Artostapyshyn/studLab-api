@@ -50,6 +50,7 @@ public class ComplaintController {
         return ResponseEntity.ok(savedComplaint);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping("/process")
     public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody Complaint complaint) {
         Map<String, Object> response = new HashMap<>();

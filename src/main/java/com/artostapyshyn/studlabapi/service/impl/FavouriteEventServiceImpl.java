@@ -6,7 +6,6 @@ import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +17,7 @@ import java.util.Optional;
 public class FavouriteEventServiceImpl implements FavouriteEventService {
 
     private final FavouriteEventRepository favouriteEventRepository;
+
     private final EventRepository eventRepository;
 
     @Override

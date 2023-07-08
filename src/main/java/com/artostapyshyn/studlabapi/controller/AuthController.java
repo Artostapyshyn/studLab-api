@@ -36,7 +36,7 @@ public class AuthController {
 
     private final StudentService studentService;
 
-    private final VerificationCodesService verificationCodesService;
+    private final VerificationCodeService verificationCodeService;
 
     private final EmailService emailService;
 
@@ -128,12 +128,12 @@ public class AuthController {
             student.setRole(Role.ROLE_STUDENT);
             studentService.save(student);
 
-            VerificationCode existingCode = verificationCodesService.findByEmail(email);
+            VerificationCode existingCode = verificationCodeService.findByEmail(email);
             if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
                 return handleResendCodeError(response, "Verification code has already been sent.");
             }
 
-            int verificationCode = verificationCodesService.generateCode(email).getCode();
+            int verificationCode = verificationCodeService.generateCode(email).getCode();
             emailService.sendVerificationCode(email, verificationCode);
 
             VerificationCode verification = new VerificationCode();
@@ -154,20 +154,20 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
-        VerificationCode existingCode = verificationCodesService.findByEmail(email);
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
 
         if (existingCode != null) {
             LocalDateTime expirationDate = existingCode.getExpirationDate();
             LocalDateTime currentTime = LocalDateTime.now();
 
             if (expirationDate.isBefore(currentTime)) {
-                verificationCodesService.deleteExpiredTokens();
+                verificationCodeService.deleteExpiredTokens();
             } else {
                 return handleResendCodeError(response, "Verification code has already been sent. Please wait before requesting another code.");
             }
         }
 
-        int verificationCode = verificationCodesService.generateCode(email).getCode();
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
         emailService.sendVerificationCode(email, verificationCode);
 
         VerificationCode verification = new VerificationCode();
@@ -211,7 +211,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        Optional<VerificationCode> verifCode = verificationCodesService.findByStudentId(student.getId());
+        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.getId());
         if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
             response.put("message", "Invalid verification code");
             return ResponseEntity.badRequest().body(response);

@@ -18,7 +18,9 @@ import java.util.Optional;
 public class ComplaintServiceImpl implements ComplaintService {
 
     private final ComplaintRepository complaintRepository;
+
     private final CommentService commentService;
+
     private final StudentService studentService;
 
     @Override

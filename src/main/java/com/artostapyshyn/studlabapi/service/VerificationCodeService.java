@@ -5,7 +5,7 @@ import com.artostapyshyn.studlabapi.entity.VerificationCode;
 
 import java.util.Optional;
 
-public interface VerificationCodesService {
+public interface VerificationCodeService {
     VerificationCode generateCode(String email);
 
     VerificationCode save(VerificationCode verificationCode);

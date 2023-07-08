@@ -6,8 +6,10 @@ import com.artostapyshyn.studlabapi.enums.Role;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @AllArgsConstructor
 public class TestUtils {
@@ -23,7 +25,10 @@ public class TestUtils {
         student.setPhotoBytes(generateRandomBytes());
 
         student.setEmail(RandomStringUtils.randomAlphabetic(10) + "@gmail.com");
-        student.setPassword(RandomStringUtils.randomAlphabetic(10));
+
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String password = bCryptPasswordEncoder.encode(RandomStringUtils.randomAlphabetic(10));
+        student.setPassword(password);
 
         student.setEnabled(true);
         student.setHasNewMessages(false);
@@ -80,6 +85,14 @@ public class TestUtils {
         return favouriteEvent;
     }
 
+    public static FavouriteEvent createRandomFavouriteEvent() {
+        FavouriteEvent favouriteEvent = new FavouriteEvent();
+        favouriteEvent.setEvent(createRandomEvent());
+        favouriteEvent.setStudentId(createRandomStudent().getId());
+
+        return favouriteEvent;
+    }
+
     public static University createRandomUniversity() {
         University university = new University();
         university.setDomain("gmail.com");
@@ -101,12 +114,37 @@ public class TestUtils {
         Complaint complaint = new Complaint();
         complaint.setStudentId(createRandomStudent().getId());
         complaint.setCloseComplaint(true);
-        complaint.setStatus("Закрито");
+        complaint.setStatus("Відкрито");
         complaint.setComplaintReason(RandomStringUtils.randomAlphabetic(10));
         complaint.setCommentId(1L);
         complaint.setBlockDuration(null);
         complaint.setBlockUser(false);
-        complaint.setDeleteComment(false);
+        complaint.setDeleteComment(true);
         return complaint;
+    }
+
+    public static Comment createRandomComment() {
+        Student student = createRandomStudent();
+        Comment comment = new Comment();
+        Event event = createRandomEvent();
+
+        comment.setCommentText(RandomStringUtils.randomAlphabetic(10));
+        comment.setStudent(student);
+        comment.setLikes(0);
+        comment.setEventId(event.getId());
+        comment.setReplies(new ArrayList<>());
+
+        return comment;
+    }
+
+    public static Reply createRandomReply() {
+        Student student = createRandomStudent();
+        Comment comment = createRandomComment();
+        Reply reply = new Reply();
+        reply.setReplyText(RandomStringUtils.randomAlphabetic(10));
+        reply.setStudent(student);
+        reply.setComment(comment);
+
+        return reply;
     }
 }
