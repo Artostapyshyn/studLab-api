@@ -54,8 +54,8 @@ public class FavouriteEventController {
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
         if (favouriteEvent.isPresent()) {
-            favouriteEventService.delete(favouriteEvent.get());
             favouriteEventService.removeFromFavorites(eventId);
+            favouriteEventService.delete(favouriteEvent.get());
             response.put("status", "deleted");
             return ResponseEntity.ok().body(response);
         }

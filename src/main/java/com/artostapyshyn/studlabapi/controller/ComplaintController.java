@@ -66,7 +66,7 @@ public class ComplaintController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping("/remove")
-    public ResponseEntity<?> removeComplaints(@RequestParam("complaintId") Long complaintId) {
+    public ResponseEntity<Map<String, String>> removeComplaints(@RequestParam("complaintId") Long complaintId) {
         Map<String, String> response = new HashMap<>();
         Optional<Complaint> complaint = complaintService.findById(complaintId);
         if (complaint.isPresent()) {

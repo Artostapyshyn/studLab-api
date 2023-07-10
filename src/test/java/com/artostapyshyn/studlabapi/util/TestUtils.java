@@ -85,14 +85,6 @@ public class TestUtils {
         return favouriteEvent;
     }
 
-    public static FavouriteEvent createRandomFavouriteEvent() {
-        FavouriteEvent favouriteEvent = new FavouriteEvent();
-        favouriteEvent.setEvent(createRandomEvent());
-        favouriteEvent.setStudentId(createRandomStudent().getId());
-
-        return favouriteEvent;
-    }
-
     public static University createRandomUniversity() {
         University university = new University();
         university.setDomain("gmail.com");
@@ -115,11 +107,13 @@ public class TestUtils {
         complaint.setStudentId(createRandomStudent().getId());
         complaint.setCloseComplaint(true);
         complaint.setStatus("Відкрито");
+
         complaint.setComplaintReason(RandomStringUtils.randomAlphabetic(10));
         complaint.setCommentId(1L);
         complaint.setBlockDuration(null);
         complaint.setBlockUser(false);
         complaint.setDeleteComment(true);
+
         return complaint;
     }
 
@@ -146,5 +140,11 @@ public class TestUtils {
         reply.setComment(comment);
 
         return reply;
+    }
+
+    public static Slider createRandomSlider() {
+        Slider slider = new Slider();
+        slider.setSliderPhoto(generateRandomBytes());
+        return slider;
     }
 }

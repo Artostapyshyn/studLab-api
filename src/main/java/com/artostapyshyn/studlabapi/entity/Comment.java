@@ -13,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -58,4 +59,15 @@ public class Comment {
     @JoinColumn(name = "student_id")
     private Student student;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Comment comment)) return false;
+        return Objects.equals(getId(), comment.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

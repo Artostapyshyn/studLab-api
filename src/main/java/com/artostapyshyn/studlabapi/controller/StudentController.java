@@ -53,7 +53,7 @@ public class StudentController {
 
     @Operation(summary = "Get personal information")
     @PostMapping("/profile")
-    public ResponseEntity<?> getProfile(@RequestBody Student student) {
+    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
         List<Object> response = new ArrayList<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 

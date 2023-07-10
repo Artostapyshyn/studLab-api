@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,4 +24,16 @@ public class Slider {
     @Basic(fetch=FetchType.LAZY)
     @Column(name = "slider_photo", nullable = false)
     private byte[] sliderPhoto;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Slider slider)) return false;
+        return Objects.equals(getId(), slider.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }

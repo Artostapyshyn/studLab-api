@@ -8,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,15 +45,17 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
 
     @Override
     public void removeFromFavorites(Long eventId) {
-        Optional<Event> event = eventRepository.findEventById(eventId);
-        event.get().setFavoriteCount(event.get().getFavoriteCount() - 1);
-        eventRepository.save(event.get());
+        Event event = eventRepository.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found with id - " + eventId));
+        event.setFavoriteCount(event.getFavoriteCount() - 1);
+        eventRepository.save(event);
     }
 
     @Override
     public void addToFavorites(Long eventId) {
-        Optional<Event> event = eventRepository.findEventById(eventId);
-        event.get().setFavoriteCount(event.get().getFavoriteCount() + 1);
-        eventRepository.save(event.get());
+        Event event = eventRepository.findEventById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found with id - " + eventId));
+        event.setFavoriteCount(event.getFavoriteCount() + 1);
+        eventRepository.save(event);
     }
 }

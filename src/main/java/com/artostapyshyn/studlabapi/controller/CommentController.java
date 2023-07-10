@@ -128,7 +128,7 @@ public class CommentController {
 
     @Operation(summary = "Delete comment by student")
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteCommentByStudent(@RequestParam("commentId") Long commentId, Authentication authentication) {
+    public ResponseEntity<Void> deleteCommentByStudent(@RequestParam("commentId") Long commentId, Authentication authentication) {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
@@ -136,7 +136,7 @@ public class CommentController {
                 commentService.delete(comment);
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of the comment.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else {
             return ResponseEntity.notFound().build();
