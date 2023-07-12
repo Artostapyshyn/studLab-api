@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+
 @Log4j2
 @RestController
 @AllArgsConstructor
@@ -28,49 +30,71 @@ public class StudentController {
 
     @Operation(summary = "Get personal information")
     @GetMapping("/personal-info")
-    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
-        List<Object> response = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> getPersonalInfo(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
         if (student.isPresent()) {
-            response.add(student);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Personal information retrieved successfully");
+            response.put("student", student.get());
+            return ResponseEntity.ok(response);
         } else {
-            response.add("Student not found.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Student not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Operation(summary = "Find student by id")
     @GetMapping("/find-by-id")
-    public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
-        List<Object> response = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> getStudentById(@RequestParam("studentId") Long id) {
+        Map<String, Object> response = new HashMap<>();
         Optional<Student> student = studentService.findById(id);
-        response.add(student);
-        return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (student.isPresent()) {
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Student found");
+            response.put("student", student.get());
+            return ResponseEntity.ok(response);
+        } else {
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Student not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
     @Operation(summary = "Get personal information")
     @PostMapping("/profile")
-    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
-        List<Object> response = new ArrayList<>();
+    public ResponseEntity<Map<String, Object>> getProfile(@RequestBody Student student) {
+        Map<String, Object> response = new HashMap<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            response.add(existingStudent);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Personal information retrieved successfully");
+            response.put("student", existingStudent);
+            return ResponseEntity.ok(response);
         } else {
-            response.add("Student not found.");
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Student not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Operation(summary = "Get all students")
     @GetMapping("/all")
-    public ResponseEntity<List<Map<String, String>>> getAllStudents() {
+    public ResponseEntity<Map<String, Object>> getAllStudents() {
         List<Map<String, String>> studentData = new ArrayList<>();
         List<Student> students = studentService.findAll();
+
         for (Student student : students) {
             Map<String, String> data = new HashMap<>();
             data.put("firstName", student.getFirstName());
@@ -78,10 +102,16 @@ public class StudentController {
             studentData.add(data);
         }
 
-        return ResponseEntity.ok(studentData);
+        Map<String, Object> response = new HashMap<>();
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "All students retrieved successfully");
+        response.put("students", studentData);
+
+        return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Uplodad resume to personal account")
+    @Operation(summary = "Upload resume to personal account")
     @PostMapping("/resumes")
     public ResponseEntity<Map<String, Object>> addResume(Authentication authentication,
                                                          @RequestParam("resume") MultipartFile file) throws IOException {
@@ -114,24 +144,40 @@ public class StudentController {
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
-    public ResponseEntity<Student> editEvent(@RequestBody Student student, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> editEvent(@RequestBody Student student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
 
         if (optionalStudent.isPresent()) {
             Student existingStudent = optionalStudent.get();
             studentService.updateStudent(existingStudent, student);
             studentService.save(existingStudent);
-            return ResponseEntity.ok(existingStudent);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Student account updated successfully");
+            response.put("student", existingStudent);
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.notFound().build();
+            Map<String, Object> response = new HashMap<>();
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Student not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Operation(summary = "Delete student account")
     @DeleteMapping("/delete-account")
-    public ResponseEntity<Void> deleteStudent(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> deleteStudent(Authentication authentication) {
         Long studentIdToDelete = studentService.getAuthStudentId(authentication);
         studentService.deleteById(studentIdToDelete);
-        return ResponseEntity.noContent().build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Student account deleted successfully");
+
+        return ResponseEntity.ok().body(response);
     }
 }

@@ -2,7 +2,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Reply;
-import com.artostapyshyn.studlabapi.exception.CommentNotFoundException;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.CommentRepository;
 import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
@@ -33,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void addReplyToComment(Reply reply, Long parentId) {
         Comment parentComment = commentRepository.findById(parentId)
-                .orElseThrow(() -> new CommentNotFoundException("Parent comment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Parent comment not found"));
 
         List<Reply> replies = parentComment.getReplies();
         replies.add(reply);

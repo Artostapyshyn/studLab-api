@@ -15,7 +15,7 @@ import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomStudent;
 
 @ActiveProfiles("test")
 @DataJpaTest
-public class StudentRepositoryTest {
+class StudentRepositoryTest {
 
     @Autowired
     private StudentRepository studentRepository;

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+
 @RestController
 @RequestMapping("/api/v1/statistic")
 @CrossOrigin(origins = "*")
@@ -31,17 +33,32 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalEnabledUsers() {
         Map<String, Object> response = new HashMap<>();
         int totalEnabledUsers = studentService.countByEnabled(true);
-        response.put("total", totalEnabledUsers);
+        response.put(CODE, "200");
+        response.put(STATUS, "error");
+        response.put(MESSAGE, "Total enabled users retrieved successfully");
+        response.put(TOTAL, totalEnabledUsers);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/registration-data")
-    public ResponseEntity<Map<String, Integer>> getRegistrationData() {
+    public ResponseEntity<Map<String, Object>> getRegistrationData() {
         try {
             Map<String, Integer> registrationData = studentService.getRegistrationData();
-            return ResponseEntity.ok(registrationData);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Registration data retrieved successfully");
+            response.putAll(registrationData);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            Map<String, Object> response = new HashMap<>();
+            response.put(CODE, "500");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Error retrieving registration data");
+
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
@@ -49,7 +66,10 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalUniversities() {
         Map<String, Object> response = new HashMap<>();
         int totalUniversities = universityService.findAll().size();
-        response.put("total", totalUniversities);
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Total universities retrieved successfully");
+        response.put(TOTAL, totalUniversities);
         return ResponseEntity.ok(response);
     }
 
@@ -57,7 +77,10 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalCreatedEvents() {
         Map<String, Object> response = new HashMap<>();
         int totalCreatedEvents = eventService.getCreatedEventCount();
-        response.put("total", totalCreatedEvents);
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Total created events retrieved successfully");
+        response.put(TOTAL, totalCreatedEvents);
         return ResponseEntity.ok(response);
     }
 }

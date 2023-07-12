@@ -8,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
 @RestController
@@ -32,7 +35,7 @@ public class FavouriteEventController {
 
     @Operation(summary = "Add event to favourite")
     @PostMapping("/add-to-favorites")
-    public Object addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+    public ResponseEntity<Object> addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Map<String, String> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Event> event = eventService.findEventById(eventId);
@@ -41,10 +44,18 @@ public class FavouriteEventController {
             favouriteEvent.setEvent(event.get());
             favouriteEvent.setStudentId(studentId);
             favouriteEventService.addToFavorites(eventId);
-            return favouriteEventService.save(favouriteEvent);
+            favouriteEventService.save(favouriteEvent);
+
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Event added to favourites successfully");
+            return ResponseEntity.ok(response);
         }
-        response.put("error", "Event not found");
-        return ResponseEntity.badRequest().body(response);
+
+        response.put(CODE, "404");
+        response.put(STATUS, "error");
+        response.put(MESSAGE, "Event not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @Operation(summary = "Remove event from favourite")
@@ -57,20 +68,33 @@ public class FavouriteEventController {
         if (favouriteEvent.isPresent()) {
             favouriteEventService.removeFromFavorites(eventId);
             favouriteEventService.delete(favouriteEvent.get());
-            response.put("status", "deleted");
-            return ResponseEntity.ok().body(response);
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Event removed from favourites successfully");
+            return ResponseEntity.ok(response);
         }
-        response.put("error", "Event not found");
-        return ResponseEntity.badRequest().body(response);
+
+        response.put(CODE, "404");
+        response.put(STATUS, "error");
+        response.put(MESSAGE, "Event not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @Operation(summary = "Get student favourite events")
     @GetMapping("/getFavourite")
-    public List<Event> getFavouriteEventsByStudentId(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);
-        return favouriteEvents.stream()
+        List<Event> events = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
                 .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Favourite events retrieved successfully");
+        response.put("events", events);
+
+        return ResponseEntity.ok(response);
     }
 }

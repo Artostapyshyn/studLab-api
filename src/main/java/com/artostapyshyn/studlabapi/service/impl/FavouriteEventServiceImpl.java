@@ -2,7 +2,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
-import com.artostapyshyn.studlabapi.exception.EventNotFoundException;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.FavouriteEventService;
@@ -49,7 +49,7 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     @Override
     public void removeFromFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new EventNotFoundException("Event not found with id - " + eventId));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id - " + eventId));
         event.setFavoriteCount(event.getFavoriteCount() - 1);
         eventRepository.save(event);
     }
@@ -57,7 +57,7 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     @Override
     public void addToFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new EventNotFoundException("Event not found with id - " + eventId));
+                .orElseThrow(() -> new ResourceNotFoundException("Event not found with id - " + eventId));
         event.setFavoriteCount(event.getFavoriteCount() + 1);
         eventRepository.save(event);
     }

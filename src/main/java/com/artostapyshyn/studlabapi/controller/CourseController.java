@@ -5,12 +5,17 @@ import com.artostapyshyn.studlabapi.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
 @RestController
@@ -23,62 +28,110 @@ public class CourseController {
 
     @Operation(summary = "Get all courses")
     @GetMapping("/all")
-    public ResponseEntity<List<Course>> getAllEvents() {
+    public ResponseEntity<Map<String, Object>> getAllCourses() {
         List<Course> courses = courseService.findAll();
-        return ResponseEntity.ok(courses);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Courses retrieved successfully");
+        response.put("courses", courses);
+
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Sort courses by creation date")
     @GetMapping("/newest")
-    public ResponseEntity<List<Course>> getCoursesByNewestDate() {
+    public ResponseEntity<Map<String, Object>> getCoursesByNewestDate() {
         List<Course> courses = courseService.findAllCoursesByCreationDateDesc();
         log.info("Listing newest courses");
-        return ResponseEntity.ok().body(courses);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put(CODE, "200");
+        response.put(STATUS, "success");
+        response.put(MESSAGE, "Newest courses retrieved successfully");
+        response.put("courses", courses);
+
+        return ResponseEntity.ok(response);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add a course.")
     @PostMapping("/add")
-    public ResponseEntity<Course> addCourse(@RequestBody Course course) {
+    public ResponseEntity<Map<String, Object>> addCourse(@RequestBody Course course) {
+        Map<String, Object> response = new HashMap<>();
 
         byte[] imageBytes = course.getCoursePhoto();
         course.setCoursePhoto(imageBytes);
+
         try {
             Course savedCourse = courseService.save(course);
             log.info("New event added with id - " + savedCourse.getId());
-            return ResponseEntity.ok(savedCourse);
+
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Course added successfully");
+            response.put("course", savedCourse);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.info("Error adding event");
-            return ResponseEntity.internalServerError().build();
+
+            response.put(CODE, "500");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Failed to add course");
+
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit a course.")
     @PutMapping("/edit")
-    public ResponseEntity<Course> editCourse(@RequestBody Course course) {
+    public ResponseEntity<Map<String, Object>> editCourse(@RequestBody Course course) {
         Optional<Course> editedCourse = courseService.findById(course.getId());
-
+        Map<String, Object> response = new HashMap<>();
         if (editedCourse.isPresent()) {
             Course existingCourse = editedCourse.get();
             courseService.updateCourse(existingCourse, course);
             courseService.save(existingCourse);
-            return ResponseEntity.ok(existingCourse);
+
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Course edited successfully");
+            response.put("course", existingCourse);
+
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.notFound().build();
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Course not found");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Delete a course by id.")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCourse(@RequestParam("courseId") Long courseId) {
+    public ResponseEntity<Map<String, Object>> deleteCourse(@RequestParam("courseId") Long courseId) {
         Optional<Course> existingCourse = courseService.findById(courseId);
+        Map<String, Object> response = new HashMap<>();
+
         if (existingCourse.isPresent()) {
             courseService.deleteById(courseId);
-            return ResponseEntity.ok().build();
+
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, "Course deleted successfully");
+
+            return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.notFound().build();
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, "Course not found");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 }

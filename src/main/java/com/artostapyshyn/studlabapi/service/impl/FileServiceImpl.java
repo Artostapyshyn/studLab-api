@@ -1,9 +1,11 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +13,8 @@ import org.webjars.NotFoundException;
 
 import java.io.IOException;
 import java.util.*;
+
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Service
 @AllArgsConstructor
@@ -21,6 +25,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public ResponseEntity<Map<String, Object>> addDocument(Long studentId, MultipartFile file, Set<String> documents,
                                                            Set<String> documentFilenames, String documentType) throws IOException {
+        Map<String, Object> response = new HashMap<>();
         Optional<Student> studentOptional = studentService.findById(studentId);
         if (studentOptional.isPresent()) {
             Student student = studentOptional.get();
@@ -33,25 +38,28 @@ public class FileServiceImpl implements FileService {
             documentFilenames.add(file.getOriginalFilename());
             studentService.save(student);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", documentType + " added");
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, documentType + " added");
             response.put("fileName", file.getOriginalFilename());
             response.put("documentBase64", documentBase64);
             return ResponseEntity.ok(response);
         } else {
-            return ResponseEntity.notFound().build();
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> addResume(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return addDocument(studentId, file, student.getResumes(), student.getResumeFilenames(), "Resume");
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> addCertificate(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return addDocument(studentId, file, student.getCertificates(), student.getCertificatesFilenames(), "Certificate");
     }
 
@@ -84,24 +92,28 @@ public class FileServiceImpl implements FileService {
             }
             studentService.save(student);
             Map<String, Object> response = new HashMap<>();
-            response.put("message", documentType + " deleted");
+            response.put(CODE, "200");
+            response.put(STATUS, "success");
+            response.put(MESSAGE, documentType + " deleted");
             return ResponseEntity.ok(response);
         } else {
             Map<String, Object> response = new HashMap<>();
-            response.put("message", documentType + " not found");
-            return ResponseEntity.notFound().build();
+            response.put(CODE, "404");
+            response.put(STATUS, "error");
+            response.put(MESSAGE, documentType + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> deleteResume(Long studentId, String fileName) {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return deleteDocument(studentId, fileName, student.getResumes(), student.getResumeFilenames(), "resume");
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> deleteCertificate(Long studentId, String fileName) {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return deleteDocument(studentId, fileName, student.getCertificates(), student.getCertificatesFilenames(), "certificate");
     }
 }

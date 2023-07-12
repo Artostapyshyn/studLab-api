@@ -1,8 +1,8 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
-import com.artostapyshyn.studlabapi.exception.StudentNotFoundException;
 import com.artostapyshyn.studlabapi.entity.Message;
 import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.MessageRepository;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
@@ -41,7 +41,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void addMessageToStudent(Long studentId) {
         Student student = studentService.findById(studentId)
-                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Message message = new Message();
         message.setContent("Вам надійшла відповідь на ваш коментар.");
@@ -63,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void updateNewMessageStatus(Long studentId, boolean hasNewMessages) {
         Student student = studentService.findById(studentId)
-                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         student.setHasNewMessages(hasNewMessages);
         studentService.save(student);
