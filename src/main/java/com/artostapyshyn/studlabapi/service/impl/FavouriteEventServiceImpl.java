@@ -2,13 +2,14 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
+import com.artostapyshyn.studlabapi.exception.EventNotFoundException;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,11 +34,13 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
         return Optional.ofNullable(favouriteEventRepository.findByStudentIdAndEventId(studentId, eventId));
     }
 
+    @Transactional
     @Override
     public FavouriteEvent save(FavouriteEvent favouriteEvent) {
         return favouriteEventRepository.save(favouriteEvent);
     }
 
+    @Transactional
     @Override
     public void delete(FavouriteEvent favouriteEvent) {
         favouriteEventRepository.delete(favouriteEvent);
@@ -46,7 +49,7 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     @Override
     public void removeFromFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found with id - " + eventId));
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id - " + eventId));
         event.setFavoriteCount(event.getFavoriteCount() - 1);
         eventRepository.save(event);
     }
@@ -54,7 +57,7 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
     @Override
     public void addToFavorites(Long eventId) {
         Event event = eventRepository.findEventById(eventId)
-                .orElseThrow(() -> new NotFoundException("Event not found with id - " + eventId));
+                .orElseThrow(() -> new EventNotFoundException("Event not found with id - " + eventId));
         event.setFavoriteCount(event.getFavoriteCount() + 1);
         eventRepository.save(event);
     }

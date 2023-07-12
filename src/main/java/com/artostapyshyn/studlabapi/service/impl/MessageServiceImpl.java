@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.exception.StudentNotFoundException;
 import com.artostapyshyn.studlabapi.entity.Message;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.MessageRepository;
@@ -7,7 +8,7 @@ import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,7 @@ public class MessageServiceImpl implements MessageService {
 
     private final StudentService studentService;
 
+    @Transactional
     @Override
     public Message save(Message message) {
         return messageRepository.save(message);
@@ -39,7 +41,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void addMessageToStudent(Long studentId) {
         Student student = studentService.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         Message message = new Message();
         message.setContent("Вам надійшла відповідь на ваш коментар.");
@@ -52,6 +54,7 @@ public class MessageServiceImpl implements MessageService {
         updateNewMessageStatus(studentId, true);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         messageRepository.deleteById(id);
@@ -60,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void updateNewMessageStatus(Long studentId, boolean hasNewMessages) {
         Student student = studentService.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         student.setHasNewMessages(hasNewMessages);
         studentService.save(student);

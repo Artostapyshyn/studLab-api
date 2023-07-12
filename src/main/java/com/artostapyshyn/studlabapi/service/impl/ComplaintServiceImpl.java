@@ -1,5 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.exception.CommentNotFoundException;
+import com.artostapyshyn.studlabapi.exception.StudentNotFoundException;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.repository.ComplaintRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
@@ -7,7 +9,7 @@ import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,23 +62,25 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         if (complaint.getCommentId() != null) {
             Comment comment = commentService.findById(complaint.getCommentId())
-                    .orElseThrow(() -> new NotFoundException("Comment not found with ID: " + complaint.getCommentId()));
+                    .orElseThrow(() -> new CommentNotFoundException("Comment not found with ID: " + complaint.getCommentId()));
             savedComplaint.setCommentId(comment.getId());
         }
 
         if (complaint.getStudentId() != null) {
             Student student = studentService.findById(complaint.getStudentId())
-                    .orElseThrow(() -> new NotFoundException("Student not found with ID: " + complaint.getStudentId()));
+                    .orElseThrow(() -> new StudentNotFoundException("Student not found with ID: " + complaint.getStudentId()));
             savedComplaint.setStudentId(student.getId());
         }
         return complaintRepository.save(savedComplaint);
     }
 
+    @Transactional
     @Override
     public void delete(Complaint complaint) {
         complaintRepository.delete(complaint);
     }
 
+    @Transactional
     @Override
     public Complaint save(Complaint complaint) {
         return complaintRepository.save(complaint);

@@ -2,13 +2,14 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Reply;
+import com.artostapyshyn.studlabapi.exception.CommentNotFoundException;
 import com.artostapyshyn.studlabapi.repository.CommentRepository;
 import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final MessageService messageService;
 
+    @Transactional
     @Override
     public Comment save(Comment comment) {
         return commentRepository.save(comment);
@@ -31,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void addReplyToComment(Reply reply, Long parentId) {
         Comment parentComment = commentRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException("Parent comment not found"));
+                .orElseThrow(() -> new CommentNotFoundException("Parent comment not found"));
 
         List<Reply> replies = parentComment.getReplies();
         replies.add(reply);
@@ -52,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.findById(id);
     }
 
+    @Transactional
     @Override
     public void delete(Comment comment) {
         commentRepository.delete(comment);

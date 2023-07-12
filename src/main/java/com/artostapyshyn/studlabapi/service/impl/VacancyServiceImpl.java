@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.VacancyRepository;
 import com.artostapyshyn.studlabapi.service.VacancyService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,11 +26,13 @@ public class VacancyServiceImpl implements VacancyService {
         return Optional.ofNullable(vacancyRepository.findVacancyById(id));
     }
 
+    @Transactional
     @Override
     public Vacancy save(Vacancy vacancy) {
         return vacancyRepository.save(vacancy);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         vacancyRepository.deleteById(id);

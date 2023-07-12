@@ -5,10 +5,10 @@ import com.artostapyshyn.studlabapi.entity.VerificationCode;
 import com.artostapyshyn.studlabapi.repository.VerificationCodeRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VerificationCodeService;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,6 +39,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         return random.nextInt(900000) + 100000;
     }
 
+    @Transactional
     @Override
     public VerificationCode save(VerificationCode verificationCode) {
         return verificationCodeRepository.save(verificationCode);

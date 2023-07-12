@@ -49,7 +49,8 @@ public class FavouriteEventController {
 
     @Operation(summary = "Remove event from favourite")
     @DeleteMapping("/remove")
-    public ResponseEntity<Map<String, String>> removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
+    public ResponseEntity<Map<String, String>> removeFavouriteEvent(Authentication authentication,
+                                                                    @RequestParam("eventId") Long eventId) {
         Map<String, String> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);

@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.CourseService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,13 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findById(id);
     }
 
+    @Transactional
     @Override
     public Course save(Course course) {
         return null;
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         courseRepository.deleteById(id);
@@ -42,6 +45,7 @@ public class CourseServiceImpl implements CourseService {
         return courseRepository.findAllCoursesByCreationDateDesc();
     }
 
+    @Transactional
     @Override
     public void updateCourse(Course existingCourse, Course updatedCourse) {
         Optional.ofNullable(updatedCourse.getCourseLink()).ifPresent(existingCourse::setCourseLink);

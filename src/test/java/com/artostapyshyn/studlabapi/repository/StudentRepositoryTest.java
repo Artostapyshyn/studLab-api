@@ -24,7 +24,7 @@ public class StudentRepositoryTest {
     private TestEntityManager entityManager;
 
     @Test
-    public void findAll() {
+    void findAll() {
         Student student1 = createRandomStudent();
         student1.setFirstName("Bob");
 
@@ -42,7 +42,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void findByEmail() {
+    void findByEmail() {
         Student student = createRandomStudent();
         student.setEmail("test@gmail.com");
         entityManager.persist(student);
@@ -56,7 +56,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void findById() {
+    void findById() {
         Student student = createRandomStudent();
         entityManager.persist(student);
         entityManager.flush();
@@ -68,7 +68,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void save() {
+    void save() {
         Student student = createRandomStudent();
 
         Student result = studentRepository.save(student);
@@ -82,7 +82,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void deleteById() {
+    void deleteById() {
         Student student = createRandomStudent();
         entityManager.persist(student);
         entityManager.flush();
@@ -94,7 +94,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void findByFirstNameAndLastName() {
+    void findByFirstNameAndLastName() {
         String firstName = "John";
         String lastName = "Doe";
 
@@ -112,7 +112,7 @@ public class StudentRepositoryTest {
     }
 
     @Test
-    public void countByEnabled(){
+    void countByEnabled(){
         Student student1 = createRandomStudent();
         Student student2 = createRandomStudent();
         Student student3 = createRandomStudent();

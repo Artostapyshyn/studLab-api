@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.SavedVacancyRepository;
 import com.artostapyshyn.studlabapi.service.SavedVacancyService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,11 +25,13 @@ public class SavedVacancyServiceImpl implements SavedVacancyService {
         return savedVacancyRepository.findByStudentIdAndVacancyId(studentId, vacancyId);
     }
 
+    @Transactional
     @Override
     public SavedVacancy save(SavedVacancy savedVacancy) {
         return savedVacancyRepository.save(savedVacancy);
     }
 
+    @Transactional
     @Override
     public void delete(SavedVacancy savedVacancy) {
         savedVacancyRepository.delete(savedVacancy);

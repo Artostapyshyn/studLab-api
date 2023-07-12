@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static com.artostapyshyn.studlabapi.constant.RoleConstants.*;
+
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
@@ -38,12 +40,14 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("api/v1/**").permitAll()
-                .requestMatchers("api/v1/vacancies/**", "api/v1/comments/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
-                .requestMatchers("api/v1/favourites/**", "api/v1/messages/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
-                .requestMatchers("api/v1/events/**", "api/v1/course/**", "api/v1/student/**").hasAnyRole("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_MODERATOR")
-                .requestMatchers("api/v1/complaints/**", "api/v1/slider/**").hasAnyRole("ROLE_ADMIN", "ROLE_MODERATOR")
+                .requestMatchers("api/v1/vacancies/**",
+                        "api/v1/comments/**", "api/v1/favourites/**",
+                        "api/v1/messages/**", "api/v1/events/**",
+                        "api/v1/course/**", "api/v1/student/**")
+                    .hasAnyRole(STUDENT, ADMIN, MODERATOR)
+                .requestMatchers("api/v1/complaints/**", "api/v1/slider/**").hasAnyRole(ADMIN, MODERATOR)
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("api/v1/statistic/**", "/actuator/**").hasAnyRole("ROLE_ADMIN")
+                .requestMatchers("api/v1/statistic/**", "/actuator/**").hasAnyRole(ADMIN)
                 .anyRequest()
                 .authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

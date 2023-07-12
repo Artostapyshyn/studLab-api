@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.SliderRepository;
 import com.artostapyshyn.studlabapi.service.SliderService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,11 +26,13 @@ public class SliderServiceImpl implements SliderService {
         return sliderRepository.findAll();
     }
 
+    @Transactional
     @Override
     public Slider save(Slider slider) {
         return sliderRepository.save(slider);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         sliderRepository.deleteById(id);

@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -30,6 +31,7 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findByEmail(email);
     }
 
+    @Transactional
     @Override
     @CacheEvict("studentsSave")
     public Student save(Student student) {
@@ -41,6 +43,7 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findAll();
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         studentRepository.deleteById(id);
@@ -92,6 +95,7 @@ public class StudentServiceImpl implements StudentService {
         return student.getId();
     }
 
+    @Transactional
     @Override
     public void updateStudent(Student existingStudent, Student updatedStudent) {
         Optional.ofNullable(updatedStudent.getFirstName()).ifPresent(existingStudent::setFirstName);

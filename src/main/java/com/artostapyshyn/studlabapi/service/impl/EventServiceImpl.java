@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.EventService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findEventById(id);
     }
 
+    @Transactional
     @Override
     public Event save(Event event) {
         createdEventCount.incrementAndGet();
@@ -60,12 +62,14 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAllEventsByCreationDateDesc();
     }
 
+    @Transactional
     @Override
     @CacheEvict(value = {"eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     public void deleteById(Long id) {
         eventRepository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public void updateEvent(Event existingEvent, Event updatedEvent) {
         Optional.ofNullable(updatedEvent.getVenue()).ifPresent(existingEvent::setVenue);

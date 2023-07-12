@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.exception.StudentNotFoundException;
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Reply;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.webjars.NotFoundException;
 
 import java.util.*;
 
@@ -59,7 +59,8 @@ public class CommentController {
 
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
-    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody Reply reply, @RequestParam("commentId") Long commentId) {
+    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody Reply reply,
+                                                                 @RequestParam("commentId") Long commentId) {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
         responseMap.put("message", "Replied successfully");
@@ -81,7 +82,8 @@ public class CommentController {
     }
 
     @PostMapping("/like-comment")
-    public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId,
+                                                           Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
@@ -93,7 +95,9 @@ public class CommentController {
             }
 
             comment.setLikes(comment.getLikes() + 1);
-            Student currentUser = studentService.findById(currentUserId).orElseThrow(() -> new NotFoundException("Student not found"));
+            Student currentUser = studentService.findById(currentUserId)
+                    .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+
             comment.getLikedBy().add(currentUser);
             commentService.save(comment);
             responseMap.put("message", "Liked successfully");
@@ -104,13 +108,15 @@ public class CommentController {
     }
 
     @PostMapping("/unlike-comment")
-    public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId,
+                                                             Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
             Long currentUserId = studentService.getAuthStudentId(authentication);
-            Student currentUser = studentService.findById(currentUserId).orElseThrow(() -> new NotFoundException("Student not found"));
+            Student currentUser = studentService.findById(currentUserId)
+                    .orElseThrow(() -> new StudentNotFoundException("Student not found"));
             boolean removed = comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId));
             if (!removed) {
                 responseMap.put("message", "Comment not liked by the user");
@@ -128,7 +134,8 @@ public class CommentController {
 
     @Operation(summary = "Delete comment by student")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCommentByStudent(@RequestParam("commentId") Long commentId, Authentication authentication) {
+    public ResponseEntity<Void> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
+                                                       Authentication authentication) {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
