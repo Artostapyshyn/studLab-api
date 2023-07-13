@@ -1,11 +1,11 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Course;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,7 @@ public class CourseController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Courses retrieved successfully");
         response.put("courses", courses);
 
@@ -48,7 +48,7 @@ public class CourseController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Newest courses retrieved successfully");
         response.put("courses", courses);
 
@@ -69,19 +69,13 @@ public class CourseController {
             log.info("New event added with id - " + savedCourse.getId());
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Course added successfully");
             response.put("course", savedCourse);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.info("Error adding event");
-
-            response.put(CODE, "500");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Failed to add course");
-
-            return ResponseEntity.internalServerError().body(response);
+            throw new RuntimeException("Error occurred while adding course");
         }
     }
 
@@ -97,17 +91,13 @@ public class CourseController {
             courseService.save(existingCourse);
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Course edited successfully");
             response.put("course", existingCourse);
 
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Course not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Course not found");
         }
     }
 
@@ -122,16 +112,12 @@ public class CourseController {
             courseService.deleteById(courseId);
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Course deleted successfully");
 
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Course not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Course not found");
         }
     }
 }

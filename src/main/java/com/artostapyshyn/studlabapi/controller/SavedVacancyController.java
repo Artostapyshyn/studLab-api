@@ -1,12 +1,12 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.*;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.SavedVacancyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,17 +43,12 @@ public class SavedVacancyController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Vacancy saved successfully");
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Vacancy not found");
-
-            return ResponseEntity.badRequest().body(response);
+            throw new ResourceNotFoundException("Vacancy not found");
         }
     }
 
@@ -67,17 +62,12 @@ public class SavedVacancyController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Vacancy removed from saved successfully");
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Saved vacancy not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Saved vacancy not found");
         }
     }
 
@@ -92,7 +82,7 @@ public class SavedVacancyController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Saved vacancies retrieved successfully");
         response.put("vacancies", vacancies);
 

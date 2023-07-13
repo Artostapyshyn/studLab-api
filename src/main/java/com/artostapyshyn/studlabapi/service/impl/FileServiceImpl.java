@@ -5,7 +5,6 @@ import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundExcepti
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,15 +38,13 @@ public class FileServiceImpl implements FileService {
             studentService.save(student);
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, documentType + " added");
             response.put("fileName", file.getOriginalFilename());
             response.put("documentBase64", documentBase64);
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException(documentType + " not found");
         }
     }
 
@@ -93,15 +90,11 @@ public class FileServiceImpl implements FileService {
             studentService.save(student);
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, documentType + " deleted");
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, documentType + " not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException(documentType + " not found");
         }
     }
 

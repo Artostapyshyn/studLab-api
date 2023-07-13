@@ -17,10 +17,11 @@ import java.util.Random;
 @Service
 @AllArgsConstructor
 public class VerificationCodeServiceImpl implements VerificationCodeService {
-
     private final VerificationCodeRepository verificationCodeRepository;
 
     private final StudentService studentService;
+
+    private final Random random = new Random();
 
     public VerificationCode generateCode(String email) {
         Student student = studentService.findByEmail(email);
@@ -35,7 +36,6 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     }
 
     private int generateRandomCode() {
-        Random random = new Random();
         return random.nextInt(900000) + 100000;
     }
 

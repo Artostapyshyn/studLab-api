@@ -9,4 +9,5 @@ public final class ControllerConstants {
     public static final String CODE = "code";
     public static final String STATUS = "status";
     public static final String TOTAL = "total";
+    public static final String SUCCESS = "success";
 }

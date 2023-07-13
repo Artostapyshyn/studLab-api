@@ -2,13 +2,13 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -47,15 +47,12 @@ public class FavouriteEventController {
             favouriteEventService.save(favouriteEvent);
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event added to favourites successfully");
             return ResponseEntity.ok(response);
         }
 
-        response.put(CODE, "404");
-        response.put(STATUS, "error");
-        response.put(MESSAGE, "Event not found");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        throw new ResourceNotFoundException("Event not found");
     }
 
     @Operation(summary = "Remove event from favourite")
@@ -68,16 +65,14 @@ public class FavouriteEventController {
         if (favouriteEvent.isPresent()) {
             favouriteEventService.removeFromFavorites(eventId);
             favouriteEventService.delete(favouriteEvent.get());
+
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event removed from favourites successfully");
             return ResponseEntity.ok(response);
         }
 
-        response.put(CODE, "404");
-        response.put(STATUS, "error");
-        response.put(MESSAGE, "Event not found");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        throw new ResourceNotFoundException("Event not found");
     }
 
     @Operation(summary = "Get student favourite events")
@@ -91,7 +86,7 @@ public class FavouriteEventController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Favourite events retrieved successfully");
         response.put("events", events);
 

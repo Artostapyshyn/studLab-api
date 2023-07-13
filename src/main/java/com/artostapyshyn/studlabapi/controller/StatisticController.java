@@ -47,18 +47,13 @@ public class StatisticController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Registration data retrieved successfully");
             response.putAll(registrationData);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "500");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Error retrieving registration data");
-
-            return ResponseEntity.internalServerError().body(response);
+                throw new RuntimeException("Error retrieving registration data");
         }
     }
 
@@ -67,7 +62,7 @@ public class StatisticController {
         Map<String, Object> response = new HashMap<>();
         int totalUniversities = universityService.findAll().size();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Total universities retrieved successfully");
         response.put(TOTAL, totalUniversities);
         return ResponseEntity.ok(response);
@@ -78,7 +73,7 @@ public class StatisticController {
         Map<String, Object> response = new HashMap<>();
         int totalCreatedEvents = eventService.getCreatedEventCount();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Total created events retrieved successfully");
         response.put(TOTAL, totalCreatedEvents);
         return ResponseEntity.ok(response);

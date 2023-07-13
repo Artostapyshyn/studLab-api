@@ -1,11 +1,11 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +30,7 @@ public class EventController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Events retrieved successfully");
         response.put("events", events);
 
@@ -45,7 +45,7 @@ public class EventController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Events sorted by popularity retrieved successfully");
         response.put("events", events);
 
@@ -60,7 +60,7 @@ public class EventController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Events sorted by creation date retrieved successfully");
         response.put("events", events);
 
@@ -75,7 +75,7 @@ public class EventController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Upcoming events retrieved successfully");
         response.put("events", events);
 
@@ -97,19 +97,13 @@ public class EventController {
             log.info("New event added with id - " + savedEvent.getId());
 
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event added successfully");
             response.put("event", savedEvent);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.info("Error adding event");
-
-            response.put(CODE, "500");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Failed to add event");
-
-            return ResponseEntity.internalServerError().body(response);
+            throw new RuntimeException("Error occurred while adding event");
         }
     }
 
@@ -126,18 +120,13 @@ public class EventController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event edited successfully");
             response.put("event", existingEvent);
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Event not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Event not found");
         }
     }
 
@@ -151,17 +140,12 @@ public class EventController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event deleted successfully");
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Event not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Event not found");
         }
     }
 }

@@ -5,9 +5,7 @@ import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +17,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,23 +54,17 @@ public class AuthController {
             Student foundStudent = studentService.findByEmail(student.getEmail());
 
             if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
-                responseMap.put(CODE, "401");
-                responseMap.put(STATUS, "Unauthorized");
-                responseMap.put(MESSAGE, "User is blocked.");
-                return ResponseEntity.status(401).body(responseMap);
+                throw new IllegalArgumentException("User is blocked");
             }
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
         } catch (BadCredentialsException e) {
-            responseMap.put(CODE, "401");
-            responseMap.put(STATUS, "Unauthorized");
-            responseMap.put(MESSAGE, "Invalid Credentials");
-            return ResponseEntity.status(401).body(responseMap);
+            throw new BadCredentialsException("Invalid credentials");
         }
         String token = generateToken(student);
 
         responseMap.put(CODE, "200");
-        responseMap.put(STATUS, "success");
+        responseMap.put(STATUS, SUCCESS);
         responseMap.put(MESSAGE, "Logged In");
         responseMap.put("token", token);
         return ResponseEntity.ok(responseMap);
@@ -89,26 +80,17 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> checkLoginStatus(HttpServletRequest request) {
         String token = getTokenFromRequest(request);
         Map<String, Object> responseMap = new HashMap<>();
-        try {
-            String email = jwtTokenUtil.getUsernameFromToken(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        String email = jwtTokenUtil.getUsernameFromToken(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (jwtTokenUtil.validateToken(token, userDetails)) {
-                responseMap.put(CODE, "200");
-                responseMap.put(STATUS, "success");
-                responseMap.put(MESSAGE, "User is logged in");
-            } else {
-                responseMap.put(CODE, "400");
-                responseMap.put(STATUS, "error");
-                responseMap.put(MESSAGE, "User is not logged in");
-            }
-        } catch (ExpiredJwtException | UsernameNotFoundException e) {
-            responseMap.put(CODE, "400");
-            responseMap.put(STATUS, "error");
-            responseMap.put(MESSAGE, "User is not logged in");
+        if (jwtTokenUtil.validateToken(token, userDetails)) {
+            responseMap.put(CODE, "200");
+            responseMap.put(STATUS, SUCCESS);
+            responseMap.put(MESSAGE, "User is logged in");
+            return ResponseEntity.ok(responseMap);
+        } else {
+            throw new IllegalArgumentException("User is not logged in");
         }
-
-        return ResponseEntity.ok(responseMap);
     }
 
     @Operation(summary = "Join to the student service")
@@ -118,10 +100,7 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
 
         if (studentService.findByEmail(email) != null) {
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "User already registered with this email");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("User already registered with this email");
         }
 
         if (isValidEmailDomain(email, student)) {
@@ -129,22 +108,17 @@ public class AuthController {
 
             VerificationCode existingCode = verificationCodeService.findByEmail(email);
             if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-                response.put(CODE, "400");
-                response.put(STATUS, "error");
-                response.put(MESSAGE, "Verification code has already been sent. Please wait before requesting another code.");
+                throw new IllegalArgumentException("Verification code has already been sent. Please wait before requesting another code.");
             }
 
             sendCodeAndSetExpiration(email);
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Verification code sent successfully");
             return ResponseEntity.ok(response);
         }
 
-        response.put(CODE, "400");
-        response.put(STATUS, "error");
-        response.put(MESSAGE, "Invalid email");
-        return ResponseEntity.badRequest().body(response);
+        throw new IllegalArgumentException("Invalid email");
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
@@ -171,15 +145,13 @@ public class AuthController {
             if (expirationDate.isBefore(currentTime)) {
                 verificationCodeService.deleteExpiredTokens();
             } else {
-                response.put(CODE, "400");
-                response.put(STATUS, "error");
-                response.put(MESSAGE, "Verification code has already been sent. Please wait before requesting another code.");
+                throw new IllegalArgumentException("Verification code has already been sent. Please wait before requesting another code.");
             }
         }
 
         sendCodeAndSetExpiration(email);
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Verification code sent successfully");
         return ResponseEntity.ok(response);
     }
@@ -221,29 +193,18 @@ public class AuthController {
 
         if (student == null) {
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student with provided email does not exist");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("Student with provided email does not exist");
         }
 
         Optional<VerificationCode> verifyCode = verificationCodeService.findByStudentId(student.getId());
         if (verifyCode.isEmpty() || verifyCode.get().getCode() != verificationCode.getCode()) {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Invalid verification code");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("Invalid verification code");
         }
 
         LocalDateTime expirationTime = verifyCode.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Verification code has expired");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("Verification code has expired");
         }
 
         student.setEnabled(true);
@@ -251,7 +212,7 @@ public class AuthController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "User successfully verified");
         return ResponseEntity.ok(response);
     }
@@ -264,19 +225,16 @@ public class AuthController {
         Student checkedStudent = studentService.findByEmail(email);
 
         if (checkedStudent == null) {
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student with provided email does not exist");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("Student with provided email does not exist");
         }
 
         if (checkedStudent.isEnabled() && student.getPassword() != null) {
             response.put(MESSAGE, "Student is verified and signed-in");
         } else {
-            response.put(MESSAGE, "Student is not verified");
+            throw new IllegalArgumentException("Student is not verified");
         }
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         return ResponseEntity.ok(response);
     }
 
@@ -301,7 +259,7 @@ public class AuthController {
         log.info("Account registered with email - " + email);
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Account created successfully");
         response.put("token", token);
 
@@ -347,23 +305,18 @@ public class AuthController {
                 cookie.setPath("/");
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
-                break;
             }
         }
         try {
             request.logout();
-        } catch (ServletException e) {
-            responseMap.put(CODE, "500");
-            responseMap.put(STATUS, "error");
-            responseMap.put(MESSAGE, "Something went wrong while logging out");
-            return ResponseEntity.internalServerError().body(responseMap);
+            SecurityContextHolder.clearContext();
+            responseMap.put(CODE, "200");
+            responseMap.put(STATUS, SUCCESS);
+            responseMap.put(MESSAGE, "Logged out successfully");
+
+            return ResponseEntity.ok(responseMap);
+        } catch (Exception e) {
+            throw new RuntimeException("Something went wrong while logging out");
         }
-
-        SecurityContextHolder.clearContext();
-        responseMap.put(CODE, "200");
-        responseMap.put(STATUS, "success");
-        responseMap.put(MESSAGE, "Logged out successfully");
-
-        return ResponseEntity.ok(responseMap);
     }
 }

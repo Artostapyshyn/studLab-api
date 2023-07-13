@@ -1,11 +1,11 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Slider;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.SliderService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -34,18 +34,13 @@ public class SliderController {
         if (slider.isPresent()) {
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Slider image found");
             response.put("slider", slider.get());
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Slider image not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Slider image not found");
         }
     }
 
@@ -56,7 +51,7 @@ public class SliderController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Slider images retrieved successfully");
         response.put("sliders", sliders);
 
@@ -75,18 +70,13 @@ public class SliderController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Slider image added successfully");
             response.put("slider", savedSlider);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "500");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Error adding image to slider");
-
-            return ResponseEntity.internalServerError().body(response);
+            throw new RuntimeException("Error occurred while adding slider image");
         }
     }
 
@@ -100,17 +90,12 @@ public class SliderController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Slider image deleted successfully");
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Slider image not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Slider image not found");
         }
     }
 }

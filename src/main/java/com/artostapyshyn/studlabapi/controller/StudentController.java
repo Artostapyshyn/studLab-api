@@ -1,12 +1,12 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -37,15 +37,12 @@ public class StudentController {
 
         if (student.isPresent()) {
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Personal information retrieved successfully");
             response.put("student", student.get());
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Student not found");
         }
     }
 
@@ -57,15 +54,12 @@ public class StudentController {
 
         if (student.isPresent()) {
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Student found");
             response.put("student", student.get());
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Student not found");
         }
     }
 
@@ -77,15 +71,12 @@ public class StudentController {
 
         if (existingStudent != null) {
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Personal information retrieved successfully");
             response.put("student", existingStudent);
             return ResponseEntity.ok(response);
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Student not found");
         }
     }
 
@@ -104,7 +95,7 @@ public class StudentController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "All students retrieved successfully");
         response.put("students", studentData);
 
@@ -154,16 +145,12 @@ public class StudentController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Student account updated successfully");
             response.put("student", existingStudent);
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Student not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Student not found");
         }
     }
 
@@ -175,7 +162,7 @@ public class StudentController {
 
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Student account deleted successfully");
 
         return ResponseEntity.ok().body(response);

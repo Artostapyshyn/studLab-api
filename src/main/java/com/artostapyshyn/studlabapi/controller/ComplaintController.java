@@ -1,10 +1,10 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Complaint;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,7 @@ public class ComplaintController {
         List<Complaint> complaints = complaintService.findAll();
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Complaints retrieved successfully");
         response.put("complaints", complaints);
         return ResponseEntity.ok(response);
@@ -43,7 +43,7 @@ public class ComplaintController {
         List<Complaint> complaints = complaintService.findClosedComplaints();
         Map<String, Object> response = new HashMap<>();
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Closed complaints retrieved successfully");
         response.put("complaints", complaints);
         return ResponseEntity.ok(response);
@@ -53,22 +53,16 @@ public class ComplaintController {
     public ResponseEntity<Map<String, Object>> saveComplaint(@RequestBody Complaint complaint) {
         Map<String, Object> response = new HashMap<>();
         if (complaint == null) {
-            response.put(CODE, "400");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Invalid complaint");
-            return ResponseEntity.badRequest().body(response);
+            throw new IllegalArgumentException("Invalid complaint");
         }
 
         Complaint savedComplaint = complaintService.saveComplaint(complaint);
         if (savedComplaint == null) {
-            response.put(CODE, "500");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Failed to save complaint");
-            return ResponseEntity.internalServerError().body(response);
+            throw new RuntimeException("Error occurred adding complaint");
         }
 
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Complaint saved successfully");
         response.put("complaint", savedComplaint);
         return ResponseEntity.ok(response);
@@ -85,7 +79,7 @@ public class ComplaintController {
 
         complaintService.processComplaints(complaint);
         response.put(CODE, "200");
-        response.put(STATUS, "success");
+        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Processed successfully");
         return ResponseEntity.ok(response);
     }
@@ -98,13 +92,10 @@ public class ComplaintController {
         if (complaint.isPresent()) {
             complaintService.delete(complaint.get());
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Complaint deleted successfully");
             return ResponseEntity.ok().body(response);
         }
-        response.put(CODE, "404");
-        response.put(STATUS, "error");
-        response.put(MESSAGE, "Complaint not found");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        throw new ResourceNotFoundException("Complaint not found");
     }
 }

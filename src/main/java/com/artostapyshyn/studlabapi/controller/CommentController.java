@@ -11,11 +11,11 @@ import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
@@ -50,24 +50,16 @@ public class CommentController {
                 eventService.save(event.get());
 
                 response.put(CODE, "200");
-                response.put(STATUS, "success");
+                response.put(STATUS, SUCCESS);
                 response.put(MESSAGE, "Comment added successfully");
                 response.put("comment", comment);
 
                 return ResponseEntity.ok(response);
             } else {
-                response.put(CODE, "404");
-                response.put(STATUS, "error");
-                response.put(MESSAGE, "Student not found");
-
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                throw new ResourceNotFoundException("Student not found");
             }
         } else {
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Event not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Event not found");
         }
     }
 
@@ -78,7 +70,7 @@ public class CommentController {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
         responseMap.put(CODE, "200");
-        responseMap.put(STATUS, "success");
+        responseMap.put(STATUS, SUCCESS);
         responseMap.put(MESSAGE, "Replied successfully");
         return ResponseEntity.ok(responseMap);
     }
@@ -94,18 +86,13 @@ public class CommentController {
 
             Map<String, Object> response = new HashMap<>();
             response.put(CODE, "200");
-            response.put(STATUS, "success");
+            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Comments retrieved successfully");
             response.put("comments", commentList);
 
             return ResponseEntity.ok(response);
         } else {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "404");
-            response.put(STATUS, "error");
-            response.put(MESSAGE, "Event not found");
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            throw new ResourceNotFoundException("Event not found");
         }
     }
 
@@ -118,10 +105,7 @@ public class CommentController {
             Comment comment = optionalComment.get();
             Long currentUserId = studentService.getAuthStudentId(authentication);
             if (comment.getLikedBy().stream().anyMatch(student -> student.getId().equals(currentUserId))) {
-                responseMap.put(CODE, "400");
-                responseMap.put(STATUS, "error");
-                responseMap.put(MESSAGE, "Comment already liked by the user");
-                return ResponseEntity.badRequest().body(responseMap);
+                throw new IllegalArgumentException("Comment already liked by the user");
             }
 
             comment.setLikes(comment.getLikes() + 1);
@@ -131,14 +115,11 @@ public class CommentController {
             comment.getLikedBy().add(currentUser);
             commentService.save(comment);
             responseMap.put(CODE, "200");
-            responseMap.put(STATUS, "success");
+            responseMap.put(STATUS, SUCCESS);
             responseMap.put(MESSAGE, "Liked successfully");
             return ResponseEntity.ok().body(responseMap);
         }
-        responseMap.put(CODE, "400");
-        responseMap.put(STATUS, "error");
-        responseMap.put(MESSAGE, "Comment not found");
-        return ResponseEntity.badRequest().body(responseMap);
+        throw new ResourceNotFoundException("Comment not found");
     }
 
     @PostMapping("/unlike-comment")
@@ -153,29 +134,23 @@ public class CommentController {
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
             boolean removed = comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId));
             if (!removed) {
-                responseMap.put(CODE, "400");
-                responseMap.put(STATUS, "error");
-                responseMap.put(MESSAGE, "Comment not liked by the user");
-                return ResponseEntity.badRequest().body(responseMap);
+                throw new IllegalArgumentException("Comment not liked by the user");
             }
 
             comment.setLikes(Math.max(comment.getLikes() - 1, 0));
             commentService.save(comment);
             responseMap.put(CODE, "200");
-            responseMap.put(STATUS, "success");
+            responseMap.put(STATUS, SUCCESS);
             responseMap.put(MESSAGE, "Unliked successfully");
             return ResponseEntity.ok().body(responseMap);
         }
-        responseMap.put(CODE, "404");
-        responseMap.put(STATUS, "error");
-        responseMap.put(MESSAGE, "Comment not found");
-        return ResponseEntity.badRequest().body(responseMap);
+        throw new ResourceNotFoundException("Comment not found");
     }
 
     @Operation(summary = "Delete comment by student")
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
-                                                                      Authentication authentication) {
+                                                                      Authentication authentication) throws AccessDeniedException {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
@@ -183,19 +158,14 @@ public class CommentController {
             if (comment.getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
                 commentService.delete(comment);
                 responseMap.put(CODE, "200");
-                responseMap.put(STATUS, "success");
+                responseMap.put(STATUS, SUCCESS);
                 responseMap.put(MESSAGE, "Comment deleted successfully");
                 return ResponseEntity.ok().body(responseMap);
             } else {
-                responseMap.put(CODE, "403");
-                responseMap.put(STATUS, "error");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseMap);
+                throw new AccessDeniedException("Forbidden");
             }
         } else {
-            responseMap.put(CODE, "404");
-            responseMap.put(STATUS, "error");
-            responseMap.put(MESSAGE, "Comment not found");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMap);
+            throw new ResourceNotFoundException("Comment not found");
         }
     }
 
