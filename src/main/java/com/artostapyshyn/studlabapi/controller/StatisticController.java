@@ -33,9 +33,6 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalEnabledUsers() {
         Map<String, Object> response = new HashMap<>();
         int totalEnabledUsers = studentService.countByEnabled(true);
-        response.put(CODE, "200");
-        response.put(STATUS, "error");
-        response.put(MESSAGE, "Total enabled users retrieved successfully");
         response.put(TOTAL, totalEnabledUsers);
         return ResponseEntity.ok(response);
     }
@@ -44,16 +41,10 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getRegistrationData() {
         try {
             Map<String, Integer> registrationData = studentService.getRegistrationData();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Registration data retrieved successfully");
-            response.putAll(registrationData);
-
+            Map<String, Object> response = new HashMap<>(registrationData);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-                throw new RuntimeException("Error retrieving registration data");
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -61,9 +52,6 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalUniversities() {
         Map<String, Object> response = new HashMap<>();
         int totalUniversities = universityService.findAll().size();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Total universities retrieved successfully");
         response.put(TOTAL, totalUniversities);
         return ResponseEntity.ok(response);
     }
@@ -72,9 +60,6 @@ public class StatisticController {
     public ResponseEntity<Map<String, Object>> getTotalCreatedEvents() {
         Map<String, Object> response = new HashMap<>();
         int totalCreatedEvents = eventService.getCreatedEventCount();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Total created events retrieved successfully");
         response.put(TOTAL, totalCreatedEvents);
         return ResponseEntity.ok(response);
     }

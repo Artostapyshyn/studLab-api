@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Message;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,16 +28,9 @@ public class MessageController {
 
     @Operation(summary = "Get all messages by student id")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllMessages(Authentication authentication) {
+    public ResponseEntity<List<Message>> getAllMessages(Authentication authentication) {
         List<Message> messages = messageService.findAllMessagesByStudentId(studentService.getAuthStudentId(authentication));
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "All messages retrieved successfully");
-        response.put("messages", messages);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(messages);
     }
 
     @Operation(summary = "Mark messages as read")
@@ -47,10 +39,7 @@ public class MessageController {
         Map<String, Object> response = new HashMap<>();
         messageService.updateNewMessageStatus(studentService.getAuthStudentId(authentication), false);
 
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "All messages marked as read");
-
         return ResponseEntity.ok(response);
     }
 
@@ -62,13 +51,10 @@ public class MessageController {
             messageService.deleteById(messageId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Message deleted successfully");
-
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Message not found");
+            return ResponseEntity.notFound().build();
         }
     }
 }

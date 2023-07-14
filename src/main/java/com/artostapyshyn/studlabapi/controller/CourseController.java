@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Course;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -28,76 +27,49 @@ public class CourseController {
 
     @Operation(summary = "Get all courses")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllCourses() {
+    public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.findAll();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Courses retrieved successfully");
-        response.put("courses", courses);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(courses);
     }
 
     @Operation(summary = "Sort courses by creation date")
     @GetMapping("/newest")
-    public ResponseEntity<Map<String, Object>> getCoursesByNewestDate() {
+    public ResponseEntity<List<Course>> getCoursesByNewestDate() {
         List<Course> courses = courseService.findAllCoursesByCreationDateDesc();
         log.info("Listing newest courses");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Newest courses retrieved successfully");
-        response.put("courses", courses);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(courses);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add a course.")
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> addCourse(@RequestBody Course course) {
-        Map<String, Object> response = new HashMap<>();
-
+    public ResponseEntity<Course> addCourse(@RequestBody Course course) {
         byte[] imageBytes = course.getCoursePhoto();
         course.setCoursePhoto(imageBytes);
 
         try {
             Course savedCourse = courseService.save(course);
             log.info("New event added with id - " + savedCourse.getId());
-
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Course added successfully");
-            response.put("course", savedCourse);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(savedCourse);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while adding course");
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit a course.")
     @PutMapping("/edit")
-    public ResponseEntity<Map<String, Object>> editCourse(@RequestBody Course course) {
+    public ResponseEntity<Course> editCourse(@RequestBody Course course) {
         Optional<Course> editedCourse = courseService.findById(course.getId());
-        Map<String, Object> response = new HashMap<>();
+
         if (editedCourse.isPresent()) {
             Course existingCourse = editedCourse.get();
             courseService.updateCourse(existingCourse, course);
             courseService.save(existingCourse);
 
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Course edited successfully");
-            response.put("course", existingCourse);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(existingCourse);
         } else {
-            throw new ResourceNotFoundException("Course not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -110,14 +82,10 @@ public class CourseController {
 
         if (existingCourse.isPresent()) {
             courseService.deleteById(courseId);
-
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Course deleted successfully");
-
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Course not found");
+            return ResponseEntity.notFound().build();
         }
     }
 }

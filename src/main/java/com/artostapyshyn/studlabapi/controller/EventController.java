@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -25,69 +24,39 @@ public class EventController {
 
     @Operation(summary = "Get all events")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllEvents() {
+    public ResponseEntity<List<Event>> getAllEvents() {
         List<Event> events = eventService.findAll();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Events retrieved successfully");
-        response.put("events", events);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(events);
     }
 
     @Operation(summary = "Sort events by popularity")
     @GetMapping("/popular")
-    public ResponseEntity<Map<String, Object>> getEventsByPopularity() {
+    public ResponseEntity<List<Event>> getEventsByPopularity() {
         List<Event> events = eventService.findPopularEvents();
         log.info("Listing events by popularity");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Events sorted by popularity retrieved successfully");
-        response.put("events", events);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(events);
     }
 
     @Operation(summary = "Sort events by creation date")
     @GetMapping("/newest")
-    public ResponseEntity<Map<String, Object>> getEventsByNewestDate() {
+    public ResponseEntity<List<Event>> getEventsByNewestDate() {
         List<Event> events = eventService.findAllEventsByCreationDateDesc();
         log.info("Listing newest events");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Events sorted by creation date retrieved successfully");
-        response.put("events", events);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(events);
     }
 
     @Operation(summary = "Get upcoming events")
     @GetMapping("/upcoming")
-    public ResponseEntity<Map<String, Object>> getUpcomingEvents() {
+    public ResponseEntity<List<Event>> getUpcomingEvents() {
         List<Event> events = eventService.findAllEventsByDateDesc();
         log.info("Listing upcoming events");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Upcoming events retrieved successfully");
-        response.put("events", events);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(events);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add an event.")
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> addEvent(@RequestBody Event event) {
-        Map<String, Object> response = new HashMap<>();
-
+    public ResponseEntity<Event> addEvent(@RequestBody Event event) {
         event.setEventType(event.getEventType());
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
@@ -95,38 +64,25 @@ public class EventController {
         try {
             Event savedEvent = eventService.save(event);
             log.info("New event added with id - " + savedEvent.getId());
-
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Event added successfully");
-            response.put("event", savedEvent);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(savedEvent);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while adding event");
+            return ResponseEntity.internalServerError().build();
         }
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit an event.")
     @PutMapping("/edit")
-    public ResponseEntity<Map<String, Object>> editEvent(@RequestBody Event event) {
+    public ResponseEntity<Event> editEvent(@RequestBody Event event) {
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
 
         if (editedEvent.isPresent()) {
             Event existingEvent = editedEvent.get();
             eventService.updateEvent(existingEvent, event);
             eventService.save(existingEvent);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Event edited successfully");
-            response.put("event", existingEvent);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(existingEvent);
         } else {
-            throw new ResourceNotFoundException("Event not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -137,15 +93,11 @@ public class EventController {
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
             eventService.deleteById(eventId);
-
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Event deleted successfully");
-
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Event not found");
+            return ResponseEntity.notFound().build();
         }
     }
 }

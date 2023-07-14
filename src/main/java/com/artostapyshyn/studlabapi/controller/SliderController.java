@@ -29,54 +29,30 @@ public class SliderController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Get slider image by id.")
     @GetMapping("/find-by-id")
-    public ResponseEntity<Map<String, Object>> getSliderById(@RequestParam("sliderImageId") Long sliderImageId) {
+    public ResponseEntity<Slider> getSliderById(@RequestParam("sliderImageId") Long sliderImageId) {
         Optional<Slider> slider = sliderService.findById(sliderImageId);
-        if (slider.isPresent()) {
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Slider image found");
-            response.put("slider", slider.get());
-
-            return ResponseEntity.ok(response);
-        } else {
-            throw new ResourceNotFoundException("Slider image not found");
-        }
+        return slider.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Get all slider images.")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllSliderImages() {
+    public ResponseEntity<List<Slider>> getAllSliderImages() {
         List<Slider> sliders = sliderService.findAll();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Slider images retrieved successfully");
-        response.put("sliders", sliders);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(sliders);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add images to slider.")
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> addSliderImages(@RequestBody Slider slider) {
+    public ResponseEntity<Slider> addSliderImages(@RequestBody Slider slider) {
         byte[] imageBytes = slider.getSliderPhoto();
         slider.setSliderPhoto(imageBytes);
 
         try {
             Slider savedSlider = sliderService.save(slider);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Slider image added successfully");
-            response.put("slider", savedSlider);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(savedSlider);
         } catch (Exception e) {
-            throw new RuntimeException("Error occurred while adding slider image");
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -89,10 +65,7 @@ public class SliderController {
             sliderService.deleteById(sliderId);
 
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Slider image deleted successfully");
-
             return ResponseEntity.ok(response);
         } else {
             throw new ResourceNotFoundException("Slider image not found");

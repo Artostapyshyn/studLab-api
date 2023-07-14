@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Student;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,59 +29,44 @@ public class StudentController {
 
     @Operation(summary = "Get personal information")
     @GetMapping("/personal-info")
-    public ResponseEntity<Map<String, Object>> getPersonalInfo(Authentication authentication) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
+        List<Object> response = new ArrayList<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
         if (student.isPresent()) {
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Personal information retrieved successfully");
-            response.put("student", student.get());
+            response.add(student);
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Student not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
     @Operation(summary = "Find student by id")
     @GetMapping("/find-by-id")
-    public ResponseEntity<Map<String, Object>> getStudentById(@RequestParam("studentId") Long id) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
         Optional<Student> student = studentService.findById(id);
 
-        if (student.isPresent()) {
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Student found");
-            response.put("student", student.get());
-            return ResponseEntity.ok(response);
-        } else {
-            throw new ResourceNotFoundException("Student not found");
-        }
+        return student.map(value -> ResponseEntity.ok().body(value)).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Get personal information")
     @PostMapping("/profile")
-    public ResponseEntity<Map<String, Object>> getProfile(@RequestBody Student student) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
+        List<Object> response = new ArrayList<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Personal information retrieved successfully");
-            response.put("student", existingStudent);
+            response.add(existingStudent);
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Student not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
     @Operation(summary = "Get all students")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllStudents() {
+    public ResponseEntity<List<Map<String, String>>> getAllStudents() {
         List<Map<String, String>> studentData = new ArrayList<>();
         List<Student> students = studentService.findAll();
 
@@ -92,14 +76,7 @@ public class StudentController {
             data.put("lastName", student.getLastName());
             studentData.add(data);
         }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "All students retrieved successfully");
-        response.put("students", studentData);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(studentData);
     }
 
     @Operation(summary = "Upload resume to personal account")
@@ -135,22 +112,16 @@ public class StudentController {
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
-    public ResponseEntity<Map<String, Object>> editEvent(@RequestBody Student student, Authentication authentication) {
+    public ResponseEntity<Student> editStudent(@RequestBody Student student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
 
         if (optionalStudent.isPresent()) {
             Student existingStudent = optionalStudent.get();
             studentService.updateStudent(existingStudent, student);
             studentService.save(existingStudent);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Student account updated successfully");
-            response.put("student", existingStudent);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(existingStudent);
         } else {
-            throw new ResourceNotFoundException("Student not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -161,10 +132,7 @@ public class StudentController {
         studentService.deleteById(studentIdToDelete);
 
         Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Student account deleted successfully");
-
         return ResponseEntity.ok().body(response);
     }
 }

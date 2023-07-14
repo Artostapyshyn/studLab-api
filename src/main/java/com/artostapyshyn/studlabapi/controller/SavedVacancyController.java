@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.*;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.SavedVacancyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VacancyService;
@@ -32,7 +31,7 @@ public class SavedVacancyController {
 
     @Operation(summary = "Save vacancy")
     @PostMapping("/save")
-    public ResponseEntity<Map<String, Object>> saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
+    public ResponseEntity<SavedVacancy> saveVacancy(@RequestParam("vacancyId") Long vacancyId, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Vacancy> optionalVacancy = vacancyService.findVacancyById(vacancyId);
         if (optionalVacancy.isPresent()) {
@@ -40,15 +39,9 @@ public class SavedVacancyController {
             savedVacancy.setVacancy(optionalVacancy.get());
             savedVacancy.setStudentId(studentId);
             savedVacancyService.save(savedVacancy);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Vacancy saved successfully");
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(savedVacancy);
         } else {
-            throw new ResourceNotFoundException("Vacancy not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -61,31 +54,22 @@ public class SavedVacancyController {
             savedVacancyService.delete(savedVacancy);
 
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Vacancy removed from saved successfully");
-
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Saved vacancy not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
     @Operation(summary = "Get student saved vacancies")
     @GetMapping("/saved")
-    public ResponseEntity<Map<String, Object>> getSavedVacanciesByStudentId(Authentication authentication) {
+    public ResponseEntity<List<Vacancy>> getSavedVacanciesByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         List<SavedVacancy> savedVacancies = savedVacancyService.findByStudentId(studentId);
         List<Vacancy> vacancies = savedVacancies.stream()
                 .map(SavedVacancy::getVacancy)
                 .toList();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Saved vacancies retrieved successfully");
-        response.put("vacancies", vacancies);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(vacancies);
     }
 }

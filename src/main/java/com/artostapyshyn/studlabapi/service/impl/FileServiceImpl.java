@@ -37,14 +37,12 @@ public class FileServiceImpl implements FileService {
             documentFilenames.add(file.getOriginalFilename());
             studentService.save(student);
 
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, documentType + " added");
             response.put("fileName", file.getOriginalFilename());
             response.put("documentBase64", documentBase64);
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException(documentType + " not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -89,12 +87,10 @@ public class FileServiceImpl implements FileService {
             }
             studentService.save(student);
             Map<String, Object> response = new HashMap<>();
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, documentType + " deleted");
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException(documentType + " not found");
+            return ResponseEntity.notFound().build();
         }
     }
 

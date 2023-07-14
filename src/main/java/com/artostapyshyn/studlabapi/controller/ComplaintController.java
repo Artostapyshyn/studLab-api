@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Complaint;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,45 +26,29 @@ public class ComplaintController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllComplaints() {
+    public ResponseEntity<List<Complaint>> getAllComplaints() {
         List<Complaint> complaints = complaintService.findAll();
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Complaints retrieved successfully");
-        response.put("complaints", complaints);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(complaints);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/closed")
-    public ResponseEntity<Map<String, Object>> getAllClosedComplaints() {
+    public ResponseEntity<List<Complaint>> getAllClosedComplaints() {
         List<Complaint> complaints = complaintService.findClosedComplaints();
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Closed complaints retrieved successfully");
-        response.put("complaints", complaints);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(complaints);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> saveComplaint(@RequestBody Complaint complaint) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<Complaint> saveComplaint(@RequestBody Complaint complaint) {
         if (complaint == null) {
-            throw new IllegalArgumentException("Invalid complaint");
+            return ResponseEntity.badRequest().build();
         }
 
         Complaint savedComplaint = complaintService.saveComplaint(complaint);
         if (savedComplaint == null) {
-            throw new RuntimeException("Error occurred adding complaint");
+            return ResponseEntity.internalServerError().build();
         }
-
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Complaint saved successfully");
-        response.put("complaint", savedComplaint);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(savedComplaint);
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
@@ -78,8 +61,6 @@ public class ComplaintController {
         }
 
         complaintService.processComplaints(complaint);
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "Processed successfully");
         return ResponseEntity.ok(response);
     }
@@ -91,11 +72,10 @@ public class ComplaintController {
         Optional<Complaint> complaint = complaintService.findById(complaintId);
         if (complaint.isPresent()) {
             complaintService.delete(complaint.get());
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Complaint deleted successfully");
             return ResponseEntity.ok().body(response);
         }
-        throw new ResourceNotFoundException("Complaint not found");
+        response.put("error", "Complaint not found not found");
+        return ResponseEntity.badRequest().body(response);
     }
 }

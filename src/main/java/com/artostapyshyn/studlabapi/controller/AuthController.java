@@ -5,7 +5,9 @@ import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,13 +19,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -54,25 +57,23 @@ public class AuthController {
             Student foundStudent = studentService.findByEmail(student.getEmail());
 
             if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
-                throw new IllegalArgumentException("User is blocked");
+                responseMap.put(MESSAGE, "User is blocked.");
+                return ResponseEntity.status(401).body(responseMap);
             }
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Invalid credentials");
+            responseMap.put(MESSAGE, "Invalid Credentials");
+            return ResponseEntity.status(401).body(responseMap);
         }
-        String token = generateToken(student);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
 
-        responseMap.put(CODE, "200");
-        responseMap.put(STATUS, SUCCESS);
+        String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+        log.info(token);
+
         responseMap.put(MESSAGE, "Logged In");
         responseMap.put("token", token);
         return ResponseEntity.ok(responseMap);
-    }
-
-    private String generateToken(Student student) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-        return jwtTokenUtil.generateToken(userDetails, student.getId());
     }
 
     @Operation(summary = "Check user login status")
@@ -80,45 +81,26 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> checkLoginStatus(HttpServletRequest request) {
         String token = getTokenFromRequest(request);
         Map<String, Object> responseMap = new HashMap<>();
-        String email = jwtTokenUtil.getUsernameFromToken(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        if (jwtTokenUtil.validateToken(token, userDetails)) {
-            responseMap.put(CODE, "200");
-            responseMap.put(STATUS, SUCCESS);
-            responseMap.put(MESSAGE, "User is logged in");
+        if (token == null) {
+            responseMap.put(MESSAGE, "User is not logged in");
             return ResponseEntity.ok(responseMap);
-        } else {
-            throw new IllegalArgumentException("User is not logged in");
-        }
-    }
-
-    @Operation(summary = "Join to the student service")
-    @PostMapping("/join")
-    public ResponseEntity<Map<String, Object>> joinToService(@RequestBody Student student) {
-        String email = student.getEmail();
-        Map<String, Object> response = new HashMap<>();
-
-        if (studentService.findByEmail(email) != null) {
-            throw new IllegalArgumentException("User already registered with this email");
         }
 
-        if (isValidEmailDomain(email, student)) {
-            saveStudent(student);
+        try {
+            String email = jwtTokenUtil.getUsernameFromToken(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            VerificationCode existingCode = verificationCodeService.findByEmail(email);
-            if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-                throw new IllegalArgumentException("Verification code has already been sent. Please wait before requesting another code.");
+            if (jwtTokenUtil.validateToken(token, userDetails)) {
+                responseMap.put(MESSAGE, "User is logged in");
+            } else {
+                responseMap.put(MESSAGE, "User is not logged in");
             }
-
-            sendCodeAndSetExpiration(email);
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Verification code sent successfully");
-            return ResponseEntity.ok(response);
+        } catch (ExpiredJwtException | UsernameNotFoundException e) {
+            responseMap.put(MESSAGE, "User is not logged in");
         }
 
-        throw new IllegalArgumentException("Invalid email");
+        return ResponseEntity.ok(responseMap);
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
@@ -131,13 +113,50 @@ public class AuthController {
         return null;
     }
 
-    @Operation(summary = "Resend verification code to student email")
+    @Operation(summary = "Join to the student service")
+    @PostMapping("/join")
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody Student student) {
+        Map<String, Object> response = new HashMap<>();
+        String email = student.getEmail();
+
+        if (studentService.findByEmail(email) != null) {
+            response.put(MESSAGE, "User already registered with this email");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (isValidEmailDomain(email, student)) {
+            student.setEnabled(false);
+            student.setRole(Role.ROLE_STUDENT);
+            studentService.save(student);
+
+            VerificationCode existingCode = verificationCodeService.findByEmail(email);
+            if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
+                return handleResendCodeError(response, "Verification code has already been sent.");
+            }
+
+            int verificationCode = verificationCodeService.generateCode(email).getCode();
+            emailService.sendVerificationCode(email, verificationCode);
+
+            VerificationCode verification = new VerificationCode();
+            verification.setCode(verificationCode);
+            verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
+            verification.setEmail(email);
+
+            response.put(MESSAGE, "Email sent successfully");
+            log.info("Verification code sent to - " + email);
+            return ResponseEntity.ok(response);
+        }
+
+        response.put(MESSAGE, "Invalid email");
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
-        String email = student.getEmail();
         Map<String, Object> response = new HashMap<>();
-
+        String email = student.getEmail();
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
+
         if (existingCode != null) {
             LocalDateTime expirationDate = existingCode.getExpirationDate();
             LocalDateTime currentTime = LocalDateTime.now();
@@ -145,18 +164,10 @@ public class AuthController {
             if (expirationDate.isBefore(currentTime)) {
                 verificationCodeService.deleteExpiredTokens();
             } else {
-                throw new IllegalArgumentException("Verification code has already been sent. Please wait before requesting another code.");
+                return handleResendCodeError(response, "Verification code has already been sent. Please wait before requesting another code.");
             }
         }
 
-        sendCodeAndSetExpiration(email);
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Verification code sent successfully");
-        return ResponseEntity.ok(response);
-    }
-
-    private void sendCodeAndSetExpiration(String email) {
         int verificationCode = verificationCodeService.generateCode(email).getCode();
         emailService.sendVerificationCode(email, verificationCode);
 
@@ -164,12 +175,14 @@ public class AuthController {
         verification.setCode(verificationCode);
         verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
         verification.setEmail(email);
+
+        response.put(MESSAGE, "Verification code sent successfully");
+        return ResponseEntity.ok(response);
     }
 
-    private void saveStudent(Student student) {
-        student.setEnabled(false);
-        student.setRole(Role.ROLE_STUDENT);
-        studentService.save(student);
+    private ResponseEntity<Map<String, Object>> handleResendCodeError(Map<String, Object> response, String errorMessage) {
+        response.put("error", errorMessage);
+        return ResponseEntity.badRequest().body(response);
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
@@ -189,31 +202,33 @@ public class AuthController {
     @Operation(summary = "Verify student email")
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody VerificationCode verificationCode) {
-        Student student = studentService.findByEmail(verificationCode.getEmail());
+        Map<String, Object> response = new HashMap<>();
+        String email = verificationCode.getEmail();
+        int code = verificationCode.getCode();
+        Student student = studentService.findByEmail(email);
 
         if (student == null) {
-            Map<String, Object> response = new HashMap<>();
-            throw new IllegalArgumentException("Student with provided email does not exist");
+            response.put(MESSAGE, "Student with provided email does not exist");
+            return ResponseEntity.badRequest().body(response);
         }
 
-        Optional<VerificationCode> verifyCode = verificationCodeService.findByStudentId(student.getId());
-        if (verifyCode.isEmpty() || verifyCode.get().getCode() != verificationCode.getCode()) {
-            throw new IllegalArgumentException("Invalid verification code");
+        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.getId());
+        if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
+            response.put(MESSAGE, "Invalid verification code");
+            return ResponseEntity.badRequest().body(response);
         }
 
-        LocalDateTime expirationTime = verifyCode.get().getExpirationDate();
+        LocalDateTime expirationTime = verifCode.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
-            throw new IllegalArgumentException("Verification code has expired");
+            response.put(MESSAGE, "Verification code has expired");
+            return ResponseEntity.badRequest().body(response);
         }
 
         student.setEnabled(true);
         studentService.save(student);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
         response.put(MESSAGE, "User successfully verified");
+        log.info("User successfully verified with email - " + email);
         return ResponseEntity.ok(response);
     }
 
@@ -225,71 +240,71 @@ public class AuthController {
         Student checkedStudent = studentService.findByEmail(email);
 
         if (checkedStudent == null) {
-            throw new IllegalArgumentException("Student with provided email does not exist");
+            response.put(MESSAGE, "Student with provided email does not exist");
+            return ResponseEntity.badRequest().body(response);
         }
 
         if (checkedStudent.isEnabled() && student.getPassword() != null) {
             response.put(MESSAGE, "Student is verified and signed-in");
+            log.info("Checking verification status for student - " + email);
         } else {
-            throw new IllegalArgumentException("Student is not verified");
+            response.put(MESSAGE, "Student is not verified");
         }
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody Student student) {
+        Map<String, Object> responseMap = new HashMap<>();
+
         String email = student.getEmail();
         Student existingStudent = studentService.findByEmail(email);
         if (existingStudent == null) {
-            throw new IllegalArgumentException("Invalid email address");
+            responseMap.put(MESSAGE, "Invalid email address");
+            return ResponseEntity.badRequest().body(responseMap);
         }
-        if (!existingStudent.isEnabled()) {
-            throw new IllegalArgumentException("Student not verified");
-        }
+        if (existingStudent.isEnabled()) {
 
-        validateRequiredFields(student);
+            boolean isValid = checkStudent(student);
+            if (!isValid) {
+                responseMap.put(MESSAGE, "Required fields are missing");
+                return ResponseEntity.badRequest().body(responseMap);
+            }
 
-        updateStudentDetails(existingStudent, student);
+            existingStudent.setFirstName(student.getFirstName());
+            existingStudent.setLastName(student.getLastName());
 
-        String token = generateToken(existingStudent);
-
-        log.info("Account registered with email - " + email);
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Account created successfully");
-        response.put("token", token);
-
-        return ResponseEntity.ok().body(response);
-    }
-
-    private void validateRequiredFields(Student student) {
-        if (student.getFirstName() == null || student.getLastName() == null ||
-                student.getPassword() == null || student.getMajor() == null) {
-            throw new IllegalArgumentException("Required fields are missing");
-        }
-    }
-
-    private void updateStudentDetails(Student existingStudent, Student newStudent) {
-        existingStudent.setFirstName(newStudent.getFirstName());
-        existingStudent.setLastName(newStudent.getLastName());
-        existingStudent.setHasNewMessages(false);
-        existingStudent.setMajor(newStudent.getMajor());
-        existingStudent.setCourse(newStudent.getCourse());
-        byte[] imageBytes = newStudent.getPhotoBytes();
-        if (imageBytes != null) {
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            String encodedPassword = passwordEncoder.encode(student.getPassword());
+            existingStudent.setPassword(encodedPassword);
+            existingStudent.setHasNewMessages(false);
+            existingStudent.setMajor(student.getMajor());
+            existingStudent.setCourse(student.getCourse());
+            byte[] imageBytes = student.getPhotoBytes();
             existingStudent.setPhotoBytes(imageBytes);
+            existingStudent.setRegistrationDate(LocalDateTime.now());
+
+            studentService.save(existingStudent);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
+            String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+
+            responseMap.put("email", student.getEmail());
+            responseMap.put(MESSAGE, "Account created successfully");
+            log.info("Account registered with email - " + student.getEmail());
+            responseMap.put("token", token);
+        } else {
+            responseMap.put(MESSAGE, "Student not verified");
+            return ResponseEntity.badRequest().body(responseMap);
         }
-        existingStudent.setRegistrationDate(LocalDateTime.now());
+        return ResponseEntity.ok(responseMap);
+    }
 
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(newStudent.getPassword());
-        existingStudent.setPassword(encodedPassword);
-
-        studentService.save(existingStudent);
+    private boolean checkStudent(Student student) {
+        return student.getFirstName() != null &&
+                student.getLastName() != null &&
+                student.getPassword() != null &&
+                student.getMajor() != null;
     }
 
     @Operation(summary = "Logout from account")
@@ -305,18 +320,19 @@ public class AuthController {
                 cookie.setPath("/");
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
+                break;
             }
         }
         try {
             request.logout();
-            SecurityContextHolder.clearContext();
-            responseMap.put(CODE, "200");
-            responseMap.put(STATUS, SUCCESS);
-            responseMap.put(MESSAGE, "Logged out successfully");
-
-            return ResponseEntity.ok(responseMap);
-        } catch (Exception e) {
-            throw new RuntimeException("Something went wrong while logging out");
+        } catch (ServletException e) {
+            responseMap.put(MESSAGE, "Something went wrong while logging out");
+            return ResponseEntity.internalServerError().body(responseMap);
         }
+
+        SecurityContextHolder.clearContext();
+        responseMap.put(MESSAGE, "Logged out successfully");
+
+        return ResponseEntity.ok(responseMap);
     }
 }

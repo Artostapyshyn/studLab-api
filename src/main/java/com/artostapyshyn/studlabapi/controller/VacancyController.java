@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Vacancy;
-import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -26,37 +25,23 @@ public class VacancyController {
 
     @Operation(summary = "Get all vacancies")
     @GetMapping("/all")
-    public ResponseEntity<Map<String, Object>> getAllVacancies() {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<List<Vacancy>> getAllVacancies(){
         List<Vacancy> vacancies = vacancyService.findAll();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "All vacancies retrieved successfully");
-        response.put("vacancies", vacancies);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(vacancies);
     }
 
     @Operation(summary = "Add a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> addVacancy(@RequestBody Vacancy vacancy, @RequestParam("image") MultipartFile image) {
+    public ResponseEntity<Vacancy> addVacancy(@RequestBody Vacancy vacancy, @RequestParam("image") MultipartFile image) {
         Vacancy savedVacancy = vacancyService.save(vacancy);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put(CODE, "200");
-        response.put(STATUS, SUCCESS);
-        response.put(MESSAGE, "Vacancy added successfully");
-        response.put("vacancy", savedVacancy);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(savedVacancy);
     }
 
     @Operation(summary = "Edit a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/edit")
-    public ResponseEntity<Map<String, Object>> editVacancy(@RequestParam("vacancyId") Long vacancyId, @RequestParam Vacancy vacancy) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<Vacancy> editVacancy(@RequestParam("vacancyId") Long vacancyId, @RequestParam Vacancy vacancy) {
         Optional<Vacancy> optionalVacancy = vacancyService.findVacancyById(vacancyId);
 
         if (optionalVacancy.isPresent()) {
@@ -71,14 +56,9 @@ public class VacancyController {
             }
 
             Vacancy updatedVacancy = vacancyService.save(existingVacancy);
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
-            response.put(MESSAGE, "Vacancy updated successfully");
-            response.put("vacancy", updatedVacancy);
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(updatedVacancy);
         } else {
-            throw new ResourceNotFoundException("Vacancy not found");
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -91,13 +71,10 @@ public class VacancyController {
 
         if (vacancy.isPresent()) {
             vacancyService.deleteById(vacancyId);
-            response.put(CODE, "200");
-            response.put(STATUS, SUCCESS);
             response.put(MESSAGE, "Vacancy deleted successfully");
-
             return ResponseEntity.ok(response);
         } else {
-            throw new ResourceNotFoundException("Vacancy not found");
+            return ResponseEntity.notFound().build();
         }
     }
 }
