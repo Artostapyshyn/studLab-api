@@ -30,7 +30,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 @AllArgsConstructor
 @Log4j2
 public class AuthController {
@@ -66,14 +66,17 @@ public class AuthController {
             responseMap.put(MESSAGE, "Invalid Credentials");
             return ResponseEntity.status(401).body(responseMap);
         }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-
-        String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+        String token = generateToken(student);
         log.info(token);
 
         responseMap.put(MESSAGE, "Logged In");
         responseMap.put("token", token);
         return ResponseEntity.ok(responseMap);
+    }
+
+    private String generateToken(Student student) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
+        return jwtTokenUtil.generateToken(userDetails, student.getId());
     }
 
     @Operation(summary = "Check user login status")
@@ -134,13 +137,7 @@ public class AuthController {
                 return handleResendCodeError(response, "Verification code has already been sent.");
             }
 
-            int verificationCode = verificationCodeService.generateCode(email).getCode();
-            emailService.sendVerificationCode(email, verificationCode);
-
-            VerificationCode verification = new VerificationCode();
-            verification.setCode(verificationCode);
-            verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
-            verification.setEmail(email);
+            submitVerificationCode(email);
 
             response.put(MESSAGE, "Email sent successfully");
             log.info("Verification code sent to - " + email);
@@ -149,6 +146,16 @@ public class AuthController {
 
         response.put(MESSAGE, "Invalid email");
         return ResponseEntity.badRequest().body(response);
+    }
+
+    private void submitVerificationCode(String email) {
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        emailService.sendVerificationCode(email, verificationCode);
+
+        VerificationCode verification = new VerificationCode();
+        verification.setCode(verificationCode);
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
+        verification.setEmail(email);
     }
 
     @PostMapping("/resend-code")
@@ -168,13 +175,7 @@ public class AuthController {
             }
         }
 
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
-
-        VerificationCode verification = new VerificationCode();
-        verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
-        verification.setEmail(email);
+        submitVerificationCode(email);
 
         response.put(MESSAGE, "Verification code sent successfully");
         return ResponseEntity.ok(response);
@@ -186,8 +187,8 @@ public class AuthController {
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
-        String domain = Arrays.stream(email.split("@"))
-                .skip(1)
+        String domain;
+        domain = Arrays.stream(new String[]{email.split("@")[1]})
                 .findFirst()
                 .orElse("");
 
@@ -272,22 +273,8 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(responseMap);
             }
 
-            existingStudent.setFirstName(student.getFirstName());
-            existingStudent.setLastName(student.getLastName());
-
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            String encodedPassword = passwordEncoder.encode(student.getPassword());
-            existingStudent.setPassword(encodedPassword);
-            existingStudent.setHasNewMessages(false);
-            existingStudent.setMajor(student.getMajor());
-            existingStudent.setCourse(student.getCourse());
-            byte[] imageBytes = student.getPhotoBytes();
-            existingStudent.setPhotoBytes(imageBytes);
-            existingStudent.setRegistrationDate(LocalDateTime.now());
-
-            studentService.save(existingStudent);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-            String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+            signUpStudent(student, existingStudent);
+            String token = generateToken(student);
 
             responseMap.put("email", student.getEmail());
             responseMap.put(MESSAGE, "Account created successfully");
@@ -298,6 +285,23 @@ public class AuthController {
             return ResponseEntity.badRequest().body(responseMap);
         }
         return ResponseEntity.ok(responseMap);
+    }
+
+    private void signUpStudent(Student student, Student existingStudent) {
+        existingStudent.setFirstName(student.getFirstName());
+        existingStudent.setLastName(student.getLastName());
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(student.getPassword());
+        existingStudent.setPassword(encodedPassword);
+        existingStudent.setHasNewMessages(false);
+        existingStudent.setMajor(student.getMajor());
+        existingStudent.setCourse(student.getCourse());
+        byte[] imageBytes = student.getPhotoBytes();
+        existingStudent.setPhotoBytes(imageBytes);
+        existingStudent.setRegistrationDate(LocalDateTime.now());
+
+        studentService.save(existingStudent);
     }
 
     private boolean checkStudent(Student student) {

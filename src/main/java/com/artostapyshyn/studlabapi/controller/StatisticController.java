@@ -18,7 +18,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @RestController
 @RequestMapping("/api/v1/statistic")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 @AllArgsConstructor
 @Log4j2
 public class StatisticController {

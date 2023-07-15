@@ -19,7 +19,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/messages")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 public class MessageController {
 
     private final MessageService messageService;

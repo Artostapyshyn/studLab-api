@@ -20,7 +20,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/course")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 public class CourseController {
 
     private final CourseService courseService;

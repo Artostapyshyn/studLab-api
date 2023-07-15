@@ -24,7 +24,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @RestController
 @RequestMapping("/api/v1/comments")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 public class CommentController {
 
     private final EventService eventService;

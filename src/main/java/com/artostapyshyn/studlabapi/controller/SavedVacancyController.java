@@ -19,7 +19,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @RestController
 @RequestMapping("/api/v1/savedVacancies")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 @AllArgsConstructor
 public class SavedVacancyController {
 

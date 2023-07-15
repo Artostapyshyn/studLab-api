@@ -17,7 +17,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/events")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 public class EventController {
 
     private final EventService eventService;

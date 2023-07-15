@@ -22,7 +22,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @Log4j2
 @RestController
 @RequestMapping("/api/v1/favourites")
-@CrossOrigin(origins = "*")
+@CrossOrigin(maxAge = 3600, origins = "*")
 @AllArgsConstructor
 public class FavouriteEventController {
 
