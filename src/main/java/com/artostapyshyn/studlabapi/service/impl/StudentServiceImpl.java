@@ -107,6 +107,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         Optional.ofNullable(updatedStudent.getBirthDate()).ifPresent(existingStudent::setBirthDate);
+        Optional.ofNullable(updatedStudent.getCity()).ifPresent(existingStudent::setCity);
         Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
         Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);
         Optional.ofNullable(updatedStudent.getPhotoBytes()).ifPresent(existingStudent::setPhotoBytes);

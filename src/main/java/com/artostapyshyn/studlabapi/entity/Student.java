@@ -42,6 +42,9 @@ public class Student {
     @Column(name = "course")
     private String course;
 
+    @Column(name = "city")
+    private String city;
+
     @Basic(fetch=FetchType.LAZY)
     @Column(name = "student_photo")
     private byte[] photoBytes;

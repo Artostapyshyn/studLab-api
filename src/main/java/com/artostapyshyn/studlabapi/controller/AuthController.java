@@ -295,6 +295,7 @@ public class AuthController {
         String encodedPassword = passwordEncoder.encode(student.getPassword());
         existingStudent.setPassword(encodedPassword);
         existingStudent.setHasNewMessages(false);
+        existingStudent.setCity(student.getCity());
         existingStudent.setMajor(student.getMajor());
         existingStudent.setCourse(student.getCourse());
         byte[] imageBytes = student.getPhotoBytes();
@@ -308,6 +309,7 @@ public class AuthController {
         return student.getFirstName() != null &&
                 student.getLastName() != null &&
                 student.getPassword() != null &&
+                student.getCity() != null &&
                 student.getMajor() != null;
     }
 
