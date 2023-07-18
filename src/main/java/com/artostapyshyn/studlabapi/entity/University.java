@@ -1,6 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +29,8 @@ public class University {
     @Column(name = "domain", nullable = false)
     private String domain;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "university", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
     private Set<Student> students;
 
     @Override

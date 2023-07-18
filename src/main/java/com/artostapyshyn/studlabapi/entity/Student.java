@@ -1,18 +1,12 @@
 package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.Role;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -42,7 +36,7 @@ public class Student {
     @Column(name = "course")
     private String course;
 
-    @Column(name = "city")
+    @Column(name = "student_city")
     private String city;
 
     @Basic(fetch=FetchType.LAZY)
@@ -97,13 +91,19 @@ public class Student {
     private List<Comment> comments;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "university_id")
-    @JsonBackReference
     private University university;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
+
+    @JsonProperty("university")
+    public Map<String, Object> getUniversityData() {
+        Map<String, Object> universityData = new HashMap<>();
+        universityData.put("id", university.getId());
+        universityData.put("name", university.getName());
+        return universityData;
+    }
 
     @Override
     public boolean equals(Object o) {
