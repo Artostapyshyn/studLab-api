@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,7 @@ public class Complaint {
     private boolean blockUser;
 
     @Column(name = "block_duration")
+    @Future
     private String blockDuration;
 
     @Column(name = "delete_comment")

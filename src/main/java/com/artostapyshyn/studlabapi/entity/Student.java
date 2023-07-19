@@ -3,6 +3,8 @@ package com.artostapyshyn.studlabapi.entity;
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -34,6 +36,8 @@ public class Student {
     private String major;
 
     @Column(name = "course")
+    @Min(1)
+    @Max(5)
     private String course;
 
     @Column(name = "student_city")

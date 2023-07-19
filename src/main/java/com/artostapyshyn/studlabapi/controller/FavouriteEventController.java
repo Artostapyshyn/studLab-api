@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
@@ -39,9 +36,11 @@ public class FavouriteEventController {
         Optional<Event> event = eventService.findEventById(eventId);
 
         if (event.isPresent()) {
-            FavouriteEvent favouriteEvent = new FavouriteEvent();
-            favouriteEvent.setEvent(event.get());
-            favouriteEvent.setStudentId(studentId);
+            if (favouriteEventService.isEventInFavorites(eventId, studentId)) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Event already added"));
+            }
+
+            FavouriteEvent favouriteEvent = createFavouriteEvent(event.get(), studentId);
             favouriteEventService.addToFavorites(eventId);
             favouriteEventService.save(favouriteEvent);
 
@@ -49,6 +48,13 @@ public class FavouriteEventController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private FavouriteEvent createFavouriteEvent(Event event, Long studentId) {
+        FavouriteEvent favouriteEvent = new FavouriteEvent();
+        favouriteEvent.setEvent(event);
+        favouriteEvent.setStudentId(studentId);
+        return favouriteEvent;
     }
 
     @Operation(summary = "Remove event from favourite")

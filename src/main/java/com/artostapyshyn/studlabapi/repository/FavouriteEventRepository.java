@@ -11,4 +11,6 @@ public interface FavouriteEventRepository extends JpaRepository<FavouriteEvent, 
     List<FavouriteEvent> findByStudentId(Long studentId);
 
     FavouriteEvent findByStudentIdAndEventId(Long studentId, Long eventId);
+
+    boolean existsByEventIdAndStudentId(Long eventId, Long studentId);
 }

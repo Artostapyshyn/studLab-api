@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -50,6 +51,7 @@ public class Event {
     private int favoriteCount;
 
     @Column(name = "date_of_creation")
+    @CreationTimestamp
     private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "eventId")
@@ -58,11 +60,6 @@ public class Event {
     public void addComment(Comment comment) {
         eventComments.add(comment);
         comment.setEventId(this.getId());
-    }
-
-    @PrePersist
-    private void init() {
-        creationDate = LocalDateTime.now();
     }
 
     @Override

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -36,12 +37,8 @@ public class Course {
     private byte[] coursePhoto;
 
     @Column(name = "date_of_creation")
+    @CreationTimestamp
     private LocalDateTime creationDate;
-
-    @PrePersist
-    private void init() {
-        creationDate = LocalDateTime.now();
-    }
 
     @Override
     public boolean equals(Object o) {

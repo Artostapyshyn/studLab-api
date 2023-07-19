@@ -18,4 +18,6 @@ public interface FavouriteEventService {
     void removeFromFavorites(Long eventId);
 
     void addToFavorites(Long eventId);
+
+    boolean isEventInFavorites(Long eventId, Long studentId);
 }

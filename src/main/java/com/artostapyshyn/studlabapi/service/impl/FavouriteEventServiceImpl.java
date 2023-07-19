@@ -61,4 +61,10 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
         event.setFavoriteCount(event.getFavoriteCount() + 1);
         eventRepository.save(event);
     }
+
+    @Override
+    public boolean isEventInFavorites(Long eventId, Long studentId) {
+        return favouriteEventRepository.existsByEventIdAndStudentId(eventId, studentId);
+    }
+
 }
