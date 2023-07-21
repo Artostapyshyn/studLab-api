@@ -4,9 +4,11 @@ import com.artostapyshyn.studlabapi.entity.Course;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,6 +19,7 @@ import java.util.Optional;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/course")
@@ -43,7 +46,7 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add a course.")
     @PostMapping("/add")
-    public ResponseEntity<Course> addCourse(@RequestBody Course course) {
+    public ResponseEntity<Course> addCourse(@RequestBody @NonNull Course course) {
         byte[] imageBytes = course.getCoursePhoto();
         course.setCoursePhoto(imageBytes);
 
@@ -59,7 +62,7 @@ public class CourseController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit a course.")
     @PutMapping("/edit")
-    public ResponseEntity<Course> editCourse(@RequestBody Course course) {
+    public ResponseEntity<Course> editCourse(@RequestBody @NonNull Course course) {
         Optional<Course> editedCourse = courseService.findById(course.getId());
 
         if (editedCourse.isPresent()) {

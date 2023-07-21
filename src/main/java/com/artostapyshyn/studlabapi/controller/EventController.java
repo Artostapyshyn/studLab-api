@@ -3,10 +3,12 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -14,6 +16,7 @@ import java.util.*;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/events")
@@ -56,7 +59,7 @@ public class EventController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add an event.")
     @PostMapping("/add")
-    public ResponseEntity<Event> addEvent(@RequestBody Event event) {
+    public ResponseEntity<Event> addEvent(@RequestBody @NotNull Event event) {
         event.setEventType(event.getEventType());
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
@@ -73,7 +76,7 @@ public class EventController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit an event.")
     @PutMapping("/edit")
-    public ResponseEntity<Event> editEvent(@RequestBody Event event) {
+    public ResponseEntity<Event> editEvent(@RequestBody @NotNull Event event) {
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
 
         if (editedEvent.isPresent()) {

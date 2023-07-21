@@ -36,7 +36,7 @@ public class FavouriteEventController {
         Optional<Event> event = eventService.findEventById(eventId);
 
         if (event.isPresent()) {
-            if (favouriteEventService.isEventInFavorites(eventId, studentId)) {
+            if (isEventAlreadyAddedToFavorites(eventId, studentId)) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Event already added"));
             }
 
@@ -48,13 +48,6 @@ public class FavouriteEventController {
         }
 
         return ResponseEntity.notFound().build();
-    }
-
-    private FavouriteEvent createFavouriteEvent(Event event, Long studentId) {
-        FavouriteEvent favouriteEvent = new FavouriteEvent();
-        favouriteEvent.setEvent(event);
-        favouriteEvent.setStudentId(studentId);
-        return favouriteEvent;
     }
 
     @Operation(summary = "Remove event from favourite")
@@ -72,6 +65,17 @@ public class FavouriteEventController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    private FavouriteEvent createFavouriteEvent(Event event, Long studentId) {
+        FavouriteEvent favouriteEvent = new FavouriteEvent();
+        favouriteEvent.setEvent(event);
+        favouriteEvent.setStudentId(studentId);
+        return favouriteEvent;
+    }
+
+    private boolean isEventAlreadyAddedToFavorites(Long eventId, Long studentId) {
+        return favouriteEventService.isEventInFavorites(eventId, studentId);
     }
 
     @Operation(summary = "Get student favourite events")

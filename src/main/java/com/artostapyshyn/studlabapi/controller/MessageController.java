@@ -46,11 +46,10 @@ public class MessageController {
     @Operation(summary = "Delete message by id")
     @DeleteMapping("/delete-by-id")
     public ResponseEntity<Map<String, Object>> deleteMessage(@RequestParam("messageId") Long messageId) {
+        Map<String, Object> response = new HashMap<>();
         Optional<Message> optionalMessage = messageService.findById(messageId);
         if (optionalMessage.isPresent()) {
             messageService.deleteById(messageId);
-
-            Map<String, Object> response = new HashMap<>();
             response.put(MESSAGE, "Message deleted successfully");
             return ResponseEntity.ok(response);
         } else {

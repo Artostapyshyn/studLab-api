@@ -9,11 +9,13 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -21,6 +23,7 @@ import java.util.*;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
+@Validated
 @RestController
 @RequestMapping("/api/v1/comments")
 @AllArgsConstructor
@@ -33,22 +36,18 @@ public class CommentController {
 
     private final StudentService studentService;
 
-    @Operation(summary = "Add comment to event")
     @PostMapping("/add")
     public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
-                                                                 @RequestBody Comment comment,
-                                                                 Authentication authentication) {
+                                                          @RequestBody @NotNull Comment comment,
+                                                          Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
         if (event.isPresent()) {
             Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
             if (optionalStudent.isPresent()) {
                 Student student = optionalStudent.get();
-                comment.setStudent(student);
-                event.get().addComment(comment);
-                commentService.save(comment);
-                eventService.save(event.get());
-                response.add(comment);
+                Comment savedComment = addCommentToEvent(event.get(), comment, student);
+                response.add(savedComment);
                 return ResponseEntity.ok().body(response);
             } else {
                 response.add("Student not found.");
@@ -60,9 +59,16 @@ public class CommentController {
         }
     }
 
+    private Comment addCommentToEvent(Event event, Comment comment, Student student) {
+        comment.setStudent(student);
+        event.addComment(comment);
+        commentService.save(comment);
+        return comment;
+    }
+
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
-    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody Reply reply,
+    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull Reply reply,
                                                                  @RequestParam("commentId") Long commentId) {
         Map<String, Object> responseMap = new HashMap<>();
         commentService.addReplyToComment(reply, commentId);
@@ -70,67 +76,61 @@ public class CommentController {
         return ResponseEntity.ok(responseMap);
     }
 
-    @Operation(summary = "Get all comments to event")
     @GetMapping("/all")
     public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
         if (optionalEvent.isPresent()) {
             Event event = optionalEvent.get();
-            Set<Comment> comments = event.getEventComments();
-            List<Comment> commentList = new ArrayList<>(comments);
+            List<Comment> commentList = getCommentsForEvent(event);
             return ResponseEntity.ok(commentList);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
+    private List<Comment> getCommentsForEvent(Event event) {
+        Set<Comment> comments = event.getEventComments();
+        return new ArrayList<>(comments);
+    }
+
     @PostMapping("/like-comment")
     public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId,
                                                            Authentication authentication) {
-        Map<String, Object> responseMap = new HashMap<>();
-        Optional<Comment> optionalComment = commentService.findById(commentId);
-        if (optionalComment.isPresent()) {
-            Comment comment = optionalComment.get();
-            Long currentUserId = studentService.getAuthStudentId(authentication);
-            if (comment.getLikedBy().stream().anyMatch(student -> student.getId().equals(currentUserId))) {
-                responseMap.put(MESSAGE, "Comment already liked by the user");
-                return ResponseEntity.badRequest().body(responseMap);
-            }
-
-            comment.setLikes(comment.getLikes() + 1);
-            Student currentUser = studentService.findById(currentUserId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-
-            comment.getLikedBy().add(currentUser);
-            commentService.save(comment);
-            responseMap.put(MESSAGE, "Liked successfully");
-            return ResponseEntity.ok().body(responseMap);
-        }
-        responseMap.put(MESSAGE, "Comment not found");
-        return ResponseEntity.badRequest().body(responseMap);
+        return handleLikeUnlikeComment(commentId, authentication, true);
     }
 
     @PostMapping("/unlike-comment")
     public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId,
                                                              Authentication authentication) {
+        return handleLikeUnlikeComment(commentId, authentication, false);
+    }
+
+    private ResponseEntity<Map<String, Object>> handleLikeUnlikeComment(Long commentId, Authentication authentication, boolean isLike) {
         Map<String, Object> responseMap = new HashMap<>();
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
             Long currentUserId = studentService.getAuthStudentId(authentication);
-            Student currentUser = studentService.findById(currentUserId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-            boolean removed = comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId));
-            if (!removed) {
-                responseMap.put(MESSAGE, "Comment not liked by the user");
+            if ((isLike && comment.getLikedBy().stream().anyMatch(student -> student.getId().equals(currentUserId))) ||
+                    (!isLike && comment.getLikedBy().removeIf(student -> student.getId().equals(currentUserId)))) {
+                responseMap.put(MESSAGE, isLike ? "Comment already liked by the user" : "Comment not liked by the user");
                 return ResponseEntity.badRequest().body(responseMap);
             }
 
-            comment.setLikes(Math.max(comment.getLikes() - 1, 0));
+            if (isLike) {
+                comment.setLikes(comment.getLikes() + 1);
+                Student currentUser = studentService.findById(currentUserId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+                comment.getLikedBy().add(currentUser);
+            } else {
+                comment.setLikes(Math.max(comment.getLikes() - 1, 0));
+            }
+
             commentService.save(comment);
-            responseMap.put(MESSAGE, "Unliked successfully");
+            responseMap.put(MESSAGE, isLike ? "Liked successfully" : "Unliked successfully");
             return ResponseEntity.ok().body(responseMap);
         }
+
         responseMap.put(MESSAGE, "Comment not found");
         return ResponseEntity.badRequest().body(responseMap);
     }

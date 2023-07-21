@@ -11,8 +11,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -21,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,11 +31,12 @@ import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
 
+@Log4j2
+@Validated
 @RestController
 @RequestMapping("/api/v1/auth")
 @CrossOrigin(maxAge = 3600, origins = "*")
 @AllArgsConstructor
-@Log4j2
 public class AuthController {
 
     private final StudentService studentService;
@@ -51,20 +55,17 @@ public class AuthController {
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody @NotNull Student student) {
         Map<String, Object> responseMap = new HashMap<>();
         try {
             Student foundStudent = studentService.findByEmail(student.getEmail());
-
             if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
-                responseMap.put(MESSAGE, "User is blocked.");
-                return ResponseEntity.status(401).body(responseMap);
+                return handleUnauthorized("User is blocked.");
             }
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
         } catch (BadCredentialsException e) {
-            responseMap.put(MESSAGE, "Invalid Credentials");
-            return ResponseEntity.status(401).body(responseMap);
+            return handleUnauthorized("Invalid Credentials");
         }
         String token = generateToken(student);
         log.info(token);
@@ -106,19 +107,9 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    private String getTokenFromRequest(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                return cookie.getValue();
-            }
-        }
-        return null;
-    }
-
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
-    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody @NotNull Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
 
@@ -158,8 +149,29 @@ public class AuthController {
         verification.setEmail(email);
     }
 
+    @Operation(summary = "Check student status")
+    @PostMapping("/check-status")
+    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody @NotNull Student student) {
+        Map<String, Object> response = new HashMap<>();
+        String email = student.getEmail();
+        Student checkedStudent = studentService.findByEmail(email);
+
+        if (checkedStudent == null) {
+            response.put(MESSAGE, "Student with provided email does not exist");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (checkedStudent.isEnabled() && student.getPassword() != null) {
+            response.put(MESSAGE, "Student is verified and signed-in");
+            log.info("Checking verification status for student - " + email);
+        } else {
+            response.put(MESSAGE, "Student is not verified");
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/resend-code")
-    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody @NotNull Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
@@ -176,7 +188,6 @@ public class AuthController {
         }
 
         submitVerificationCode(email);
-
         response.put(MESSAGE, "Verification code sent successfully");
         return ResponseEntity.ok(response);
     }
@@ -202,115 +213,25 @@ public class AuthController {
 
     @Operation(summary = "Verify student email")
     @PostMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody VerificationCode verificationCode) {
-        Map<String, Object> response = new HashMap<>();
-        String email = verificationCode.getEmail();
-        int code = verificationCode.getCode();
-        Student student = studentService.findByEmail(email);
-
-        if (student == null) {
-            response.put(MESSAGE, "Student with provided email does not exist");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.getId());
-        if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
-            response.put(MESSAGE, "Invalid verification code");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        LocalDateTime expirationTime = verifCode.get().getExpirationDate();
-        LocalDateTime currentTime = LocalDateTime.now();
-        if (currentTime.isAfter(expirationTime)) {
-            response.put(MESSAGE, "Verification code has expired");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        student.setEnabled(true);
-        studentService.save(student);
-        response.put(MESSAGE, "User successfully verified");
-        log.info("User successfully verified with email - " + email);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "Check student status")
-    @PostMapping("/check-status")
-    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody Student student) {
-        Map<String, Object> response = new HashMap<>();
-        String email = student.getEmail();
-        Student checkedStudent = studentService.findByEmail(email);
-
-        if (checkedStudent == null) {
-            response.put(MESSAGE, "Student with provided email does not exist");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        if (checkedStudent.isEnabled() && student.getPassword() != null) {
-            response.put(MESSAGE, "Student is verified and signed-in");
-            log.info("Checking verification status for student - " + email);
-        } else {
-            response.put(MESSAGE, "Student is not verified");
-        }
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody @NotNull VerificationCode verificationCode) {
+        return verify(verificationCode);
     }
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
-    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody Student student) {
-        Map<String, Object> responseMap = new HashMap<>();
-
+    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody @NotNull Student student) {
         String email = student.getEmail();
         Student existingStudent = studentService.findByEmail(email);
+
         if (existingStudent == null) {
-            responseMap.put(MESSAGE, "Invalid email address");
-            return ResponseEntity.badRequest().body(responseMap);
+            return handleBadRequest("Invalid email address");
         }
+
         if (existingStudent.isEnabled()) {
-
-            boolean isValid = checkStudent(student);
-            if (!isValid) {
-                responseMap.put(MESSAGE, "Required fields are missing");
-                return ResponseEntity.badRequest().body(responseMap);
-            }
-
-            signUpStudent(student, existingStudent);
-            String token = generateToken(student);
-
-            responseMap.put("email", student.getEmail());
-            responseMap.put(MESSAGE, "Account created successfully");
-            log.info("Account registered with email - " + student.getEmail());
-            responseMap.put("token", token);
+            return registerStudent(student, existingStudent);
         } else {
-            responseMap.put(MESSAGE, "Student not verified");
-            return ResponseEntity.badRequest().body(responseMap);
+            return handleBadRequest("Student not verified");
         }
-        return ResponseEntity.ok(responseMap);
-    }
-
-    private void signUpStudent(Student student, Student existingStudent) {
-        existingStudent.setFirstName(student.getFirstName());
-        existingStudent.setLastName(student.getLastName());
-
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(student.getPassword());
-        existingStudent.setPassword(encodedPassword);
-        existingStudent.setHasNewMessages(false);
-        existingStudent.setCity(student.getCity());
-        existingStudent.setMajor(student.getMajor());
-        existingStudent.setCourse(student.getCourse());
-        byte[] imageBytes = student.getPhotoBytes();
-        existingStudent.setPhotoBytes(imageBytes);
-        existingStudent.setRegistrationDate(LocalDateTime.now());
-
-        studentService.save(existingStudent);
-    }
-
-    private boolean checkStudent(Student student) {
-        return student.getFirstName() != null &&
-                student.getLastName() != null &&
-                student.getPassword() != null &&
-                student.getCity() != null &&
-                student.getMajor() != null;
     }
 
     @Operation(summary = "Logout from account")
@@ -340,5 +261,100 @@ public class AuthController {
         responseMap.put(MESSAGE, "Logged out successfully");
 
         return ResponseEntity.ok(responseMap);
+    }
+
+    private ResponseEntity<Map<String, Object>> verify(VerificationCode verificationCode) {
+        Map<String, Object> response = new HashMap<>();
+        String email = verificationCode.getEmail();
+        int code = verificationCode.getCode();
+        Student student = studentService.findByEmail(email);
+
+        if (student == null) {
+            return handleBadRequest("Student with provided email does not exist");
+        }
+
+        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.getId());
+        if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
+            return handleBadRequest("Invalid verification code");
+        }
+
+        LocalDateTime expirationTime = verifCode.get().getExpirationDate();
+        LocalDateTime currentTime = LocalDateTime.now();
+        if (currentTime.isAfter(expirationTime)) {
+            return handleBadRequest("Verification code has expired");
+        }
+
+        student.setEnabled(true);
+        studentService.save(student);
+        response.put(MESSAGE, "User successfully verified");
+        log.info("User successfully verified with email - " + email);
+        return ResponseEntity.ok(response);
+    }
+
+    private ResponseEntity<Map<String, Object>> registerStudent(Student student, Student existingStudent) {
+        Map<String, Object> responseMap = new HashMap<>();
+
+        boolean isValid = checkStudent(student);
+        if (!isValid) {
+            return handleBadRequest("Required fields are missing");
+        }
+
+        signUpStudent(student, existingStudent);
+        String token = generateToken(student);
+
+        responseMap.put("email", student.getEmail());
+        responseMap.put(MESSAGE, "Account created successfully");
+        log.info("Account registered with email - " + student.getEmail());
+        responseMap.put("token", token);
+
+        return ResponseEntity.ok(responseMap);
+    }
+
+    private ResponseEntity<Map<String, Object>> handleBadRequest(String message) {
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put(MESSAGE, message);
+        return ResponseEntity.badRequest().body(responseMap);
+    }
+
+    private ResponseEntity<Map<String, Object>> handleUnauthorized(String message) {
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put(MESSAGE, message);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
+    }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void signUpStudent(Student student, Student existingStudent) {
+        existingStudent.setFirstName(student.getFirstName());
+        existingStudent.setLastName(student.getLastName());
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(student.getPassword());
+        existingStudent.setPassword(encodedPassword);
+        existingStudent.setHasNewMessages(false);
+        existingStudent.setCity(student.getCity());
+        existingStudent.setMajor(student.getMajor());
+        existingStudent.setCourse(student.getCourse());
+        byte[] imageBytes = student.getPhotoBytes();
+        existingStudent.setPhotoBytes(imageBytes);
+        existingStudent.setRegistrationDate(LocalDateTime.now());
+
+        studentService.save(existingStudent);
+    }
+
+    private boolean checkStudent(Student student) {
+        return student.getFirstName() != null &&
+                student.getLastName() != null &&
+                student.getPassword() != null &&
+                student.getCity() != null &&
+                student.getMajor() != null;
     }
 }

@@ -2,10 +2,12 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.Complaint;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,11 +17,12 @@ import java.util.Optional;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
+@Log4j2
+@Validated
 @RestController
 @RequestMapping("/api/v1/complaints")
 @AllArgsConstructor
 @CrossOrigin(maxAge = 3600, origins = "*")
-@Log4j2
 public class ComplaintController {
 
     private final ComplaintService complaintService;
@@ -39,11 +42,7 @@ public class ComplaintController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Complaint> saveComplaint(@RequestBody Complaint complaint) {
-        if (complaint == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
+    public ResponseEntity<Complaint> saveComplaint(@RequestBody @NotNull Complaint complaint) {
         Complaint savedComplaint = complaintService.saveComplaint(complaint);
         if (savedComplaint == null) {
             return ResponseEntity.internalServerError().build();
@@ -53,13 +52,8 @@ public class ComplaintController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping("/process")
-    public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody Complaint complaint) {
+    public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody @NotNull Complaint complaint) {
         Map<String, Object> response = new HashMap<>();
-
-        if (complaint == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         complaintService.processComplaints(complaint);
         response.put(MESSAGE, "Processed successfully");
         return ResponseEntity.ok(response);

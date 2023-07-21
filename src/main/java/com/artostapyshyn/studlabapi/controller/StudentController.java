@@ -4,10 +4,12 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +19,7 @@ import java.util.*;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/student")
@@ -27,37 +30,27 @@ public class StudentController {
 
     private final FileService fileService;
 
-    @Operation(summary = "Get personal information")
-    @GetMapping("/personal-info")
-    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
-        List<Object> response = new ArrayList<>();
+    @GetMapping(value = "/personal-info")
+    public ResponseEntity<Map<String, Object>> getPersonalInfo(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
         if (student.isPresent()) {
-            response.add(student);
+            response.put("student", student.get());
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @Operation(summary = "Find student by id")
-    @GetMapping("/find-by-id")
-    public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
-        Optional<Student> student = studentService.findById(id);
-
-        return student.map(value -> ResponseEntity.ok().body(value)).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @Operation(summary = "Get personal information")
-    @PostMapping("/profile")
-    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
-        List<Object> response = new ArrayList<>();
+    @PostMapping(value = "/profile")
+    public ResponseEntity<Map<String, Object>> getProfile(@RequestBody @NotNull Student student) {
+        Map<String, Object> response = new HashMap<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            response.add(existingStudent);
+            response.put("student", existingStudent);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
@@ -67,17 +60,26 @@ public class StudentController {
     @Operation(summary = "Get all students")
     @GetMapping("/all")
     public ResponseEntity<List<Map<String, String>>> getAllStudents() {
-        List<Map<String, String>> studentData = new ArrayList<>();
-        List<Student> students = studentService.findAll();
+        List<Map<String, String>> studentData = studentService.findAll().stream()
+                .map(student -> {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("firstName", student.getFirstName());
+                    data.put("lastName", student.getLastName());
+                    return data;
+                })
+                .toList();
 
-        for (Student student : students) {
-            Map<String, String> data = new HashMap<>();
-            data.put("firstName", student.getFirstName());
-            data.put("lastName", student.getLastName());
-            studentData.add(data);
-        }
         return ResponseEntity.ok(studentData);
     }
+
+    @Operation(summary = "Find student by id")
+    @GetMapping("/find-by-id")
+    public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
+        Optional<Student> student = studentService.findById(id);
+
+        return ResponseEntity.of(student);
+    }
+
 
     @Operation(summary = "Upload resume to personal account")
     @PostMapping("/resumes")
