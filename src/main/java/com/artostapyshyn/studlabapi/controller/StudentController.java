@@ -1,6 +1,10 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.entity.AlternateRegistrationStudent;
+import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
 import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
+import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,16 +32,21 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    private final FavouriteEventService favouriteEventService;
+
+    private final AlternateRegistrationStudentService alternateRegistrationStudentService;
+
     private final FileService fileService;
 
-    @GetMapping(value = "/personal-info")
-    public ResponseEntity<Map<String, Object>> getPersonalInfo(Authentication authentication) {
-        Map<String, Object> response = new HashMap<>();
+    @Operation(summary = "Get personal information")
+    @GetMapping("/personal-info")
+    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
+        List<Object> response = new ArrayList<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
         if (student.isPresent()) {
-            response.put("student", student.get());
+            response.add(student);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
@@ -50,7 +59,9 @@ public class StudentController {
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
+            List<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentId(existingStudent.getId());
             response.put("student", existingStudent);
+            response.put("events", favouriteEvent);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
@@ -80,6 +91,12 @@ public class StudentController {
         return ResponseEntity.of(student);
     }
 
+    @Operation(summary = "Find alternate registration student by code")
+    @GetMapping("/alternate/find-by-id")
+    public ResponseEntity<AlternateRegistrationStudent> getAlternateStudentByCode(@RequestParam("code") String code) {
+        Optional<AlternateRegistrationStudent> student = alternateRegistrationStudentService.findByCode(code);
+        return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @Operation(summary = "Upload resume to personal account")
     @PostMapping("/resumes")

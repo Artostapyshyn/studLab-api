@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,7 +52,11 @@ public class AuthController {
 
     private final UserDetailsServiceImpl userDetailsService;
 
+    private final AlternateRegistrationStudentService alternateRegistrationStudentService;
+
     private final JwtTokenUtil jwtTokenUtil;
+
+    private final ModelMapper modelMapper;
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
@@ -231,6 +236,25 @@ public class AuthController {
             return registerStudent(student, existingStudent);
         } else {
             return handleBadRequest("Student not verified");
+        }
+    }
+
+    @Operation(summary = "Verify alternative registration student")
+    @PostMapping("/alternate/verify")
+    public ResponseEntity<Map<String, Object>> registerAlternate(@RequestBody AlternateRegistrationStudent alternateStudent) {
+        String code = alternateStudent.getCode();
+        Map<String, Object> response = new HashMap<>();
+
+        if (alternateRegistrationStudentService.isValidCode(code)) {
+            Student student = modelMapper.map(alternateStudent, Student.class);
+            student.setRole(Role.ROLE_STUDENT);
+            studentService.save(student);
+
+            response.put("message", "Student validated successfully");
+            return ResponseEntity.ok().body(response);
+        } else {
+            response.put("message", "Invalid registration code.");
+            return ResponseEntity.badRequest().body(response);
         }
     }
 
