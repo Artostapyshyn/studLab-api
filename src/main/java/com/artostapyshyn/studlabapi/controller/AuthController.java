@@ -11,7 +11,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -60,7 +59,7 @@ public class AuthController {
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody @NotNull Student student) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student) {
         Map<String, Object> responseMap = new HashMap<>();
         try {
             Student foundStudent = studentService.findByEmail(student.getEmail());
@@ -114,7 +113,7 @@ public class AuthController {
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
-    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody @NotNull Student student) {
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
 
@@ -133,7 +132,9 @@ public class AuthController {
                 return handleResendCodeError(response, "Verification code has already been sent.");
             }
 
-            submitVerificationCode(email);
+            int verificationCode = verificationCodeService.generateCode(email).getCode();
+            emailService.sendVerificationCode(email, verificationCode);
+            submitVerificationCode(email, verificationCode);
 
             response.put(MESSAGE, "Email sent successfully");
             log.info("Verification code sent to - " + email);
@@ -144,19 +145,9 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    private void submitVerificationCode(String email) {
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
-
-        VerificationCode verification = new VerificationCode();
-        verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(1));
-        verification.setEmail(email);
-    }
-
     @Operation(summary = "Check student status")
     @PostMapping("/check-status")
-    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody @NotNull Student student) {
+    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
         Student checkedStudent = studentService.findByEmail(email);
@@ -176,7 +167,7 @@ public class AuthController {
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody @NotNull Student student) {
+    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
         String email = student.getEmail();
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
@@ -192,7 +183,9 @@ public class AuthController {
             }
         }
 
-        submitVerificationCode(email);
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        emailService.sendVerificationCode(email, verificationCode);
+        submitVerificationCode(email, verificationCode);
         response.put(MESSAGE, "Verification code sent successfully");
         return ResponseEntity.ok(response);
     }
@@ -202,29 +195,15 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    public boolean isValidEmailDomain(String email, Student student) {
-        String domain;
-        domain = Arrays.stream(new String[]{email.split("@")[1]})
-                .findFirst()
-                .orElse("");
-
-        University university = universityService.findByDomain(domain);
-        if (university != null) {
-            student.setUniversity(university);
-            return true;
-        }
-        return false;
-    }
-
     @Operation(summary = "Verify student email")
     @PostMapping("/verify")
-    public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody @NotNull VerificationCode verificationCode) {
+    public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody VerificationCode verificationCode) {
         return verify(verificationCode);
     }
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
-    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody @NotNull Student student) {
+    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody Student student) {
         String email = student.getEmail();
         Student existingStudent = studentService.findByEmail(email);
 
@@ -258,6 +237,58 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "Forgot password")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> resetUserPassword(@RequestBody Student resetStudent) {
+        Map<String, Object> response = new HashMap<>();
+        String email = resetStudent.getEmail();
+
+        Student student = studentService.findByEmail(email);
+        if (student == null) {
+            response.put(MESSAGE, "User is not registered registered with this email");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        studentService.save(student);
+
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
+        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
+            return handleResendCodeError(response, "Verification code has already been sent.");
+        }
+
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        emailService.sendResetPasswordCode(email, verificationCode);
+        submitVerificationCode(email, verificationCode);
+
+        response.put(MESSAGE, "Email sent successfully");
+        log.info("Verification code sent to - " + email);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Verify student email to reset password")
+    @PostMapping("/reset-password/verify")
+    public ResponseEntity<Map<String, Object>> verifyResetPasswordCode(@RequestBody VerificationCode verificationCode) {
+        return verify(verificationCode);
+    }
+
+    @Operation(summary = "Reset password with the new password")
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Student resetStudent) {
+        Map<String, Object> response = new HashMap<>();
+        String email = resetStudent.getEmail();
+
+        Student student = studentService.findByEmail(email);
+        if (student == null) {
+            response.put(MESSAGE, "User is not registered with this email");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        studentService.updateStudent(student, resetStudent);
+
+        response.put(MESSAGE, "Password has been successfully changed");
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response) {
@@ -287,22 +318,43 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    private ResponseEntity<Map<String, Object>> verify(VerificationCode verificationCode) {
+    private void submitVerificationCode(String email, int verificationCode) {
+        VerificationCode verification = new VerificationCode();
+        verification.setCode(verificationCode);
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(3));
+        verification.setEmail(email);
+    }
+
+    public boolean isValidEmailDomain(String email, Student student) {
+        String domain;
+        domain = Arrays.stream(new String[]{email.split("@")[1]})
+                .findFirst()
+                .orElse("");
+
+        University university = universityService.findByDomain(domain);
+        if (university != null) {
+            student.setUniversity(university);
+            return true;
+        }
+        return false;
+    }
+
+    private ResponseEntity<Map<String, Object>> verify(VerificationCode code) {
         Map<String, Object> response = new HashMap<>();
-        String email = verificationCode.getEmail();
-        int code = verificationCode.getCode();
+        String email = code.getEmail();
+        int verificationCode = code.getCode();
         Student student = studentService.findByEmail(email);
 
         if (student == null) {
             return handleBadRequest("Student with provided email does not exist");
         }
 
-        Optional<VerificationCode> verifCode = verificationCodeService.findByStudentId(student.getId());
-        if (verifCode.isEmpty() || verifCode.get().getCode() != code) {
+        Optional<VerificationCode> verificationCodeOptional = verificationCodeService.findByStudentId(student.getId());
+        if (verificationCodeOptional.isEmpty() || verificationCodeOptional.get().getCode() != verificationCode) {
             return handleBadRequest("Invalid verification code");
         }
 
-        LocalDateTime expirationTime = verifCode.get().getExpirationDate();
+        LocalDateTime expirationTime = verificationCodeOptional.get().getExpirationDate();
         LocalDateTime currentTime = LocalDateTime.now();
         if (currentTime.isAfter(expirationTime)) {
             return handleBadRequest("Verification code has expired");

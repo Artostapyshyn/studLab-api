@@ -21,4 +21,14 @@ public class EmailServiceImpl implements EmailService {
         message.setText("Верифікаційни код: " + code);
         mailSender.send(message);
     }
+
+    @Override
+    public void sendResetPasswordCode(String toEmail, int code) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("studlabbot@gmail.com");
+        message.setTo(toEmail);
+        message.setSubject("Зміна паролю");
+        message.setText("Верифікаційни код: " + code);
+        mailSender.send(message);
+    }
 }

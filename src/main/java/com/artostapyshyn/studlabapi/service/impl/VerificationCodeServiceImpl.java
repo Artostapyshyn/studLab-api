@@ -30,7 +30,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         verificationCode.setCode(verificationCodeValue);
         verificationCode.setStudentId(student.getId());
         verificationCode.setEmail(email);
-        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(1));
+        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(3));
         verificationCode.setLastSentTime(LocalDateTime.now());
         return verificationCodeRepository.save(verificationCode);
     }
