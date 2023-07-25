@@ -2,12 +2,15 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Reply;
+import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.CommentRepository;
 import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.MessageService;
+import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,8 @@ public class CommentServiceImpl implements CommentService {
 
     private final MessageService messageService;
 
+    private final StudentService studentService;
+
     @Transactional
     @Override
     public Comment save(Comment comment) {
@@ -31,22 +36,25 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void addReplyToComment(Reply reply, Long parentId) {
+    public void addReplyToComment(Reply reply, Long parentId, Authentication authentication) {
         Comment parentComment = commentRepository.findById(parentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Parent comment not found"));
 
-        List<Reply> replies = parentComment.getReplies();
-        replies.add(reply);
+        Long id = studentService.getAuthStudentId(authentication);
+        Optional<Student> student = studentService.findById(id);
+        if(student.isPresent()) {
+            List<Reply> replies = parentComment.getReplies();
+            replies.add(reply);
 
-        reply.setComment(parentComment);
-        reply.setStudent(parentComment.getStudent());
+            reply.setComment(parentComment);
+            reply.setStudent(student.get());
+            commentRepository.save(parentComment);
+            replyRepository.save(reply);
 
-        commentRepository.save(parentComment);
-        replyRepository.save(reply);
-
-        Long studentId = parentComment.getStudent().getId();
-        messageService.addMessageToStudent(studentId);
-        messageService.updateNewMessageStatus(studentId, true);
+            Long studentId = parentComment.getStudent().getId();
+            messageService.addMessageToStudent(studentId);
+            messageService.updateNewMessageStatus(studentId, true);
+        }
     }
 
     @Override

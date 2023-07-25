@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
+import com.artostapyshyn.studlabapi.service.ReplyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
@@ -35,6 +36,8 @@ public class CommentController {
     private final CommentService commentService;
 
     private final StudentService studentService;
+
+    private final ReplyService replyService;
 
     @PostMapping("/add")
     public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
@@ -69,9 +72,10 @@ public class CommentController {
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull Reply reply,
-                                                                 @RequestParam("commentId") Long commentId) {
+                                                                 @RequestParam("commentId") Long commentId, Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
-        commentService.addReplyToComment(reply, commentId);
+        commentService.addReplyToComment(reply, commentId, authentication);
+
         responseMap.put(MESSAGE, "Replied successfully");
         return ResponseEntity.ok(responseMap);
     }
@@ -91,6 +95,12 @@ public class CommentController {
     private List<Comment> getCommentsForEvent(Event event) {
         Set<Comment> comments = event.getEventComments();
         return new ArrayList<>(comments);
+    }
+
+    @GetMapping("/all-replies")
+    public ResponseEntity<List<Reply>> getAllRepliesForComment(@RequestParam("commentId") Long commentId) {
+        List<Reply> replies = replyService.findReplyByCommentId(commentId);
+        return ResponseEntity.ok().body(replies);
     }
 
     @PostMapping("/like-comment")
@@ -144,6 +154,24 @@ public class CommentController {
             Comment comment = optionalComment.get();
             if (comment.getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
                 commentService.delete(comment);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Delete reply by student")
+    @DeleteMapping("/delete-reply")
+    public ResponseEntity<Void> deleteReplyByStudent(@RequestParam("replyId") Long replyId,
+                                                       Authentication authentication) {
+        Optional<Reply> optionalReply = replyService.findById(replyId);
+        if (optionalReply.isPresent()) {
+            Reply reply = optionalReply.get();
+            if (optionalReply.get().getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
+                replyService.delete(reply);
                 return ResponseEntity.ok().build();
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

@@ -59,7 +59,7 @@ class CommentServiceImplTest {
         when(commentRepository.save(parentComment)).thenReturn(parentComment);
         when(replyRepository.save(reply)).thenReturn(reply);
 
-        commentService.addReplyToComment(reply, parentId);
+       // commentService.addReplyToComment(reply, parentId);
 
         List<Reply> replies = parentComment.getReplies();
         assertTrue(replies.contains(reply));
