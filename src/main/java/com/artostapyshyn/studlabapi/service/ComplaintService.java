@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.ComplaintDto;
 import com.artostapyshyn.studlabapi.entity.Complaint;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public interface ComplaintService {
     List<Complaint> findClosedComplaints();
 
     Complaint saveComplaint(Complaint complaint);
+
+    Complaint convertDtoToComplaint(ComplaintDto complaintDto);
 
     void delete(Complaint complaint);
 }

@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
+import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -72,11 +73,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public void updateEvent(Event existingEvent, Event updatedEvent) {
-        Optional.ofNullable(updatedEvent.getVenue()).ifPresent(existingEvent::setVenue);
-        Optional.ofNullable(updatedEvent.getDate()).ifPresent(existingEvent::setDate);
-        Optional.ofNullable(updatedEvent.getDescription()).ifPresent(existingEvent::setDescription);
-        Optional.ofNullable(updatedEvent.getNameOfEvent()).ifPresent(existingEvent::setNameOfEvent);
-        Optional.ofNullable(updatedEvent.getEventPhoto()).ifPresent(existingEvent::setEventPhoto);
-        Optional.ofNullable(updatedEvent.getEventType()).ifPresent(existingEvent::setEventType);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(updatedEvent, existingEvent);
     }
 }

@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
@@ -11,7 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Month;
+import java.time.format.TextStyle;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -55,6 +59,15 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
+    public void updatePassword(Student student, String newPassword) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        student.setPassword(encodedPassword);
+        studentRepository.save(student);
+    }
+
+    @Override
     public int countByEnabled(boolean enabled) {
         return studentRepository.countByEnabled(true);
     }
@@ -64,26 +77,16 @@ public class StudentServiceImpl implements StudentService {
     public Map<String, Integer> getRegistrationData() {
         List<Student> students = studentRepository.findAll();
 
-        int[] monthlyRegistrations = new int[12];
+        Map<String, Integer> registrationData = students.stream()
+                .collect(Collectors.groupingBy(
+                        student -> student.getRegistrationDate().getMonth().getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()),
+                        Collectors.summingInt(student -> 1)
+                ));
 
-        for (Student student : students) {
-            int month = student.getRegistrationDate().getMonthValue();
-            monthlyRegistrations[month - 1]++;
+        for (Month month : Month.values()) {
+            String monthName = month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault());
+            registrationData.putIfAbsent(monthName, 0);
         }
-
-        Map<String, Integer> registrationData = new LinkedHashMap<>();
-        registrationData.put("січень", monthlyRegistrations[0]);
-        registrationData.put("лютий", monthlyRegistrations[1]);
-        registrationData.put("березень", monthlyRegistrations[2]);
-        registrationData.put("квітень", monthlyRegistrations[3]);
-        registrationData.put("травень", monthlyRegistrations[4]);
-        registrationData.put("червень", monthlyRegistrations[5]);
-        registrationData.put("липень", monthlyRegistrations[6]);
-        registrationData.put("серпень", monthlyRegistrations[7]);
-        registrationData.put("вересень", monthlyRegistrations[8]);
-        registrationData.put("жовтень", monthlyRegistrations[9]);
-        registrationData.put("листопад", monthlyRegistrations[10]);
-        registrationData.put("грудень", monthlyRegistrations[11]);
 
         return registrationData;
     }
@@ -98,18 +101,14 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     @Override
     public void updateStudent(Student existingStudent, Student updatedStudent) {
-        Optional.ofNullable(updatedStudent.getFirstName()).ifPresent(existingStudent::setFirstName);
-        Optional.ofNullable(updatedStudent.getLastName()).ifPresent(existingStudent::setLastName);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+        modelMapper.map(updatedStudent, existingStudent);
 
         if (updatedStudent.getPassword() != null) {
             String hashedPassword = new BCryptPasswordEncoder().encode(updatedStudent.getPassword());
             existingStudent.setPassword(hashedPassword);
         }
-
-        Optional.ofNullable(updatedStudent.getBirthDate()).ifPresent(existingStudent::setBirthDate);
-        Optional.ofNullable(updatedStudent.getCity()).ifPresent(existingStudent::setCity);
-        Optional.ofNullable(updatedStudent.getMajor()).ifPresent(existingStudent::setMajor);
-        Optional.ofNullable(updatedStudent.getCourse()).ifPresent(existingStudent::setCourse);
-        Optional.ofNullable(updatedStudent.getPhotoBytes()).ifPresent(existingStudent::setPhotoBytes);
     }
 }

@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.entity.Course;
 import com.artostapyshyn.studlabapi.repository.CourseRepository;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,9 +49,8 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     @Override
     public void updateCourse(Course existingCourse, Course updatedCourse) {
-        Optional.ofNullable(updatedCourse.getCourseLink()).ifPresent(existingCourse::setCourseLink);
-        Optional.ofNullable(updatedCourse.getCourseDescription()).ifPresent(existingCourse::setCourseDescription);
-        Optional.ofNullable(updatedCourse.getCourseName()).ifPresent(existingCourse::setCourseName);
-        Optional.ofNullable(updatedCourse.getCoursePhoto()).ifPresent(existingCourse::setCoursePhoto);
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(updatedCourse, existingCourse);
     }
 }

@@ -40,17 +40,11 @@ public class StudentController {
 
     @Operation(summary = "Get personal information")
     @GetMapping("/personal-info")
-    public ResponseEntity<List<Object>> getPersonalInfo(Authentication authentication) {
-        List<Object> response = new ArrayList<>();
+    public ResponseEntity<Student> getPersonalInfo(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
-        if (student.isPresent()) {
-            response.add(student);
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(value = "/profile")

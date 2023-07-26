@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.ComplaintDto;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.ComplaintRepository;
@@ -7,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final CommentService commentService;
 
     private final StudentService studentService;
+
+    private final ModelMapper modelMapper;
 
     @Override
     public void processComplaints(Complaint complaint) {
@@ -71,6 +75,11 @@ public class ComplaintServiceImpl implements ComplaintService {
             savedComplaint.setStudentId(student.getId());
         }
         return complaintRepository.save(savedComplaint);
+    }
+
+    @Override
+    public Complaint convertDtoToComplaint(ComplaintDto complaintDto) {
+        return modelMapper.map(complaintDto, Complaint.class);
     }
 
     @Transactional

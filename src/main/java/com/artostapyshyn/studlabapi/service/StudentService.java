@@ -27,4 +27,6 @@ public interface StudentService {
     Long getAuthStudentId(Authentication authentication);
 
     void updateStudent(Student existingStudent, Student updatedStudent);
+
+    void updatePassword(Student student, String password);
 }

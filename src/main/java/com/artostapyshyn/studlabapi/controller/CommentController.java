@@ -1,5 +1,7 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.CommentDto;
+import com.artostapyshyn.studlabapi.dto.ReplyDto;
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Reply;
@@ -41,7 +43,7 @@ public class CommentController {
 
     @PostMapping("/add")
     public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
-                                                          @RequestBody @NotNull Comment comment,
+                                                          @RequestBody @NotNull CommentDto commentDto,
                                                           Authentication authentication) {
         List<Object> response = new ArrayList<>();
         Optional<Event> event = eventService.findEventById(eventId);
@@ -49,7 +51,7 @@ public class CommentController {
             Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
             if (optionalStudent.isPresent()) {
                 Student student = optionalStudent.get();
-                Comment savedComment = addCommentToEvent(event.get(), comment, student);
+                Comment savedComment = commentService.addCommentToEvent(event.get(), commentDto, student);
                 response.add(savedComment);
                 return ResponseEntity.ok().body(response);
             } else {
@@ -62,22 +64,19 @@ public class CommentController {
         }
     }
 
-    private Comment addCommentToEvent(Event event, Comment comment, Student student) {
-        comment.setStudent(student);
-        event.addComment(comment);
-        commentService.save(comment);
-        return comment;
-    }
-
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
-    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull Reply reply,
+    public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull ReplyDto replyDto,
                                                                  @RequestParam("commentId") Long commentId, Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
-        commentService.addReplyToComment(reply, commentId, authentication);
-
-        responseMap.put(MESSAGE, "Replied successfully");
-        return ResponseEntity.ok(responseMap);
+        try {
+            replyService.addReplyToComment(replyDto, commentId, authentication);
+            responseMap.put(MESSAGE, "Replied successfully");
+            return ResponseEntity.ok(responseMap);
+        } catch (ResourceNotFoundException e) {
+            responseMap.put(MESSAGE, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMap);
+        }
     }
 
     @GetMapping("/all")

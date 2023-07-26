@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.ComplaintDto;
 import com.artostapyshyn.studlabapi.entity.Complaint;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import jakarta.validation.constraints.NotNull;
@@ -52,9 +53,11 @@ public class ComplaintController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping("/process")
-    public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody @NotNull Complaint complaint) {
+    public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody @NotNull ComplaintDto complaintDto) {
         Map<String, Object> response = new HashMap<>();
+        Complaint complaint = complaintService.convertDtoToComplaint(complaintDto);
         complaintService.processComplaints(complaint);
+
         response.put(MESSAGE, "Processed successfully");
         return ResponseEntity.ok(response);
     }

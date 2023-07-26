@@ -1,8 +1,9 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.CommentDto;
 import com.artostapyshyn.studlabapi.entity.Comment;
-import com.artostapyshyn.studlabapi.entity.Reply;
-import org.springframework.security.core.Authentication;
+import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.entity.Student;
 
 import java.util.Optional;
 
@@ -10,7 +11,7 @@ public interface CommentService {
 
     Comment save(Comment comment);
 
-    void addReplyToComment(Reply reply, Long parentId, Authentication authentication);
+    Comment addCommentToEvent(Event event, CommentDto commentDto, Student student);
 
     Optional<Comment> findById(Long id);
 

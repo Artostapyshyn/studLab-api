@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.*;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.*;
@@ -59,19 +60,20 @@ public class AuthController {
 
     @Operation(summary = "Login to student system")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginDto loginDto) {
         Map<String, Object> responseMap = new HashMap<>();
         try {
-            Student foundStudent = studentService.findByEmail(student.getEmail());
+            Student foundStudent = studentService.findByEmail(loginDto.getEmail());
             if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
                 return handleUnauthorized("User is blocked.");
             }
 
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(student.getEmail(), student.getPassword()));
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         } catch (BadCredentialsException e) {
             return handleUnauthorized("Invalid Credentials");
         }
-        String token = generateToken(student);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
+        String token = jwtTokenUtil.generateToken(userDetails, loginDto.getId());
         log.info(token);
 
         responseMap.put(MESSAGE, "Logged In");
@@ -79,10 +81,6 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    private String generateToken(Student student) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(student.getEmail());
-        return jwtTokenUtil.generateToken(userDetails, student.getId());
-    }
 
     @Operation(summary = "Check user login status")
     @GetMapping("/login-status")
@@ -113,14 +111,16 @@ public class AuthController {
 
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
-    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody VerificationDto verificationDto) {
         Map<String, Object> response = new HashMap<>();
-        String email = student.getEmail();
+        String email = verificationDto.getEmail();
 
         if (studentService.findByEmail(email) != null) {
             response.put(MESSAGE, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
+
+        Student student = modelMapper.map(verificationDto, Student.class);
 
         if (isValidEmailDomain(email, student)) {
             student.setEnabled(false);
@@ -145,31 +145,10 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @Operation(summary = "Check student status")
-    @PostMapping("/check-status")
-    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody Student student) {
-        Map<String, Object> response = new HashMap<>();
-        String email = student.getEmail();
-        Student checkedStudent = studentService.findByEmail(email);
-
-        if (checkedStudent == null) {
-            response.put(MESSAGE, "Student with provided email does not exist");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        if (checkedStudent.isEnabled() && student.getPassword() != null) {
-            response.put(MESSAGE, "Student is verified and signed-in");
-            log.info("Checking verification status for student - " + email);
-        } else {
-            response.put(MESSAGE, "Student is not verified");
-        }
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/resend-code")
-    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody Student student) {
+    public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody ResendCodeDto resendCodeDto) {
         Map<String, Object> response = new HashMap<>();
-        String email = student.getEmail();
+        String email = resendCodeDto.getEmail();
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
 
         if (existingCode != null) {
@@ -190,6 +169,27 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Check student status")
+    @PostMapping("/check-status")
+    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody CheckStatusDto checkStatusDto) {
+        Map<String, Object> response = new HashMap<>();
+        String email = checkStatusDto.getEmail();
+        Student checkedStudent = studentService.findByEmail(email);
+
+        if (checkedStudent == null) {
+            response.put(MESSAGE, "Student with provided email does not exist");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        if (checkedStudent.isEnabled() && checkStatusDto.getPassword() != null) {
+            response.put(MESSAGE, "Student is verified and signed-in");
+            log.info("Checking verification status for student - " + email);
+        } else {
+            response.put(MESSAGE, "Student is not verified");
+        }
+        return ResponseEntity.ok(response);
+    }
+
     private ResponseEntity<Map<String, Object>> handleResendCodeError(Map<String, Object> response, String errorMessage) {
         response.put("error", errorMessage);
         return ResponseEntity.badRequest().body(response);
@@ -203,8 +203,8 @@ public class AuthController {
 
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
-    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody Student student) {
-        String email = student.getEmail();
+    public ResponseEntity<Map<String, Object>> saveUser(@RequestBody SignUpDto signUpDto) {
+        String email = signUpDto.getEmail();
         Student existingStudent = studentService.findByEmail(email);
 
         if (existingStudent == null) {
@@ -212,7 +212,7 @@ public class AuthController {
         }
 
         if (existingStudent.isEnabled()) {
-            return registerStudent(student, existingStudent);
+            return registerStudent(signUpDto, existingStudent);
         } else {
             return handleBadRequest("Student not verified");
         }
@@ -237,19 +237,35 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Forgot password")
-    @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, Object>> resetUserPassword(@RequestBody Student resetStudent) {
+    @Operation(summary = "Reset password with the new password")
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
         Map<String, Object> response = new HashMap<>();
-        String email = resetStudent.getEmail();
+        String email = resetPasswordDto.getEmail();
 
         Student student = studentService.findByEmail(email);
         if (student == null) {
-            response.put(MESSAGE, "User is not registered registered with this email");
+            response.put(MESSAGE, "User is not registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
 
-        studentService.save(student);
+        studentService.updatePassword(student, resetPasswordDto.getPassword());
+
+        response.put(MESSAGE, "Password has been successfully changed");
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Forgot password")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> resetUserPassword(@RequestBody ForgotPasswordDto forgotPasswordDto) {
+        Map<String, Object> response = new HashMap<>();
+        String email = forgotPasswordDto.getEmail();
+
+        Student student = studentService.findByEmail(email);
+        if (student == null) {
+            response.put(MESSAGE, "User is not registered with this email");
+            return ResponseEntity.badRequest().body(response);
+        }
 
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
         if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
@@ -269,24 +285,6 @@ public class AuthController {
     @PostMapping("/reset-password/verify")
     public ResponseEntity<Map<String, Object>> verifyResetPasswordCode(@RequestBody VerificationCode verificationCode) {
         return verify(verificationCode);
-    }
-
-    @Operation(summary = "Reset password with the new password")
-    @PostMapping("/reset-password")
-    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Student resetStudent) {
-        Map<String, Object> response = new HashMap<>();
-        String email = resetStudent.getEmail();
-
-        Student student = studentService.findByEmail(email);
-        if (student == null) {
-            response.put(MESSAGE, "User is not registered with this email");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        studentService.updateStudent(student, resetStudent);
-
-        response.put(MESSAGE, "Password has been successfully changed");
-        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Logout from account")
@@ -367,20 +365,21 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    private ResponseEntity<Map<String, Object>> registerStudent(Student student, Student existingStudent) {
+    private ResponseEntity<Map<String, Object>> registerStudent(SignUpDto signUpDto, Student existingStudent) {
         Map<String, Object> responseMap = new HashMap<>();
 
-        boolean isValid = checkStudent(student);
+        boolean isValid = checkSignUpDto(signUpDto);
         if (!isValid) {
             return handleBadRequest("Required fields are missing");
         }
 
-        signUpStudent(student, existingStudent);
-        String token = generateToken(student);
+        signUpStudent(signUpDto, existingStudent);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
+        String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
 
-        responseMap.put("email", student.getEmail());
+        responseMap.put("email", signUpDto.getEmail());
         responseMap.put(MESSAGE, "Account created successfully");
-        log.info("Account registered with email - " + student.getEmail());
+        log.info("Account registered with email - " + signUpDto.getEmail());
         responseMap.put("token", token);
 
         return ResponseEntity.ok(responseMap);
@@ -408,29 +407,30 @@ public class AuthController {
         return null;
     }
 
-    private void signUpStudent(Student student, Student existingStudent) {
-        existingStudent.setFirstName(student.getFirstName());
-        existingStudent.setLastName(student.getLastName());
+    private void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
+        existingStudent.setFirstName(signUpDto.getFirstName());
+        existingStudent.setLastName(signUpDto.getLastName());
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(student.getPassword());
+        String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
         existingStudent.setPassword(encodedPassword);
         existingStudent.setHasNewMessages(false);
-        existingStudent.setCity(student.getCity());
-        existingStudent.setMajor(student.getMajor());
-        existingStudent.setCourse(student.getCourse());
-        byte[] imageBytes = student.getPhotoBytes();
+        existingStudent.setCity(signUpDto.getCity());
+        existingStudent.setMajor(signUpDto.getMajor());
+        existingStudent.setCourse(signUpDto.getCourse());
+        byte[] imageBytes = signUpDto.getPhotoBytes();
         existingStudent.setPhotoBytes(imageBytes);
         existingStudent.setRegistrationDate(LocalDateTime.now());
 
         studentService.save(existingStudent);
     }
 
-    private boolean checkStudent(Student student) {
-        return student.getFirstName() != null &&
-                student.getLastName() != null &&
-                student.getPassword() != null &&
-                student.getCity() != null &&
-                student.getMajor() != null;
+
+    private boolean checkSignUpDto(SignUpDto signUpDto) {
+        return signUpDto.getFirstName() != null &&
+                signUpDto.getLastName() != null &&
+                signUpDto.getPassword() != null &&
+                signUpDto.getCity() != null &&
+                signUpDto.getMajor() != null;
     }
 }
