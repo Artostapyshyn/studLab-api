@@ -74,10 +74,14 @@ public class CommentController {
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull Reply reply,
                                                                  @RequestParam("commentId") Long commentId, Authentication authentication) {
         Map<String, Object> responseMap = new HashMap<>();
-        commentService.addReplyToComment(reply, commentId, authentication);
-
-        responseMap.put(MESSAGE, "Replied successfully");
-        return ResponseEntity.ok(responseMap);
+        try {
+            commentService.addReplyToComment(reply, commentId, authentication);
+            responseMap.put(MESSAGE, "Replied successfully");
+            return ResponseEntity.ok(responseMap);
+        } catch (ResourceNotFoundException e) {
+            responseMap.put(MESSAGE, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMap);
+        }
     }
 
     @GetMapping("/all")

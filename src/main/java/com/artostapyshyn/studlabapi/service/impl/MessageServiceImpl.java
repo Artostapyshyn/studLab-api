@@ -44,7 +44,7 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Message message = new Message();
-        message.setContent("Вам надійшла відповідь на ваш коментар.");
+        message.setContent("Вам надійшла відповідь на ваш коментар події ");
         message.setSentTime(LocalDateTime.now());
         message.setStudent(student);
 

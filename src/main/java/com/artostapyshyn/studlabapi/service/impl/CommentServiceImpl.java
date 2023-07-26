@@ -48,7 +48,6 @@ public class CommentServiceImpl implements CommentService {
 
             reply.setComment(parentComment);
             reply.setStudent(student.get());
-            commentRepository.save(parentComment);
             replyRepository.save(reply);
 
             Long studentId = parentComment.getStudent().getId();
