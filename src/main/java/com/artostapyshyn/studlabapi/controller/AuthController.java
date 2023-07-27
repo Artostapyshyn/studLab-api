@@ -145,6 +145,7 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @Operation(summary = "Resend verification code")
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody ResendCodeDto resendCodeDto) {
         Map<String, Object> response = new HashMap<>();
@@ -171,9 +172,9 @@ public class AuthController {
 
     @Operation(summary = "Check student status")
     @PostMapping("/check-status")
-    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody CheckStatusDto checkStatusDto) {
+    public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
-        String email = checkStatusDto.getEmail();
+        String email = student.getEmail();
         Student checkedStudent = studentService.findByEmail(email);
 
         if (checkedStudent == null) {
@@ -181,7 +182,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        if (checkedStudent.isEnabled() && checkStatusDto.getPassword() != null) {
+        if (checkedStudent.isEnabled() && student.getPassword() != null) {
             response.put(MESSAGE, "Student is verified and signed-in");
             log.info("Checking verification status for student - " + email);
         } else {
@@ -295,12 +296,11 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                String cookieValue = cookie.getValue();
+                cookie.getValue();
                 cookie.setValue("");
                 cookie.setPath("/");
                 cookie.setMaxAge(0);
                 response.addCookie(cookie);
-                break;
             }
         }
         try {

@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.service.EventService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.UniversityService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public class StatisticController {
 
     private final EventService eventService;
 
+    @Operation(summary = "Get all registered students number")
     @GetMapping("/registered-amount")
     public ResponseEntity<Map<String, Object>> getTotalEnabledUsers() {
         Map<String, Object> response = new HashMap<>();
@@ -37,6 +39,7 @@ public class StatisticController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get registration statistic")
     @GetMapping("/registration-data")
     public ResponseEntity<Map<String, Object>> getRegistrationData() {
         try {
@@ -48,6 +51,7 @@ public class StatisticController {
         }
     }
 
+    @Operation(summary = "Get total universities")
     @GetMapping("/universities")
     public ResponseEntity<Map<String, Object>> getTotalUniversities() {
         Map<String, Object> response = new HashMap<>();
@@ -56,6 +60,7 @@ public class StatisticController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Get total amount of created events")
     @GetMapping("/created-events")
     public ResponseEntity<Map<String, Object>> getTotalCreatedEvents() {
         Map<String, Object> response = new HashMap<>();

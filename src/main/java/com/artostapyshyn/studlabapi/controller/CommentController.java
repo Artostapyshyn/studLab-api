@@ -41,6 +41,7 @@ public class CommentController {
 
     private final ReplyService replyService;
 
+    @Operation(summary = "Add comment to an existing event")
     @PostMapping("/add")
     public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
                                                           @RequestBody @NotNull CommentDto commentDto,
@@ -79,6 +80,7 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Get all event comments")
     @GetMapping("/all")
     public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
@@ -96,18 +98,21 @@ public class CommentController {
         return new ArrayList<>(comments);
     }
 
+    @Operation(summary = "Get all replies")
     @GetMapping("/all-replies")
     public ResponseEntity<List<Reply>> getAllRepliesForComment(@RequestParam("commentId") Long commentId) {
         List<Reply> replies = replyService.findReplyByCommentId(commentId);
         return ResponseEntity.ok().body(replies);
     }
 
+    @Operation(summary = "Like comment")
     @PostMapping("/like-comment")
     public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId,
                                                            Authentication authentication) {
         return handleLikeUnlikeComment(commentId, authentication, true);
     }
 
+    @Operation(summary = "Unlike comment")
     @PostMapping("/unlike-comment")
     public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId,
                                                              Authentication authentication) {
