@@ -21,6 +21,8 @@ public class FileServiceImpl implements FileService {
 
     private final StudentService studentService;
 
+    private final static String NOT_FOUND = "Student not found";
+
     @Override
     public ResponseEntity<Map<String, Object>> addDocument(Long studentId, MultipartFile file, Set<String> documents,
                                                            Set<String> documentFilenames, String documentType) throws IOException {
@@ -48,13 +50,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public ResponseEntity<Map<String, Object>> addResume(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return addDocument(studentId, file, student.getResumes(), student.getResumeFilenames(), "Resume");
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> addCertificate(Long studentId, MultipartFile file) throws IOException {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return addDocument(studentId, file, student.getCertificates(), student.getCertificatesFilenames(), "Certificate");
     }
 
@@ -77,7 +79,7 @@ public class FileServiceImpl implements FileService {
         }
 
         if (removed) {
-            Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException("Student not found"));
+            Student student = studentService.findById(studentId).orElseThrow(() -> new NotFoundException(NOT_FOUND));
             if (documentType.equals("resume")) {
                 student.setResumes(documents);
                 student.setResumeFilenames(documentFilenames);
@@ -96,13 +98,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public ResponseEntity<Map<String, Object>> deleteResume(Long studentId, String fileName) {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return deleteDocument(studentId, fileName, student.getResumes(), student.getResumeFilenames(), "resume");
     }
 
     @Override
     public ResponseEntity<Map<String, Object>> deleteCertificate(Long studentId, String fileName) {
-        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return deleteDocument(studentId, fileName, student.getCertificates(), student.getCertificatesFilenames(), "certificate");
     }
 }

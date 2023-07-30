@@ -55,6 +55,7 @@ public class CourseController {
             log.info("New event added with id - " + savedCourse.getId());
             return ResponseEntity.ok(savedCourse);
         } catch (Exception e) {
+            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

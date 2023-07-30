@@ -44,7 +44,7 @@ class EmailServiceImplTest {
         String expectedMessageText = "Верифікаційний код: " + code;
         ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
 
-        verify(emailService, times(1)).sendVerificationCode(eq(student.getEmail()), eq(code));
+        verify(emailService, times(1)).sendVerificationCode(student.getEmail(), code);
         verify(mailSender, times(1)).send(messageCaptor.capture());
 
         SimpleMailMessage sentMessage = messageCaptor.getValue();
