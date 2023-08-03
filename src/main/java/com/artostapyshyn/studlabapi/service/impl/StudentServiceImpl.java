@@ -1,8 +1,10 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.SignUpDto;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
+import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
@@ -12,16 +14,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Month;
-import java.time.format.TextStyle;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+
+    private final StudentStatisticsService studentStatisticsService;
 
     @Override
     @Cacheable("studentsById")
@@ -68,30 +70,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public int countByEnabled(boolean enabled) {
-        return studentRepository.countByEnabled(true);
-    }
-
-    @Override
-    @Cacheable("registrationData")
-    public Map<String, Integer> getRegistrationData() {
-        List<Student> students = studentRepository.findAll();
-
-        Map<String, Integer> registrationData = students.stream()
-                .collect(Collectors.groupingBy(
-                        student -> student.getRegistrationDate().getMonth().getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()),
-                        Collectors.summingInt(student -> 1)
-                ));
-
-        for (Month month : Month.values()) {
-            String monthName = month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault());
-            registrationData.putIfAbsent(monthName, 0);
-        }
-
-        return registrationData;
-    }
-
-    @Override
     public Long getAuthStudentId(Authentication authentication) {
         String studentEmail = authentication.getName();
         Student student = studentRepository.findByEmail(studentEmail);
@@ -110,5 +88,24 @@ public class StudentServiceImpl implements StudentService {
             String hashedPassword = new BCryptPasswordEncoder().encode(updatedStudent.getPassword());
             existingStudent.setPassword(hashedPassword);
         }
+    }
+
+    @Override
+    public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
+        existingStudent.setFirstName(signUpDto.getFirstName());
+        existingStudent.setLastName(signUpDto.getLastName());
+        existingStudent.setHasNewMessages(false);
+        existingStudent.setCity(signUpDto.getCity());
+        existingStudent.setMajor(signUpDto.getMajor());
+        existingStudent.setCourse(signUpDto.getCourse());
+        existingStudent.setPhotoBytes(signUpDto.getPhotoBytes());
+        existingStudent.setRegistrationDate(LocalDateTime.now());
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
+        existingStudent.setPassword(encodedPassword);
+
+        studentRepository.save(existingStudent);
+        studentStatisticsService.updateStatistics(existingStudent.getRegistrationDate());
     }
 }

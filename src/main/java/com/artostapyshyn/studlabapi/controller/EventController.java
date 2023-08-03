@@ -69,6 +69,7 @@ public class EventController {
             log.info("New event added with id - " + savedEvent.getId());
             return ResponseEntity.ok(savedEvent);
         } catch (Exception e) {
+            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

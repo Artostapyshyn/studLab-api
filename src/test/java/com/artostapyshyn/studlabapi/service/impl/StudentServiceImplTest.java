@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
+import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ class StudentServiceImplTest {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private StudentStatisticsService studentStatisticsService;
 
     @Autowired
     private StudentRepository studentRepository;
@@ -111,7 +115,7 @@ class StudentServiceImplTest {
         student2.setEnabled(false);
         studentRepository.saveAll(Arrays.asList(student1, student2));
 
-        int result = studentService.countByEnabled(true);
+        int result = studentStatisticsService.countByEnabled(true);
 
         assertNotEquals(2, result);
         assertEquals(1, result);
@@ -125,7 +129,7 @@ class StudentServiceImplTest {
         student2.setRegistrationDate(LocalDateTime.of(2022, 1, 20, 0, 0));
         studentRepository.saveAll(Arrays.asList(student1, student2));
 
-        Map<String, Integer> result = studentService.getRegistrationData();
+        Map<String, Integer> result = studentStatisticsService.getRegistrationData();
 
         assertNotNull(result);
         assertEquals(2, result.get("січень").intValue());

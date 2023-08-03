@@ -23,7 +23,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,6 +69,7 @@ public class AuthController {
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         } catch (BadCredentialsException e) {
+            log.warn(e.getMessage());
             return handleUnauthorized("Invalid Credentials");
         }
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
@@ -103,6 +103,7 @@ public class AuthController {
                 responseMap.put(MESSAGE, "User is not logged in");
             }
         } catch (ExpiredJwtException | UsernameNotFoundException e) {
+            log.warn(e.getMessage());
             responseMap.put(MESSAGE, "User is not logged in");
         }
 
@@ -306,6 +307,7 @@ public class AuthController {
         try {
             request.logout();
         } catch (ServletException e) {
+            log.warn(e.getMessage());
             responseMap.put(MESSAGE, "Something went wrong while logging out");
             return ResponseEntity.internalServerError().body(responseMap);
         }
@@ -373,7 +375,7 @@ public class AuthController {
             return handleBadRequest("Required fields are missing");
         }
 
-        signUpStudent(signUpDto, existingStudent);
+        studentService.signUpStudent(signUpDto, existingStudent);
         UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
         String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
 
@@ -406,25 +408,6 @@ public class AuthController {
         }
         return null;
     }
-
-    private void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
-        existingStudent.setFirstName(signUpDto.getFirstName());
-        existingStudent.setLastName(signUpDto.getLastName());
-
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
-        existingStudent.setPassword(encodedPassword);
-        existingStudent.setHasNewMessages(false);
-        existingStudent.setCity(signUpDto.getCity());
-        existingStudent.setMajor(signUpDto.getMajor());
-        existingStudent.setCourse(signUpDto.getCourse());
-        byte[] imageBytes = signUpDto.getPhotoBytes();
-        existingStudent.setPhotoBytes(imageBytes);
-        existingStudent.setRegistrationDate(LocalDateTime.now());
-
-        studentService.save(existingStudent);
-    }
-
 
     private boolean checkSignUpDto(SignUpDto signUpDto) {
         return signUpDto.getFirstName() != null &&

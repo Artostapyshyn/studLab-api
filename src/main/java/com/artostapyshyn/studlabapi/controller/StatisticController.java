@@ -1,7 +1,7 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.service.EventService;
-import com.artostapyshyn.studlabapi.service.StudentService;
+import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import com.artostapyshyn.studlabapi.service.UniversityService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 @Log4j2
 public class StatisticController {
 
-    private final StudentService studentService;
+    private final StudentStatisticsService studentStatisticsService;
 
     private final UniversityService universityService;
 
@@ -34,7 +34,7 @@ public class StatisticController {
     @GetMapping("/registered-amount")
     public ResponseEntity<Map<String, Object>> getTotalEnabledUsers() {
         Map<String, Object> response = new HashMap<>();
-        int totalEnabledUsers = studentService.countByEnabled(true);
+        int totalEnabledUsers = studentStatisticsService.countByEnabled(true);
         response.put(TOTAL, totalEnabledUsers);
         return ResponseEntity.ok(response);
     }
@@ -43,10 +43,11 @@ public class StatisticController {
     @GetMapping("/registration-data")
     public ResponseEntity<Map<String, Object>> getRegistrationData() {
         try {
-            Map<String, Integer> registrationData = studentService.getRegistrationData();
+            Map<String, Integer> registrationData = studentStatisticsService.getRegistrationData();
             Map<String, Object> response = new HashMap<>(registrationData);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
