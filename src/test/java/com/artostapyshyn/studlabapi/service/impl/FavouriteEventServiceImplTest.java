@@ -13,8 +13,6 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -34,9 +32,6 @@ class FavouriteEventServiceImplTest {
 
     @InjectMocks
     private FavouriteEventServiceImpl favouriteEventService;
-
-    @Captor
-    private ArgumentCaptor<FavouriteEvent> favouriteEventCaptor;
 
     @Test
     void findByStudentId() {

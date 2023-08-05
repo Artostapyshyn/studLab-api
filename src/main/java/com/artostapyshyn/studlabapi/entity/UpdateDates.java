@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -30,4 +31,18 @@ public class UpdateDates {
     @Column(name = "last_update_month")
     private YearMonth lastUpdateMonth;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UpdateDates that)) return false;
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getLastUpdateDate(), that.getLastUpdateDate())
+                && Objects.equals(getLastUpdateWeek(), that.getLastUpdateWeek())
+                && Objects.equals(getLastUpdateMonth(), that.getLastUpdateMonth());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getLastUpdateDate(), getLastUpdateWeek(), getLastUpdateMonth());
+    }
 }

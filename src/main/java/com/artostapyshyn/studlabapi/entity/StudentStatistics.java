@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,4 +26,18 @@ public class StudentStatistics {
 
     @Column(name = "count")
     private int count;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StudentStatistics that)) return false;
+        return getCount() == that.getCount()
+                && Objects.equals(getId(), that.getId())
+                && getInterval() == that.getInterval();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getInterval(), getCount());
+    }
 }

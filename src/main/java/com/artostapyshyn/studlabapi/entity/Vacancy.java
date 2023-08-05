@@ -31,11 +31,13 @@ public class Vacancy {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Vacancy vacancy)) return false;
-        return Objects.equals(getId(), vacancy.getId());
+        return Objects.equals(getId(), vacancy.getId())
+                && Objects.equals(getDescription(), vacancy.getDescription())
+                && Objects.equals(getNameOfVacancy(), vacancy.getNameOfVacancy());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getDescription(), getNameOfVacancy());
     }
 }

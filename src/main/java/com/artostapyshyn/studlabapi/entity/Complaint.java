@@ -47,15 +47,24 @@ public class Complaint {
     @Column(name = "close_complaint")
     private boolean closeComplaint;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Complaint complaint)) return false;
-        return Objects.equals(getId(), complaint.getId());
+        return isBlockUser() == complaint.isBlockUser()
+                && isDeleteComment() == complaint.isDeleteComment()
+                && isCloseComplaint() == complaint.isCloseComplaint()
+                && Objects.equals(getId(), complaint.getId())
+                && Objects.equals(getStudentId(), complaint.getStudentId())
+                && Objects.equals(getCommentId(), complaint.getCommentId())
+                && Objects.equals(getStatus(), complaint.getStatus())
+                && Objects.equals(getComplaintReason(), complaint.getComplaintReason())
+                && Objects.equals(getBlockDuration(), complaint.getBlockDuration());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getStudentId(), getCommentId(), getStatus(), getComplaintReason(), isBlockUser(), getBlockDuration(), isDeleteComment(), isCloseComplaint());
     }
 }

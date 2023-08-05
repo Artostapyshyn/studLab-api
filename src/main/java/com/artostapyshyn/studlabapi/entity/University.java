@@ -37,11 +37,14 @@ public class University {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof University that)) return false;
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getName(), that.getName())
+                && Objects.equals(getDomain(), that.getDomain())
+                && Objects.equals(getStudents(), that.getStudents());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getName(), getDomain(), getStudents());
     }
 }

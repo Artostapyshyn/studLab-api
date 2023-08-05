@@ -43,11 +43,14 @@ public class Reply {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Reply reply)) return false;
-        return Objects.equals(getId(), reply.getId());
+        return Objects.equals(getId(), reply.getId())
+                && Objects.equals(getReplyText(), reply.getReplyText())
+                && Objects.equals(getComment(), reply.getComment())
+                && Objects.equals(getStudent(), reply.getStudent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getReplyText(), getComment(), getStudent());
     }
 }

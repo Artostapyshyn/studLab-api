@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Getter
@@ -32,7 +33,7 @@ public class Course {
     @Column(name = "name_of_course", nullable = false)
     private String courseName;
 
-    @Basic(fetch=FetchType.LAZY)
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "course_photo", nullable = false)
     private byte[] coursePhoto;
 
@@ -40,15 +41,23 @@ public class Course {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Course course)) return false;
-        return Objects.equals(getId(), course.getId());
+        return Objects.equals(getId(), course.getId())
+                && Objects.equals(getCourseLink(), course.getCourseLink())
+                && Objects.equals(getCourseDescription(), course.getCourseDescription())
+                && Objects.equals(getCourseName(), course.getCourseName())
+                && Arrays.equals(getCoursePhoto(), course.getCoursePhoto())
+                && Objects.equals(getCreationDate(), course.getCreationDate());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        int result = Objects.hash(getId(), getCourseLink(), getCourseDescription(), getCourseName(), getCreationDate());
+        result = 31 * result + Arrays.hashCode(getCoursePhoto());
+        return result;
     }
 }

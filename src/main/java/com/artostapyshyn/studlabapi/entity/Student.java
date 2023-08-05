@@ -113,11 +113,21 @@ public class Student {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Student student)) return false;
-        return Objects.equals(getId(), student.getId());
+        return isEnabled() == student.isEnabled()
+                && Objects.equals(getId(), student.getId())
+                && Objects.equals(getLastName(), student.getLastName())
+                && Objects.equals(getFirstName(), student.getFirstName())
+                && Arrays.equals(getPhotoBytes(), student.getPhotoBytes())
+                && Objects.equals(getEmail(), student.getEmail())
+                && Objects.equals(getPassword(), student.getPassword())
+                && Objects.equals(getUniversity(), student.getUniversity())
+                && getRole() == student.getRole();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        int result = Objects.hash(getId(), getLastName(), getFirstName(), getBirthDate(), getMajor(), getCourse(), getCity(), getEmail(), getPassword(), getResumes(), getResumeFilenames(), getCertificates(), getCertificatesFilenames(), getMessages(), isEnabled(), getHasNewMessages(), getBlockedUntil(), getRegistrationDate(), getComments(), getUniversity(), getRole());
+        result = 31 * result + Arrays.hashCode(getPhotoBytes());
+        return result;
     }
 }

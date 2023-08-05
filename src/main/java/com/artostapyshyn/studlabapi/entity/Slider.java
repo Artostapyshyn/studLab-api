@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @Getter
@@ -29,11 +30,14 @@ public class Slider {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Slider slider)) return false;
-        return Objects.equals(getId(), slider.getId());
+        return Objects.equals(getId(), slider.getId())
+                && Arrays.equals(getSliderPhoto(), slider.getSliderPhoto());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        int result = Objects.hash(getId());
+        result = 31 * result + Arrays.hashCode(getSliderPhoto());
+        return result;
     }
 }

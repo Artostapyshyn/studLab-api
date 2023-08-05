@@ -28,15 +28,18 @@ public class FavouriteEvent {
     @JoinColumn(name = "event_id")
     private Event event;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof FavouriteEvent that)) return false;
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getStudentId(), that.getStudentId())
+                && Objects.equals(getEvent(), that.getEvent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getStudentId(), getEvent());
     }
 }

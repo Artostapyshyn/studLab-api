@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -66,11 +67,23 @@ public class Event {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Event event)) return false;
-        return Objects.equals(getId(), event.getId());
+        return getFavoriteCount() == event.getFavoriteCount()
+                && Objects.equals(getId(), event.getId())
+                && Objects.equals(getDate(), event.getDate())
+                && Objects.equals(getVenue(), event.getVenue())
+                && Objects.equals(getDescription(), event.getDescription())
+                && Objects.equals(getNameOfEvent(), event.getNameOfEvent())
+                && getEventType() == event.getEventType()
+                && Arrays.equals(getEventPhoto(), event.getEventPhoto())
+                && Objects.equals(getCreationDate(), event.getCreationDate())
+                && Objects.equals(getEventComments(), event.getEventComments());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        int result = Objects.hash(getId(), getDate(), getVenue(), getDescription(), getNameOfEvent(),
+                getEventType(), getFavoriteCount(), getCreationDate(), getEventComments());
+        result = 31 * result + Arrays.hashCode(getEventPhoto());
+        return result;
     }
 }

@@ -59,15 +59,22 @@ public class Comment {
     @JoinColumn(name = "student_id")
     private Student student;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Comment comment)) return false;
-        return Objects.equals(getId(), comment.getId());
+        return getLikes() == comment.getLikes()
+                && Objects.equals(getId(), comment.getId())
+                && Objects.equals(getCommentText(), comment.getCommentText())
+                && Objects.equals(getReplies(), comment.getReplies())
+                && Objects.equals(getLikedBy(), comment.getLikedBy())
+                && Objects.equals(getEventId(), comment.getEventId())
+                && Objects.equals(getStudent(), comment.getStudent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getCommentText(), getLikes(), getReplies(), getLikedBy(), getEventId(), getStudent());
     }
 }

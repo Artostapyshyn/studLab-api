@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,4 +33,18 @@ public class AlternateRegistrationStudent {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AlternateRegistrationStudent that)) return false;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getLastName(), that.getLastName())
+                && Objects.equals(getFirstName(), that.getFirstName())
+                && Objects.equals(getCode(), that.getCode())
+                && Objects.equals(getEmail(), that.getEmail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getLastName(), getFirstName(), getCode(), getEmail());
+    }
 }

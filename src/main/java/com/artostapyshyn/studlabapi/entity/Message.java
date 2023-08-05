@@ -38,11 +38,14 @@ public class Message {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Message message)) return false;
-        return Objects.equals(getId(), message.getId());
+        return Objects.equals(getId(), message.getId())
+                && Objects.equals(getContent(), message.getContent())
+                && Objects.equals(getSentTime(), message.getSentTime())
+                && Objects.equals(getStudent(), message.getStudent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getContent(), getSentTime(), getStudent());
     }
 }

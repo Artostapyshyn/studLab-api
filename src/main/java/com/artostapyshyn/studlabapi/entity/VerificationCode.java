@@ -40,11 +40,16 @@ public class VerificationCode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VerificationCode that)) return false;
-        return Objects.equals(getId(), that.getId());
+        return getCode() == that.getCode()
+                && Objects.equals(getId(), that.getId())
+                && Objects.equals(getStudentId(), that.getStudentId())
+                && Objects.equals(getEmail(), that.getEmail())
+                && Objects.equals(getExpirationDate(), that.getExpirationDate())
+                && Objects.equals(getLastSentTime(), that.getLastSentTime());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getId(), getCode(), getStudentId(), getEmail(), getExpirationDate(), getLastSentTime());
     }
 }
