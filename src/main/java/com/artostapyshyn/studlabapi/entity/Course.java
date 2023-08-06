@@ -41,7 +41,6 @@ public class Course {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -59,5 +58,17 @@ public class Course {
         int result = Objects.hash(getId(), getCourseLink(), getCourseDescription(), getCourseName(), getCreationDate());
         result = 31 * result + Arrays.hashCode(getCoursePhoto());
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" +
+                "id=" + id +
+                ", courseLink='" + courseLink + '\'' +
+                ", courseDescription='" + courseDescription + '\'' +
+                ", courseName='" + courseName + '\'' +
+                ", coursePhoto=" + Arrays.toString(coursePhoto) +
+                ", creationDate=" + creationDate +
+                '}';
     }
 }

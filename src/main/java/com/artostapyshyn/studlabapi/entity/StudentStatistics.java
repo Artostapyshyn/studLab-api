@@ -40,4 +40,13 @@ public class StudentStatistics {
     public int hashCode() {
         return Objects.hash(getId(), getInterval(), getCount());
     }
+
+    @Override
+    public String toString() {
+        return "StudentStatistics{" +
+                "id=" + id +
+                ", interval=" + interval +
+                ", count=" + count +
+                '}';
+    }
 }

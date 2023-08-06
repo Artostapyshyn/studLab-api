@@ -40,4 +40,12 @@ public class Slider {
         result = 31 * result + Arrays.hashCode(getSliderPhoto());
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Slider{" +
+                "id=" + id +
+                ", sliderPhoto=" + Arrays.toString(sliderPhoto) +
+                '}';
+    }
 }

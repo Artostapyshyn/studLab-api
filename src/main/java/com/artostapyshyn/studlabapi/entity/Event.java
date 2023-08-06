@@ -86,4 +86,20 @@ public class Event {
         result = 31 * result + Arrays.hashCode(getEventPhoto());
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", date=" + date +
+                ", venue='" + venue + '\'' +
+                ", description='" + description + '\'' +
+                ", nameOfEvent='" + nameOfEvent + '\'' +
+                ", eventType=" + eventType +
+                ", eventPhoto=" + Arrays.toString(eventPhoto) +
+                ", favoriteCount=" + favoriteCount +
+                ", creationDate=" + creationDate +
+                ", eventComments=" + eventComments +
+                '}';
+    }
 }

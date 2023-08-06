@@ -40,4 +40,13 @@ public class Vacancy {
     public int hashCode() {
         return Objects.hash(getId(), getDescription(), getNameOfVacancy());
     }
+
+    @Override
+    public String toString() {
+        return "Vacancy{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", nameOfVacancy='" + nameOfVacancy + '\'' +
+                '}';
+    }
 }

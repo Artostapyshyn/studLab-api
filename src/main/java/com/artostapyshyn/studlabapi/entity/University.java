@@ -44,7 +44,12 @@ public class University {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getName(), getDomain(), getStudents());
+    public String toString() {
+        return "University{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", domain='" + domain + '\'' +
+                ", students=" + students +
+                '}';
     }
 }

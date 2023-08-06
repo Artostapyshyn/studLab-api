@@ -77,4 +77,17 @@ public class Comment {
     public int hashCode() {
         return Objects.hash(getId(), getCommentText(), getLikes(), getReplies(), getLikedBy(), getEventId(), getStudent());
     }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", commentText='" + commentText + '\'' +
+                ", likes=" + likes +
+                ", replies=" + replies +
+                ", likedBy=" + likedBy +
+                ", eventId=" + eventId +
+                ", student=" + student +
+                '}';
+    }
 }

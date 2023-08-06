@@ -53,4 +53,14 @@ public class Reply {
     public int hashCode() {
         return Objects.hash(getId(), getReplyText(), getComment(), getStudent());
     }
+
+    @Override
+    public String toString() {
+        return "Reply{" +
+                "id=" + id +
+                ", replyText='" + replyText + '\'' +
+                ", comment=" + comment +
+                ", student=" + student +
+                '}';
+    }
 }

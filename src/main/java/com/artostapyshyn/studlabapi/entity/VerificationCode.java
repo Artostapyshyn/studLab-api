@@ -52,4 +52,16 @@ public class VerificationCode {
     public int hashCode() {
         return Objects.hash(getId(), getCode(), getStudentId(), getEmail(), getExpirationDate(), getLastSentTime());
     }
+
+    @Override
+    public String toString() {
+        return "VerificationCode{" +
+                "id=" + id +
+                ", code=" + code +
+                ", studentId=" + studentId +
+                ", email='" + email + '\'' +
+                ", expirationDate=" + expirationDate +
+                ", lastSentTime=" + lastSentTime +
+                '}';
+    }
 }

@@ -94,7 +94,7 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
     @Enumerated(EnumType.STRING)
@@ -110,6 +110,20 @@ public class Student {
     }
 
     @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", photoBytes=" + Arrays.toString(photoBytes) +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", university=" + university +
+                ", role=" + role +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Student student)) return false;
@@ -117,9 +131,22 @@ public class Student {
                 && Objects.equals(getId(), student.getId())
                 && Objects.equals(getLastName(), student.getLastName())
                 && Objects.equals(getFirstName(), student.getFirstName())
+                && Objects.equals(getBirthDate(), student.getBirthDate())
+                && Objects.equals(getMajor(), student.getMajor())
+                && Objects.equals(getCourse(), student.getCourse())
+                && Objects.equals(getCity(), student.getCity())
                 && Arrays.equals(getPhotoBytes(), student.getPhotoBytes())
                 && Objects.equals(getEmail(), student.getEmail())
                 && Objects.equals(getPassword(), student.getPassword())
+                && Objects.equals(getResumes(), student.getResumes())
+                && Objects.equals(getResumeFilenames(), student.getResumeFilenames())
+                && Objects.equals(getCertificates(), student.getCertificates())
+                && Objects.equals(getCertificatesFilenames(), student.getCertificatesFilenames())
+                && Objects.equals(getMessages(), student.getMessages())
+                && Objects.equals(getHasNewMessages(), student.getHasNewMessages())
+                && Objects.equals(getBlockedUntil(), student.getBlockedUntil())
+                && Objects.equals(getRegistrationDate(), student.getRegistrationDate())
+                && Objects.equals(getComments(), student.getComments())
                 && Objects.equals(getUniversity(), student.getUniversity())
                 && getRole() == student.getRole();
     }

@@ -45,4 +45,14 @@ public class UpdateDates {
     public int hashCode() {
         return Objects.hash(getId(), getLastUpdateDate(), getLastUpdateWeek(), getLastUpdateMonth());
     }
+
+    @Override
+    public String toString() {
+        return "UpdateDates{" +
+                "id=" + id +
+                ", lastUpdateDate=" + lastUpdateDate +
+                ", lastUpdateWeek=" + lastUpdateWeek +
+                ", lastUpdateMonth=" + lastUpdateMonth +
+                '}';
+    }
 }

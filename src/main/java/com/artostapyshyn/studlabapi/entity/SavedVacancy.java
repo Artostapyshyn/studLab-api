@@ -41,4 +41,13 @@ public class SavedVacancy {
     public int hashCode() {
         return Objects.hash(getId(), getStudentId(), getVacancy());
     }
+
+    @Override
+    public String toString() {
+        return "SavedVacancy{" +
+                "id=" + id +
+                ", studentId=" + studentId +
+                ", vacancy=" + vacancy +
+                '}';
+    }
 }

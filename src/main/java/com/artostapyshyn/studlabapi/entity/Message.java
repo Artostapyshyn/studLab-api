@@ -48,4 +48,14 @@ public class Message {
     public int hashCode() {
         return Objects.hash(getId(), getContent(), getSentTime(), getStudent());
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", sentTime=" + sentTime +
+                ", student=" + student +
+                '}';
+    }
 }

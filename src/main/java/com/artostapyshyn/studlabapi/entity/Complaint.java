@@ -67,4 +67,19 @@ public class Complaint {
     public int hashCode() {
         return Objects.hash(getId(), getStudentId(), getCommentId(), getStatus(), getComplaintReason(), isBlockUser(), getBlockDuration(), isDeleteComment(), isCloseComplaint());
     }
+
+    @Override
+    public String toString() {
+        return "Complaint{" +
+                "id=" + id +
+                ", studentId=" + studentId +
+                ", commentId=" + commentId +
+                ", status='" + status + '\'' +
+                ", complaintReason='" + complaintReason + '\'' +
+                ", blockUser=" + blockUser +
+                ", blockDuration='" + blockDuration + '\'' +
+                ", deleteComment=" + deleteComment +
+                ", closeComplaint=" + closeComplaint +
+                '}';
+    }
 }

@@ -47,4 +47,15 @@ public class AlternateRegistrationStudent {
     public int hashCode() {
         return Objects.hash(getId(), getLastName(), getFirstName(), getCode(), getEmail());
     }
+
+    @Override
+    public String toString() {
+        return "AlternateRegistrationStudent{" +
+                "id=" + id +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", code='" + code + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

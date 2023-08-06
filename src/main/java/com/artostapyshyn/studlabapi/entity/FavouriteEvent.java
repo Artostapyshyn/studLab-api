@@ -42,4 +42,13 @@ public class FavouriteEvent {
     public int hashCode() {
         return Objects.hash(getId(), getStudentId(), getEvent());
     }
+
+    @Override
+    public String toString() {
+        return "FavouriteEvent{" +
+                "id=" + id +
+                ", studentId=" + studentId +
+                ", event=" + event +
+                '}';
+    }
 }
