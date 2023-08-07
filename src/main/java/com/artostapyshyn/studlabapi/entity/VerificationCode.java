@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,9 +32,11 @@ public class VerificationCode {
     private String email;
 
     @Column(name = "expiration_date")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime expirationDate;
 
     @Column(name = "last_sent_time")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastSentTime;
 
     @Override

@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class Course {
     private byte[] coursePhoto;
 
     @Column(name = "date_of_creation")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     @CreationTimestamp
     private LocalDateTime creationDate;
 

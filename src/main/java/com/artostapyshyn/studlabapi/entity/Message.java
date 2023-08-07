@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,7 @@ public class Message {
     private String content;
 
     @Column(name = "time_sent")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime sentTime;
 
     @JsonIgnore
