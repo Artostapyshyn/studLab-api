@@ -10,6 +10,8 @@ import java.util.List;
 public interface FavouriteEventRepository extends JpaRepository<FavouriteEvent, Long> {
     List<FavouriteEvent> findByStudentId(Long studentId);
 
+    List<FavouriteEvent> findByEventId(Long eventId);
+
     FavouriteEvent findByStudentIdAndEventId(Long studentId, Long eventId);
 
     boolean existsByEventIdAndStudentId(Long eventId, Long studentId);

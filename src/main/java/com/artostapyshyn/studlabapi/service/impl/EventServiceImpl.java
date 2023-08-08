@@ -1,8 +1,11 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
+import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,16 +17,14 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@AllArgsConstructor
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
 
-    private AtomicInteger createdEventCount;
+    private final FavouriteEventRepository favouriteEventRepository;
 
-    public EventServiceImpl(EventRepository eventRepository) {
-        this.eventRepository = eventRepository;
-        this.createdEventCount = new AtomicInteger(0);
-    }
+    private AtomicInteger createdEventCount;
 
     @Override
     public List<Event> findAll() {
@@ -67,6 +68,8 @@ public class EventServiceImpl implements EventService {
     @Override
     @CacheEvict(value = {"eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     public void deleteById(Long id) {
+        List<FavouriteEvent> favoriteEvents = favouriteEventRepository.findByEventId(id);
+        favouriteEventRepository.deleteAll(favoriteEvents);
         eventRepository.deleteById(id);
     }
 

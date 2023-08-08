@@ -96,8 +96,9 @@ public class EventController {
     public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
-            eventService.deleteById(eventId);
             Map<String, Object> response = new HashMap<>();
+            eventService.deleteById(eventId);
+
             response.put(MESSAGE, "Event deleted successfully");
             return ResponseEntity.ok(response);
         } else {

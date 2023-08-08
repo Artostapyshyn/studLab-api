@@ -40,6 +40,11 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
         return favouriteEventRepository.save(favouriteEvent);
     }
 
+    @Override
+    public List<FavouriteEvent> findByEventId(Long eventId) {
+        return favouriteEventRepository.findByEventId(eventId);
+    }
+
     @Transactional
     @Override
     public void delete(FavouriteEvent favouriteEvent) {

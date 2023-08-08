@@ -2,10 +2,7 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.CommentDto;
 import com.artostapyshyn.studlabapi.dto.ReplyDto;
-import com.artostapyshyn.studlabapi.entity.Comment;
-import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.entity.Reply;
-import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
@@ -18,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -151,14 +149,16 @@ public class CommentController {
 
     @Operation(summary = "Delete comment by student")
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
+    public ResponseEntity<Map<String, Object>> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
                                                        Authentication authentication) {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
-            if (comment.getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
+            boolean hasAdminOrModeratorRole = isHasAdminOrModeratorRole(authentication);
+
+            if (comment.getStudent().getId().equals(studentService.getAuthStudentId(authentication)) || hasAdminOrModeratorRole) {
                 commentService.delete(comment);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok().body(Collections.singletonMap(MESSAGE, "Comment deleted successfully"));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
@@ -169,20 +169,30 @@ public class CommentController {
 
     @Operation(summary = "Delete reply by student")
     @DeleteMapping("/delete-reply")
-    public ResponseEntity<Void> deleteReplyByStudent(@RequestParam("replyId") Long replyId,
+    public ResponseEntity<Map<String, Object>> deleteReplyByStudent(@RequestParam("replyId") Long replyId,
                                                        Authentication authentication) {
         Optional<Reply> optionalReply = replyService.findById(replyId);
         if (optionalReply.isPresent()) {
+            boolean hasAdminOrModeratorRole = isHasAdminOrModeratorRole(authentication);
             Reply reply = optionalReply.get();
-            if (optionalReply.get().getStudent().getId().equals(studentService.getAuthStudentId(authentication))) {
+            if (optionalReply.get().getStudent().getId().equals(studentService.getAuthStudentId(authentication)) || hasAdminOrModeratorRole) {
                 replyService.delete(reply);
-                return ResponseEntity.ok().build();
+                return ResponseEntity.ok().body(Collections.singletonMap(MESSAGE, "Reply deleted successfully"));
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private static boolean isHasAdminOrModeratorRole(Authentication authentication) {
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        return authorities.stream()
+                .anyMatch(grantedAuthority ->
+                        grantedAuthority.getAuthority().equals("ROLE_ADMIN") ||
+                                grantedAuthority.getAuthority().equals("ROLE_MODERATOR"));
     }
 
 }

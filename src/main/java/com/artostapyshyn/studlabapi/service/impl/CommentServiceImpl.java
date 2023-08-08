@@ -3,15 +3,18 @@ package com.artostapyshyn.studlabapi.service.impl;
 import com.artostapyshyn.studlabapi.dto.CommentDto;
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.entity.Reply;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.repository.CommentRepository;
+import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final EventService eventService;
+    private final ReplyRepository replyRepository;
 
     @Transactional
     @Override
@@ -49,6 +53,8 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void delete(Comment comment) {
+        List<Reply> replies = replyRepository.findReplyByCommentId(comment.getId());
+        replyRepository.deleteAll(replies);
         commentRepository.delete(comment);
     }
 }

@@ -28,7 +28,6 @@ public class FavouriteEvent {
     @JoinColumn(name = "event_id")
     private Event event;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
