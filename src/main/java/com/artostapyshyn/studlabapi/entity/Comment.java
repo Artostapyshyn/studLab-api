@@ -59,7 +59,6 @@ public class Comment {
     @JoinColumn(name = "student_id")
     private Student student;
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,7 +1,9 @@
 package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.EventType;
+import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +31,8 @@ public class Event {
     private Long id;
 
     @Column(name = "date_of_event", nullable = false)
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
     @Column(name = "venue", nullable = false)
@@ -54,7 +57,7 @@ public class Event {
     private int favoriteCount;
 
     @Column(name = "date_of_creation")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @CreationTimestamp
     private LocalDateTime creationDate;
 

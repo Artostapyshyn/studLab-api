@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @DataJpaTest
-public class AlternateRegistrationStudentRepositoryTest {
+class AlternateRegistrationStudentRepositoryTest {
 
     @Autowired
     private AlternateRegistrationStudentRepository alternateRegistrationStudentRepository;
@@ -22,7 +22,7 @@ public class AlternateRegistrationStudentRepositoryTest {
     private TestEntityManager entityManager;
 
     @Test
-    public void testExistsByCode_ExistingCode_ReturnsTrue() {
+    void testExistsByCode_ExistingCode_ReturnsTrue() {
         String existingCode = "ABC123";
         AlternateRegistrationStudent student = new AlternateRegistrationStudent();
         student.setCode(existingCode);
@@ -34,7 +34,7 @@ public class AlternateRegistrationStudentRepositoryTest {
     }
 
     @Test
-    public void testExistsByCode_NonExistingCode_ReturnsFalse() {
+    void testExistsByCode_NonExistingCode_ReturnsFalse() {
         String nonExistingCode = "XYZ456";
 
         boolean exists = alternateRegistrationStudentRepository.existsByCode(nonExistingCode);
@@ -42,7 +42,7 @@ public class AlternateRegistrationStudentRepositoryTest {
     }
 
     @Test
-    public void testFindByCode_ExistingCode_ReturnsStudent() {
+    void testFindByCode_ExistingCode_ReturnsStudent() {
         String existingCode = "ABC123";
         AlternateRegistrationStudent student = new AlternateRegistrationStudent();
         student.setCode(existingCode);
@@ -55,7 +55,7 @@ public class AlternateRegistrationStudentRepositoryTest {
     }
 
     @Test
-    public void testFindByCode_NonExistingCode_ReturnsEmptyOptional() {
+    void testFindByCode_NonExistingCode_ReturnsEmptyOptional() {
         String nonExistingCode = "XYZ456";
 
         Optional<AlternateRegistrationStudent> result = alternateRegistrationStudentRepository.findByCode(nonExistingCode);

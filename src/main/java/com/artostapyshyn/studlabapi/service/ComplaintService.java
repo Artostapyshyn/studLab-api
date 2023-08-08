@@ -18,9 +18,7 @@ public interface ComplaintService {
 
     List<Complaint> findClosedComplaints();
 
-    Complaint saveComplaint(Complaint complaint);
-
-    Complaint convertDtoToComplaint(ComplaintDto complaintDto);
+    Complaint saveComplaint(ComplaintDto complaintDto);
 
     void delete(Complaint complaint);
 }

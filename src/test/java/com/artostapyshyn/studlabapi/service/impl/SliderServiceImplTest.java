@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase
-public class SliderServiceImplTest {
+class SliderServiceImplTest {
 
     @Mock
     private SliderRepository sliderRepository;

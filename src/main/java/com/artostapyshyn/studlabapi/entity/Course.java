@@ -39,7 +39,7 @@ public class Course {
     private byte[] coursePhoto;
 
     @Column(name = "date_of_creation")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @CreationTimestamp
     private LocalDateTime creationDate;
 

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test")
 @DataJpaTest
-public class StudentStatisticsRepositoryTest {
+class StudentStatisticsRepositoryTest {
 
     @Autowired
     private StudentStatisticsRepository studentStatisticsRepository;
@@ -21,7 +21,7 @@ public class StudentStatisticsRepositoryTest {
     private TestEntityManager entityManager;
 
     @Test
-    public void testGetDailyStatistics() {
+    void testGetDailyStatistics() {
         StudentStatistics statistics = new StudentStatistics();
         statistics.setInterval(Interval.DAY);
         statistics.setCount(100);
@@ -32,7 +32,7 @@ public class StudentStatisticsRepositoryTest {
     }
 
     @Test
-    public void testGetWeeklyStatistics() {
+    void testGetWeeklyStatistics() {
         StudentStatistics statistics = new StudentStatistics();
         statistics.setInterval(Interval.WEEK);
         statistics.setCount(500);
@@ -43,7 +43,7 @@ public class StudentStatisticsRepositoryTest {
     }
 
     @Test
-    public void testGetMonthlyStatistics() {
+    void testGetMonthlyStatistics() {
         StudentStatistics statistics = new StudentStatistics();
         statistics.setInterval(Interval.MONTH);
         statistics.setCount(2000);
@@ -54,7 +54,7 @@ public class StudentStatisticsRepositoryTest {
     }
 
     @Test
-    public void testGetAllTimeStatistics() {
+    void testGetAllTimeStatistics() {
         StudentStatistics statistics = new StudentStatistics();
         statistics.setInterval(Interval.ALL_TIME);
         statistics.setCount(10000);
@@ -65,7 +65,7 @@ public class StudentStatisticsRepositoryTest {
     }
 
     @Test
-    public void testFindByInterval() {
+    void testFindByInterval() {
         StudentStatistics statistics = new StudentStatistics();
         statistics.setInterval(Interval.DAY);
         statistics.setCount(100);

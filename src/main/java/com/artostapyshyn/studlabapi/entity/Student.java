@@ -1,7 +1,9 @@
 package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.Role;
+import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -87,7 +89,8 @@ public class Student {
     private LocalDateTime blockedUntil;
 
     @Column(name = "registration_date")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime registrationDate;
 
     @JsonIgnore

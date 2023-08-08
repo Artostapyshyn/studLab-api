@@ -54,32 +54,24 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Complaint saveComplaint(Complaint complaint) {
+    public Complaint saveComplaint(ComplaintDto complaintDto) {
         Complaint savedComplaint = new Complaint();
-        savedComplaint.setComplaintReason(complaint.getComplaintReason());
+        savedComplaint.setComplaintReason(complaintDto.getComplaintReason());
         savedComplaint.setStatus("Відкрито");
-        savedComplaint.setDeleteComment(complaint.isDeleteComment());
-        savedComplaint.setBlockUser(complaint.isBlockUser());
-        savedComplaint.setBlockDuration(complaint.getBlockDuration());
-        savedComplaint.setCloseComplaint(complaint.isCloseComplaint());
 
-        if (complaint.getCommentId() != null) {
-            Comment comment = commentService.findById(complaint.getCommentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + complaint.getCommentId()));
+        if (complaintDto.getCommentId() != null) {
+            Comment comment = commentService.findById(complaintDto.getCommentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + complaintDto.getCommentId()));
             savedComplaint.setCommentId(comment.getId());
         }
 
-        if (complaint.getStudentId() != null) {
-            Student student = studentService.findById(complaint.getStudentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + complaint.getStudentId()));
+        if (complaintDto.getStudentId() != null) {
+            Student student = studentService.findById(complaintDto.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + complaintDto.getStudentId()));
             savedComplaint.setStudentId(student.getId());
         }
-        return complaintRepository.save(savedComplaint);
-    }
 
-    @Override
-    public Complaint convertDtoToComplaint(ComplaintDto complaintDto) {
-        return modelMapper.map(complaintDto, Complaint.class);
+        return complaintRepository.save(savedComplaint);
     }
 
     @Transactional
