@@ -139,26 +139,16 @@ public class Student {
                 && Objects.equals(getMajor(), student.getMajor())
                 && Objects.equals(getCourse(), student.getCourse())
                 && Objects.equals(getCity(), student.getCity())
-                && Arrays.equals(getPhotoBytes(), student.getPhotoBytes())
                 && Objects.equals(getEmail(), student.getEmail())
                 && Objects.equals(getPassword(), student.getPassword())
-                && Objects.equals(getResumes(), student.getResumes())
-                && Objects.equals(getResumeFilenames(), student.getResumeFilenames())
-                && Objects.equals(getCertificates(), student.getCertificates())
-                && Objects.equals(getCertificatesFilenames(), student.getCertificatesFilenames())
-                && Objects.equals(getMessages(), student.getMessages())
                 && Objects.equals(getHasNewMessages(), student.getHasNewMessages())
                 && Objects.equals(getBlockedUntil(), student.getBlockedUntil())
                 && Objects.equals(getRegistrationDate(), student.getRegistrationDate())
-                && Objects.equals(getComments(), student.getComments())
-                && Objects.equals(getUniversity(), student.getUniversity())
-                && getRole() == student.getRole();
+                && Objects.equals(getUniversity(), student.getUniversity());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(getId(), getLastName(), getFirstName(), getBirthDate(), getMajor(), getCourse(), getCity(), getEmail(), getPassword(), getResumes(), getResumeFilenames(), getCertificates(), getCertificatesFilenames(), getMessages(), isEnabled(), getHasNewMessages(), getBlockedUntil(), getRegistrationDate(), getComments(), getUniversity(), getRole());
-        result = 31 * result + Arrays.hashCode(getPhotoBytes());
-        return result;
+        return Objects.hash(getId(), getLastName(), getFirstName(), getBirthDate(), getMajor(), getCourse(), getCity(), getEmail(), getPassword(), isEnabled(), getHasNewMessages(), getBlockedUntil(), getRegistrationDate(), getUniversity());
     }
 }

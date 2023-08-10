@@ -26,6 +26,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final StudentService studentService;
 
     @Override
+    @Transactional
     public void processComplaints(Complaint newComplaintData) {
         Optional<Complaint> existingComplaint = complaintRepository.findById(newComplaintData.getId());
 

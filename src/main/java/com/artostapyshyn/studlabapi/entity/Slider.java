@@ -30,15 +30,12 @@ public class Slider {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Slider slider)) return false;
-        return Objects.equals(getId(), slider.getId())
-                && Arrays.equals(getSliderPhoto(), slider.getSliderPhoto());
+        return Objects.equals(getId(), slider.getId());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(getId());
-        result = 31 * result + Arrays.hashCode(getSliderPhoto());
-        return result;
+        return Objects.hash(getId());
     }
 
     @Override

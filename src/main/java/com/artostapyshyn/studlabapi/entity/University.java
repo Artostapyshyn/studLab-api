@@ -39,8 +39,7 @@ public class University {
         if (!(o instanceof University that)) return false;
         return Objects.equals(getId(), that.getId())
                 && Objects.equals(getName(), that.getName())
-                && Objects.equals(getDomain(), that.getDomain())
-                && Objects.equals(getStudents(), that.getStudents());
+                && Objects.equals(getDomain(), that.getDomain());
     }
 
     @Override
@@ -51,5 +50,10 @@ public class University {
                 ", domain='" + domain + '\'' +
                 ", students=" + students +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getDomain());
     }
 }

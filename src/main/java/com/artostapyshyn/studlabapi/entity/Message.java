@@ -45,13 +45,12 @@ public class Message {
         if (!(o instanceof Message message)) return false;
         return Objects.equals(getId(), message.getId())
                 && Objects.equals(getContent(), message.getContent())
-                && Objects.equals(getSentTime(), message.getSentTime())
-                && Objects.equals(getStudent(), message.getStudent());
+                && Objects.equals(getSentTime(), message.getSentTime());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getContent(), getSentTime(), getStudent());
+        return Objects.hash(getId(), getContent(), getSentTime());
     }
 
     @Override

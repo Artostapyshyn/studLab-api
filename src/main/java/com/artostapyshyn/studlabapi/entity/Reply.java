@@ -44,14 +44,12 @@ public class Reply {
         if (this == o) return true;
         if (!(o instanceof Reply reply)) return false;
         return Objects.equals(getId(), reply.getId())
-                && Objects.equals(getReplyText(), reply.getReplyText())
-                && Objects.equals(getComment(), reply.getComment())
-                && Objects.equals(getStudent(), reply.getStudent());
+                && Objects.equals(getReplyText(), reply.getReplyText());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getReplyText(), getComment(), getStudent());
+        return Objects.hash(getId(), getReplyText());
     }
 
     @Override

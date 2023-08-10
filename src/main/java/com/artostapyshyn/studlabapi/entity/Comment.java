@@ -68,13 +68,12 @@ public class Comment {
                 && Objects.equals(getCommentText(), comment.getCommentText())
                 && Objects.equals(getReplies(), comment.getReplies())
                 && Objects.equals(getLikedBy(), comment.getLikedBy())
-                && Objects.equals(getEventId(), comment.getEventId())
-                && Objects.equals(getStudent(), comment.getStudent());
+                && Objects.equals(getEventId(), comment.getEventId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCommentText(), getLikes(), getReplies(), getLikedBy(), getEventId(), getStudent());
+        return Objects.hash(getId(), getCommentText(), getLikes(), getReplies(), getLikedBy(), getEventId());
     }
 
     @Override

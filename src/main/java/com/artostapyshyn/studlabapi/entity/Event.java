@@ -80,17 +80,14 @@ public class Event {
                 && Objects.equals(getDescription(), event.getDescription())
                 && Objects.equals(getNameOfEvent(), event.getNameOfEvent())
                 && getEventType() == event.getEventType()
-                && Arrays.equals(getEventPhoto(), event.getEventPhoto())
                 && Objects.equals(getCreationDate(), event.getCreationDate())
                 && Objects.equals(getEventComments(), event.getEventComments());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(getId(), getDate(), getVenue(), getDescription(), getNameOfEvent(),
+        return Objects.hash(getId(), getDate(), getVenue(), getDescription(), getNameOfEvent(),
                 getEventType(), getFavoriteCount(), getCreationDate(), getEventComments());
-        result = 31 * result + Arrays.hashCode(getEventPhoto());
-        return result;
     }
 
     @Override

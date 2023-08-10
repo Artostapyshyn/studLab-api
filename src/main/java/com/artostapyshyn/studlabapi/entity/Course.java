@@ -51,15 +51,12 @@ public class Course {
                 && Objects.equals(getCourseLink(), course.getCourseLink())
                 && Objects.equals(getCourseDescription(), course.getCourseDescription())
                 && Objects.equals(getCourseName(), course.getCourseName())
-                && Arrays.equals(getCoursePhoto(), course.getCoursePhoto())
                 && Objects.equals(getCreationDate(), course.getCreationDate());
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(getId(), getCourseLink(), getCourseDescription(), getCourseName(), getCreationDate());
-        result = 31 * result + Arrays.hashCode(getCoursePhoto());
-        return result;
+        return Objects.hash(getId(), getCourseLink(), getCourseDescription(), getCourseName(), getCreationDate());
     }
 
     @Override
