@@ -1,14 +1,11 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.entity.AlternateRegistrationStudent;
-import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
-import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +29,6 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    private final FavouriteEventService favouriteEventService;
-
     private final AlternateRegistrationStudentService alternateRegistrationStudentService;
 
     private final FileService fileService;
@@ -49,17 +44,14 @@ public class StudentController {
         return ResponseEntity.ok(studentList);
     }
 
-
-    @Operation(summary = "Get student public profile")
-    @PostMapping(value = "/profile")
-    public ResponseEntity<Map<String, Object>> getProfile(@RequestBody @NotNull Student student) {
-        Map<String, Object> response = new HashMap<>();
+    @Operation(summary = "Get personal information")
+    @PostMapping("/profile")
+    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
+        List<Object> response = new ArrayList<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            List<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentId(existingStudent.getId());
-            response.put("student", existingStudent);
-            response.put("events", favouriteEvent);
+            response.add(existingStudent);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();

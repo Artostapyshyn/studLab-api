@@ -8,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,8 @@ public class FavouriteEventController {
 
     private final EventServiceImpl eventService;
 
+    private final ModelMapper modelMapper;
+
     @Operation(summary = "Add event to favourite")
     @PostMapping("/add-to-favorites")
     public ResponseEntity<Object> addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
@@ -36,7 +39,7 @@ public class FavouriteEventController {
         Optional<Event> event = eventService.findEventById(eventId);
 
         if (event.isPresent()) {
-            if (isEventAlreadyAddedToFavorites(eventId, studentId)) {
+            if (favouriteEventService.isEventInFavorites(eventId, studentId)) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Event already added"));
             }
 
@@ -58,8 +61,8 @@ public class FavouriteEventController {
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
         if (favouriteEvent.isPresent()) {
-            favouriteEventService.removeFromFavorites(eventId);
             favouriteEventService.delete(favouriteEvent.get());
+            favouriteEventService.removeFromFavorites(eventId);
             response.put(MESSAGE, "Event removed from favourites successfully");
             return ResponseEntity.ok(response);
         }
@@ -74,22 +77,15 @@ public class FavouriteEventController {
         return favouriteEvent;
     }
 
-    private boolean isEventAlreadyAddedToFavorites(Long eventId, Long studentId) {
-        return favouriteEventService.isEventInFavorites(eventId, studentId);
-    }
-
     @Operation(summary = "Get student favourite events")
     @GetMapping("/getFavourite")
-    public ResponseEntity<Map<String, Object>> getFavouriteEventsByStudentId(Authentication authentication) {
+    public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);
         List<Event> events = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
                 .toList();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("events", events);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(events);
     }
 }

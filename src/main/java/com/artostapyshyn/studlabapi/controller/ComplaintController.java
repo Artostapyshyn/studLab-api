@@ -3,7 +3,6 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.dto.ComplaintDto;
 import com.artostapyshyn.studlabapi.entity.Complaint;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
-import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -31,8 +30,6 @@ public class ComplaintController {
 
     private final ComplaintService complaintService;
 
-    private final StudentService studentService;
-
     @Operation(summary = "Get all complaints")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/all")
@@ -52,7 +49,6 @@ public class ComplaintController {
     @Operation(summary = "Add a complaint")
     @PostMapping("/add")
     public ResponseEntity<Complaint> saveComplaint(@RequestBody @NotNull ComplaintDto complaintDto, Authentication authentication) {
-        complaintDto.setStudentId(studentService.getAuthStudentId(authentication));
         Complaint complaint = complaintService.saveComplaint(complaintDto);
         if (complaint == null) {
             return ResponseEntity.internalServerError().build();
@@ -65,8 +61,7 @@ public class ComplaintController {
     @PostMapping("/process")
     public ResponseEntity<Map<String, Object>> processComplaint(@RequestBody @NotNull Complaint complaint, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
-        Complaint savedComplaint = complaintService.save(complaint);
-        complaintService.processComplaints(savedComplaint);
+        complaintService.processComplaints(complaint);
 
         response.put(MESSAGE, "Processed successfully");
         return ResponseEntity.ok(response);
@@ -75,7 +70,7 @@ public class ComplaintController {
     @Operation(summary = "Remove complaint")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping("/remove")
-    public ResponseEntity<Map<String, Object>> removeComplaints(@RequestParam("complaintId") Long complaintId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> removeComplaints(@RequestParam("complaintId") Long complaintId) {
         Map<String, Object> response = new HashMap<>();
         Optional<Complaint> complaint = complaintService.findById(complaintId);
         if (complaint.isPresent()) {

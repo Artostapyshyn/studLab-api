@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.FavouriteEventService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,7 @@ public class FavouriteEventServiceImpl implements FavouriteEventService {
         return favouriteEventRepository.findByEventId(eventId);
     }
 
+    @CacheEvict(value = "favouriteEventsByStudentId", key = "#favouriteEvent.studentId")
     @Transactional
     @Override
     public void delete(FavouriteEvent favouriteEvent) {

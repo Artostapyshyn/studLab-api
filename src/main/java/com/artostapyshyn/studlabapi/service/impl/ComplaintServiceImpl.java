@@ -31,8 +31,10 @@ public class ComplaintServiceImpl implements ComplaintService {
         Optional<Complaint> existingComplaint = complaintRepository.findById(newComplaintData.getId());
 
         existingComplaint.ifPresent(complaint -> {
-            Student student = studentService.findById(newComplaintData.getStudentId()).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-            Comment comment = commentService.findById(newComplaintData.getCommentId()).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+            Student student = studentService.findById(newComplaintData.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            Comment comment = commentService.findById(newComplaintData.getCommentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 
             if (newComplaintData.isDeleteComment()) {
                 commentService.delete(comment);
@@ -48,12 +50,10 @@ public class ComplaintServiceImpl implements ComplaintService {
 
             if (newComplaintData.isCloseComplaint()) {
                 complaint.setStatus("Закрито");
+                complaintRepository.save(complaint);
             }
-
-            complaintRepository.save(complaint);
         });
     }
-
 
     @Override
     public Complaint saveComplaint(ComplaintDto complaintDto) {
@@ -65,6 +65,10 @@ public class ComplaintServiceImpl implements ComplaintService {
             Comment comment = commentService.findById(complaintDto.getCommentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + complaintDto.getCommentId()));
             savedComplaint.setCommentId(comment.getId());
+
+            Student author = studentService.findById(comment.getStudent().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + comment.getStudent().getId()));
+            savedComplaint.setStudentId(author.getId());
         }
 
         if (complaintDto.getStudentId() != null) {

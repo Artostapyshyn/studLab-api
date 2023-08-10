@@ -56,13 +56,12 @@ public class Complaint {
                 && Objects.equals(getStudentId(), complaint.getStudentId())
                 && Objects.equals(getCommentId(), complaint.getCommentId())
                 && Objects.equals(getStatus(), complaint.getStatus())
-                && Objects.equals(getComplaintReason(), complaint.getComplaintReason())
-                && Objects.equals(getBlockDuration(), complaint.getBlockDuration());
+                && Objects.equals(getComplaintReason(), complaint.getComplaintReason());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getStudentId(), getCommentId(), getStatus(), getComplaintReason(), isBlockUser(), getBlockDuration(), isDeleteComment(), isCloseComplaint());
+        return Objects.hash(getId(), getStudentId(), getCommentId(), getStatus(), getComplaintReason(), isBlockUser(), isDeleteComment(), isCloseComplaint());
     }
 
     @Override
