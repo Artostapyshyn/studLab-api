@@ -2,7 +2,10 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.CommentDto;
 import com.artostapyshyn.studlabapi.dto.ReplyDto;
-import com.artostapyshyn.studlabapi.entity.*;
+import com.artostapyshyn.studlabapi.entity.Comment;
+import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.entity.Reply;
+import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
@@ -18,10 +21,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
 
 @Log4j2
 @Validated
@@ -63,6 +67,14 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "Find comment by id.")
+    @GetMapping("/find-by-id")
+    public ResponseEntity<Comment> getCommentById(@RequestParam("commentId") Long commentId) {
+        Comment comment = commentService.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't find comment by id - " + commentId));
+        return ResponseEntity.ok().body(comment);
+    }
+
     @Operation(summary = "Reply to comment")
     @PostMapping("/reply")
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull ReplyDto replyDto,
@@ -76,6 +88,14 @@ public class CommentController {
             responseMap.put(MESSAGE, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMap);
         }
+    }
+
+    @Operation(summary = "Find comment by id.")
+    @GetMapping("/reply/find-by-id")
+    public ResponseEntity<Reply> getReplyById(@RequestParam("replyId") Long replyId) {
+        Reply reply = replyService.findById(replyId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't find reply by id - " + replyId));
+        return ResponseEntity.ok().body(reply);
     }
 
     @Operation(summary = "Get all event comments")
@@ -150,7 +170,7 @@ public class CommentController {
     @Operation(summary = "Delete comment by student")
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
-                                                       Authentication authentication) {
+                                                                      Authentication authentication) {
         Optional<Comment> optionalComment = commentService.findById(commentId);
         if (optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
@@ -170,7 +190,7 @@ public class CommentController {
     @Operation(summary = "Delete reply by student")
     @DeleteMapping("/delete-reply")
     public ResponseEntity<Map<String, Object>> deleteReplyByStudent(@RequestParam("replyId") Long replyId,
-                                                       Authentication authentication) {
+                                                                    Authentication authentication) {
         Optional<Reply> optionalReply = replyService.findById(replyId);
         if (optionalReply.isPresent()) {
             boolean hasAdminOrModeratorRole = isHasAdminOrModeratorRole(authentication);

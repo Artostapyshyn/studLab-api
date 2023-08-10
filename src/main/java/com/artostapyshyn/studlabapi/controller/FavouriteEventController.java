@@ -80,13 +80,16 @@ public class FavouriteEventController {
 
     @Operation(summary = "Get student favourite events")
     @GetMapping("/getFavourite")
-    public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);
         List<Event> events = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
                 .toList();
 
-        return ResponseEntity.ok(events);
+        Map<String, Object> response = new HashMap<>();
+        response.put("events", events);
+
+        return ResponseEntity.ok(response);
     }
 }
