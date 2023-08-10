@@ -8,7 +8,6 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,32 +25,34 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     private final StudentService studentService;
 
-    private final ModelMapper modelMapper;
-
     @Override
-    public void processComplaints(Complaint complaint) {
-        studentService.findById(complaint.getStudentId())
-                .ifPresent(student -> commentService.findById(complaint.getCommentId())
-                        .ifPresent(comment -> handleComplaint(student, comment, complaint)));
-    }
+    public void processComplaints(Complaint newComplaintData) {
+        Optional<Complaint> existingComplaint = complaintRepository.findById(newComplaintData.getId());
 
-    private void handleComplaint(Student student, Comment comment, Complaint complaint) {
-        if (complaint.isDeleteComment()) {
-            commentService.delete(comment);
-        }
+        existingComplaint.ifPresent(complaint -> {
+            Student student = studentService.findById(newComplaintData.getStudentId()).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            Comment comment = commentService.findById(newComplaintData.getCommentId()).orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
 
-        if (complaint.isBlockUser()) {
-            switch (complaint.getBlockDuration()) {
-                case "week" -> student.setBlockedUntil(LocalDateTime.now().plusWeeks(1));
-                case "month" -> student.setBlockedUntil(LocalDateTime.now().plusMonths(1));
-                case "forever" -> student.setBlockedUntil(LocalDateTime.now().plusYears(10));
+            if (newComplaintData.isDeleteComment()) {
+                commentService.delete(comment);
             }
-        }
-        if (complaint.isCloseComplaint()) {
-            complaint.setStatus("Закрито");
-        }
-        complaintRepository.save(complaint);
+
+            if (newComplaintData.isBlockUser()) {
+                switch (newComplaintData.getBlockDuration()) {
+                    case "week" -> student.setBlockedUntil(LocalDateTime.now().plusWeeks(1));
+                    case "month" -> student.setBlockedUntil(LocalDateTime.now().plusMonths(1));
+                    case "forever" -> student.setBlockedUntil(LocalDateTime.now().plusYears(10));
+                }
+            }
+
+            if (newComplaintData.isCloseComplaint()) {
+                complaint.setStatus("Закрито");
+            }
+
+            complaintRepository.save(complaint);
+        });
     }
+
 
     @Override
     public Complaint saveComplaint(ComplaintDto complaintDto) {
