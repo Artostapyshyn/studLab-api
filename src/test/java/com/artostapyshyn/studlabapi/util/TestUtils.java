@@ -21,7 +21,7 @@ public class TestUtils {
         student.setBirthDate("1990-01-01");
 
         student.setMajor(RandomStringUtils.randomAlphabetic(10));
-        student.setCourse(RandomStringUtils.randomAlphabetic(10));
+        student.setCourse("2");
         student.setPhotoBytes(generateRandomBytes());
 
         student.setEmail(RandomStringUtils.randomAlphabetic(10) + "@gmail.com");

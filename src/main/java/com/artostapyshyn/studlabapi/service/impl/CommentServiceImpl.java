@@ -24,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
 
     private final EventService eventService;
+
     private final ReplyRepository replyRepository;
 
     @Transactional

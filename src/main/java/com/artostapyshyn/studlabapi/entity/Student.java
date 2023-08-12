@@ -45,7 +45,7 @@ public class Student {
     @Column(name = "student_city")
     private String city;
 
-    @Basic(fetch=FetchType.LAZY)
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "student_photo")
     private byte[] photoBytes;
 
@@ -57,22 +57,22 @@ public class Student {
     private String password;
 
     @Column(name = "student_resumes")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "student_resumes")
     private Set<String> resumes = new HashSet<>();
 
     @Column(name = "student_resume_filenames")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "student_resume_filenames")
     private Set<String> resumeFilenames = new HashSet<>();
 
     @Column(name = "student_certificates")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "student_certificates")
     private Set<String> certificates = new HashSet<>();
 
     @Column(name = "student_certificates_filenames")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "student_certificates_filenames")
     private Set<String> certificatesFilenames = new HashSet<>();
 

@@ -5,8 +5,10 @@ import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundExcepti
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.webjars.NotFoundException;
 
@@ -24,6 +26,7 @@ public class FileServiceImpl implements FileService {
     private final static String NOT_FOUND = "Student not found";
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> addDocument(Long studentId, MultipartFile file, Set<String> documents,
                                                            Set<String> documentFilenames, String documentType) throws IOException {
         Map<String, Object> response = new HashMap<>();
@@ -34,9 +37,8 @@ public class FileServiceImpl implements FileService {
             String documentBase64 = Base64.getEncoder().encodeToString(documentBytes);
 
             documents.add(documentBase64);
-            studentService.save(student);
-
             documentFilenames.add(file.getOriginalFilename());
+
             studentService.save(student);
 
             response.put(MESSAGE, documentType + " added");
@@ -49,18 +51,22 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> addResume(Long studentId, MultipartFile file) throws IOException {
         Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return addDocument(studentId, file, student.getResumes(), student.getResumeFilenames(), "Resume");
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> addCertificate(Long studentId, MultipartFile file) throws IOException {
         Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return addDocument(studentId, file, student.getCertificates(), student.getCertificatesFilenames(), "Certificate");
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = "studentsById")
     public ResponseEntity<Map<String, Object>> deleteDocument(Long studentId,
                                                               String fileName, Set<String> documents, Set<String> documentFilenames,
                                                               String documentType) {
@@ -97,12 +103,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> deleteResume(Long studentId, String fileName) {
         Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return deleteDocument(studentId, fileName, student.getResumes(), student.getResumeFilenames(), "resume");
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Map<String, Object>> deleteCertificate(Long studentId, String fileName) {
         Student student = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND));
         return deleteDocument(studentId, fileName, student.getCertificates(), student.getCertificatesFilenames(), "certificate");

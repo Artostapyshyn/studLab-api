@@ -26,20 +26,20 @@ public class StudentServiceImpl implements StudentService {
     private final StudentStatisticsService studentStatisticsService;
 
     @Override
-    @Cacheable("studentsById")
+    @Cacheable("students")
     public Optional<Student> findById(Long id) {
         return studentRepository.findById(id);
     }
 
     @Override
-    @Cacheable("studentsByEmail")
+    @Cacheable("students")
     public Student findByEmail(String email) {
         return studentRepository.findByEmail(email);
     }
 
     @Transactional
     @Override
-    @CacheEvict("studentsSave")
+    @CacheEvict(value = "students", allEntries = true)
     public Student save(Student student) {
         return studentRepository.save(student);
     }
@@ -51,6 +51,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     @Override
+    @CacheEvict(value = "students", allEntries = true)
     public void deleteById(Long id) {
         studentRepository.deleteById(id);
     }
@@ -91,6 +92,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @CacheEvict(value = "students", allEntries = true)
     public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
         existingStudent.setFirstName(signUpDto.getFirstName());
         existingStudent.setLastName(signUpDto.getLastName());

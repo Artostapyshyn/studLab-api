@@ -27,16 +27,19 @@ public class EventServiceImpl implements EventService {
     private AtomicInteger createdEventCount;
 
     @Override
+    @Cacheable(value = "allEvents")
     public List<Event> findAll() {
         return eventRepository.findAll();
     }
 
     @Override
+    @Cacheable(value = "eventById")
     public Optional<Event> findEventById(Long id) {
         return eventRepository.findEventById(id);
     }
 
     @Transactional
+    @CacheEvict(value = {"allEvents", "eventById", "popularEvents", "eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     @Override
     public Event save(Event event) {
         createdEventCount.incrementAndGet();
@@ -48,25 +51,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Cacheable(value = "popularEvents")
     public List<Event> findPopularEvents() {
         return eventRepository.findPopularEvents();
     }
 
     @Override
-    @Cacheable(value = "eventsByDateDesc", key = "'eventsByDateDesc'")
+    @Cacheable(value = "eventsByDateDesc")
     public List<Event> findAllEventsByDateDesc() {
         return eventRepository.findAllEventsByDateDesc();
     }
 
     @Override
-    @Cacheable(value = "eventsByCreationDateDesc", key = "'eventsByCreationDateDesc'")
+    @Cacheable(value = "eventsByCreationDateDesc")
     public List<Event> findAllEventsByCreationDateDesc() {
         return eventRepository.findAllEventsByCreationDateDesc();
     }
 
     @Transactional
+    @CacheEvict(value = {"allEvents", "eventById", "popularEvents", "eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     @Override
-    @CacheEvict(value = {"eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     public void deleteById(Long id) {
         List<FavouriteEvent> favoriteEvents = favouriteEventRepository.findByEventId(id);
         favouriteEventRepository.deleteAll(favoriteEvents);
@@ -74,6 +78,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Transactional
+    @CacheEvict(value = {"allEvents", "eventById", "popularEvents", "eventsByDateDesc", "eventsByCreationDateDesc"}, allEntries = true)
     @Override
     public void updateEvent(Event existingEvent, Event updatedEvent) {
         ModelMapper modelMapper = new ModelMapper();

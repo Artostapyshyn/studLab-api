@@ -6,6 +6,8 @@ import com.artostapyshyn.studlabapi.repository.VerificationCodeRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.VerificationCodeService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final Random random = new Random();
 
+    @Override
     public VerificationCode generateCode(String email) {
         Student student = studentService.findByEmail(email);
         int verificationCodeValue = generateRandomCode();
@@ -39,22 +42,26 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         return random.nextInt(900000) + 100000;
     }
 
+    @CacheEvict(value = {"verificationCodeByStudentId", "verificationCodeByEmail"}, allEntries = true)
     @Transactional
     @Override
     public VerificationCode save(VerificationCode verificationCode) {
         return verificationCodeRepository.save(verificationCode);
     }
 
+    @Cacheable(value = "verificationCodeByStudentId")
     @Override
     public Optional<VerificationCode> findByStudentId(Long id) {
         return verificationCodeRepository.findByStudentId(id);
     }
 
+    @Cacheable(value = "verificationCodeByEmail")
     @Override
     public VerificationCode findByEmail(String email) {
         return verificationCodeRepository.findByEmail(email);
     }
 
+    @CacheEvict(value = {"verificationCodeByStudentId", "verificationCodeByEmail"}, allEntries = true)
     @Scheduled(fixedRate = 90000000)
     @Transactional
     @Override

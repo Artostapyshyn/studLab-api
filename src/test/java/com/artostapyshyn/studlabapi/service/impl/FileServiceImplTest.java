@@ -68,7 +68,7 @@ class FileServiceImplTest {
         assertTrue(documents.contains(documentBase64));
         assertTrue(documentFilenames.contains(fileName));
 
-        verify(studentService, times(2)).save(student);
+        verify(studentService, times(1)).save(student);
     }
 
     @Test

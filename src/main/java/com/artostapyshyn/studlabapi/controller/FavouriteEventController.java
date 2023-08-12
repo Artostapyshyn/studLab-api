@@ -8,7 +8,6 @@ import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +28,6 @@ public class FavouriteEventController {
     private final StudentServiceImpl studentService;
 
     private final EventServiceImpl eventService;
-
-    private final ModelMapper modelMapper;
 
     @Operation(summary = "Add event to favourite")
     @PostMapping("/add-to-favorites")

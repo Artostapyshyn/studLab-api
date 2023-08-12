@@ -11,6 +11,8 @@ import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.ReplyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +32,13 @@ public class ReplyServiceImpl implements ReplyService {
     private final MessageService messageService;
 
     @Override
+    @Cacheable("repliesByCommentId")
     public List<Reply> findReplyByCommentId(Long commentId) {
         return replyRepository.findReplyByCommentId(commentId);
     }
 
     @Override
+    @CacheEvict(value = {"repliesByCommentId", "repliesById"}, allEntries = true)
     public void addReplyToComment(ReplyDto replyDto, Long parentCommentId, Authentication authentication) {
         Comment parentComment = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Parent comment not found"));
@@ -58,18 +62,20 @@ public class ReplyServiceImpl implements ReplyService {
         }
     }
 
-
     @Override
+    @Cacheable("repliesById")
     public Optional<Reply> findById(Long id) {
         return replyRepository.findById(id);
     }
 
     @Override
+    @CacheEvict(value = {"repliesByCommentId", "repliesById"}, allEntries = true)
     public Reply save(Reply reply) {
         return replyRepository.save(reply);
     }
 
     @Override
+    @CacheEvict(value = {"repliesByCommentId", "repliesById"}, allEntries = true)
     public void delete(Reply reply) {
         replyRepository.delete(reply);
     }
