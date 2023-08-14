@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.ERROR;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
 
 @Log4j2
@@ -117,7 +118,7 @@ public class AuthController {
         String email = verificationDto.getEmail();
 
         if (studentService.findByEmail(email) != null) {
-            response.put(MESSAGE, "User already registered with this email");
+            response.put(ERROR, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -389,7 +390,7 @@ public class AuthController {
 
     private ResponseEntity<Map<String, Object>> handleBadRequest(String message) {
         Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put(MESSAGE, message);
+        responseMap.put(ERROR, message);
         return ResponseEntity.badRequest().body(responseMap);
     }
 

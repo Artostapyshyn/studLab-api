@@ -7,4 +7,5 @@ import lombok.NoArgsConstructor;
 public final class ControllerConstants {
     public static final String MESSAGE = "message";
     public static final String TOTAL = "total";
+    public static final String ERROR = "error";
 }
