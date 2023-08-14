@@ -8,9 +8,6 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +56,6 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Transactional
-    @CachePut(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public Complaint saveComplaint(ComplaintDto complaintDto) {
         Complaint savedComplaint = new Complaint();
@@ -86,32 +82,27 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public void delete(Complaint complaint) {
         complaintRepository.delete(complaint);
     }
 
     @Override
-    @Cacheable(value = "allComplaints")
     public List<Complaint> findAll() {
         return complaintRepository.findAll();
     }
 
     @Override
-    @Cacheable(value = "complaintById")
     public Optional<Complaint> findById(Long id) {
         return complaintRepository.findById(id);
     }
 
     @Override
-    @Cacheable(value = "closedComplaints")
     public List<Complaint> findClosedComplaints() {
         return complaintRepository.findClosedComplaints();
     }
 
     @Transactional
-    @CachePut(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public Complaint save(Complaint complaint) {
         return complaintRepository.save(complaint);

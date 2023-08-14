@@ -7,9 +7,6 @@ import com.artostapyshyn.studlabapi.repository.MessageRepository;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,25 +24,21 @@ public class MessageServiceImpl implements MessageService {
 
     @Transactional
     @Override
-    @CachePut(value = "messagesByStudentId")
     public Message save(Message message) {
         return messageRepository.save(message);
     }
 
     @Override
-    @Cacheable("messagesById")
     public Optional<Message> findById(Long id) {
         return messageRepository.findById(id);
     }
 
     @Override
-    @Cacheable("messagesByStudentId")
     public List<Message> findAllMessagesByStudentId(Long id) {
         return messageRepository.findAllMessagesByStudentId(id);
     }
 
     @Override
-    @CachePut(value = "messagesByStudentId")
     public void addMessageToStudent(Long studentId) {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
@@ -63,13 +56,11 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"messagesById", "messagesByStudentId"}, beforeInvocation = true)
     public void deleteById(Long id) {
         messageRepository.deleteById(id);
     }
 
     @Override
-    @CachePut(value = "messagesByStudentId")
     public void updateNewMessageStatus(Long studentId, boolean hasNewMessages) {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));

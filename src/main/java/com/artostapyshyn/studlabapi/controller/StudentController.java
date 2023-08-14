@@ -45,13 +45,13 @@ public class StudentController {
     }
 
     @Operation(summary = "Get personal information")
-    @PostMapping("/profile")
-    public ResponseEntity<List<Object>> getProfile(@RequestBody Student student) {
-        List<Object> response = new ArrayList<>();
+    @PostMapping(value = "/profile")
+    public ResponseEntity<Map<String, Object>> getProfile(@RequestBody Student student) {
+        Map<String, Object> response = new HashMap<>();
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            response.add(existingStudent);
+            response.put("student", existingStudent);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();

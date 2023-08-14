@@ -15,4 +15,6 @@ public interface VerificationCodeService {
     VerificationCode findByEmail(String email);
 
     void deleteExpiredTokens();
+
+    void delete(VerificationCode code);
 }

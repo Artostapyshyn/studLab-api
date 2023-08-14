@@ -31,7 +31,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
         verificationCode.setCode(verificationCodeValue);
         verificationCode.setStudentId(student.getId());
         verificationCode.setEmail(email);
-        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(3));
+        verificationCode.setExpirationDate(LocalDateTime.now().plusMinutes(2));
         verificationCode.setLastSentTime(LocalDateTime.now());
         return verificationCodeRepository.save(verificationCode);
     }
@@ -61,5 +61,10 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
     @Override
     public void deleteExpiredTokens() {
         verificationCodeRepository.deleteExpiredTokens();
+    }
+
+    @Override
+    public void delete(VerificationCode code) {
+        verificationCodeRepository.delete(code);
     }
 }

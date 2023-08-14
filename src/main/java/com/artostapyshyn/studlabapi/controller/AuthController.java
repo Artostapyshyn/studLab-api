@@ -6,7 +6,6 @@ import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -22,7 +21,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,8 +50,6 @@ public class AuthController {
 
     private final UserDetailsServiceImpl userDetailsService;
 
-    private final AlternateRegistrationStudentService alternateRegistrationStudentService;
-
     private final JwtTokenUtil jwtTokenUtil;
 
     private final ModelMapper modelMapper;
@@ -82,35 +78,6 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-
-    @Operation(summary = "Check user login status")
-    @GetMapping("/login-status")
-    public ResponseEntity<Map<String, Object>> checkLoginStatus(HttpServletRequest request) {
-        String token = getTokenFromRequest(request);
-        Map<String, Object> responseMap = new HashMap<>();
-
-        if (token == null) {
-            responseMap.put(MESSAGE, "User is not logged in");
-            return ResponseEntity.ok(responseMap);
-        }
-
-        try {
-            String email = jwtTokenUtil.getUsernameFromToken(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            if (jwtTokenUtil.validateToken(token, userDetails)) {
-                responseMap.put(MESSAGE, "User is logged in");
-            } else {
-                responseMap.put(MESSAGE, "User is not logged in");
-            }
-        } catch (ExpiredJwtException | UsernameNotFoundException e) {
-            log.warn(e.getMessage());
-            responseMap.put(MESSAGE, "User is not logged in");
-        }
-
-        return ResponseEntity.ok(responseMap);
-    }
-
     @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody VerificationDto verificationDto) {
@@ -131,15 +98,10 @@ public class AuthController {
 
             VerificationCode existingCode = verificationCodeService.findByEmail(email);
             if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-                return handleResendCodeError(response, "Verification code has already been sent.");
+                return handleResendCodeError(response);
             }
 
-            int verificationCode = verificationCodeService.generateCode(email).getCode();
-            emailService.sendVerificationCode(email, verificationCode);
-            submitVerificationCode(email, verificationCode);
-
-            response.put(MESSAGE, "Email sent successfully");
-            log.info("Verification code sent to - " + email);
+            sendVerificationCode(email, response);
             return ResponseEntity.ok(response);
         }
 
@@ -152,23 +114,9 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody ResendCodeDto resendCodeDto) {
         Map<String, Object> response = new HashMap<>();
         String email = resendCodeDto.getEmail();
-        VerificationCode existingCode = verificationCodeService.findByEmail(email);
 
-        if (existingCode != null) {
-            LocalDateTime expirationDate = existingCode.getExpirationDate();
-            LocalDateTime currentTime = LocalDateTime.now();
-
-            if (expirationDate.isBefore(currentTime)) {
-                verificationCodeService.deleteExpiredTokens();
-            } else {
-                return handleResendCodeError(response, "Verification code has already been sent. Please wait before requesting another code.");
-            }
-        }
-
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
-        submitVerificationCode(email, verificationCode);
-        response.put(MESSAGE, "Verification code sent successfully");
+        deleteExpiredCodeForEmail(email);
+        sendVerificationCode(email, response);
         return ResponseEntity.ok(response);
     }
 
@@ -191,11 +139,6 @@ public class AuthController {
             response.put(MESSAGE, "Student is not verified");
         }
         return ResponseEntity.ok(response);
-    }
-
-    private ResponseEntity<Map<String, Object>> handleResendCodeError(Map<String, Object> response, String errorMessage) {
-        response.put("error", errorMessage);
-        return ResponseEntity.badRequest().body(response);
     }
 
     @Operation(summary = "Verify student email")
@@ -221,25 +164,6 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Verify alternative registration student")
-    @PostMapping("/alternate/verify")
-    public ResponseEntity<Map<String, Object>> registerAlternate(@RequestBody AlternateRegistrationStudent alternateStudent) {
-        String code = alternateStudent.getCode();
-        Map<String, Object> response = new HashMap<>();
-
-        if (alternateRegistrationStudentService.isValidCode(code)) {
-            Student student = modelMapper.map(alternateStudent, Student.class);
-            student.setRole(Role.ROLE_STUDENT);
-            studentService.save(student);
-
-            response.put("message", "Student validated successfully");
-            return ResponseEntity.ok().body(response);
-        } else {
-            response.put("message", "Invalid registration code.");
-            return ResponseEntity.badRequest().body(response);
-        }
-    }
-
     @Operation(summary = "Reset password with the new password")
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
@@ -248,7 +172,7 @@ public class AuthController {
 
         Student student = studentService.findByEmail(email);
         if (student == null) {
-            response.put(MESSAGE, "User is not registered with this email");
+            response.put(ERROR, "User is not registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -264,23 +188,8 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         String email = forgotPasswordDto.getEmail();
 
-        Student student = studentService.findByEmail(email);
-        if (student == null) {
-            response.put(MESSAGE, "User is not registered with this email");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        VerificationCode existingCode = verificationCodeService.findByEmail(email);
-        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-            return handleResendCodeError(response, "Verification code has already been sent.");
-        }
-
-        int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendResetPasswordCode(email, verificationCode);
-        submitVerificationCode(email, verificationCode);
-
-        response.put(MESSAGE, "Email sent successfully");
-        log.info("Verification code sent to - " + email);
+        deleteExpiredCodeForEmail(email);
+        sendVerificationCode(email, response);
         return ResponseEntity.ok(response);
     }
 
@@ -319,10 +228,30 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
+    private void sendVerificationCode(String email, Map<String, Object> response) {
+        int verificationCode = verificationCodeService.generateCode(email).getCode();
+        emailService.sendVerificationCode(email, verificationCode);
+        submitVerificationCode(email, verificationCode);
+
+        response.put(MESSAGE, "Email sent successfully");
+        log.info("Verification code sent to - " + email);
+    }
+
+    public void deleteExpiredCodeForEmail(String email) {
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
+        if (existingCode != null) {
+            LocalDateTime expirationDate = existingCode.getExpirationDate();
+            LocalDateTime currentTime = LocalDateTime.now();
+            if (expirationDate.isBefore(currentTime)) {
+                verificationCodeService.delete(existingCode);
+            }
+        }
+    }
+
     private void submitVerificationCode(String email, int verificationCode) {
         VerificationCode verification = new VerificationCode();
         verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(3));
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(2));
         verification.setEmail(email);
     }
 
@@ -394,20 +323,15 @@ public class AuthController {
         return ResponseEntity.badRequest().body(responseMap);
     }
 
+    private ResponseEntity<Map<String, Object>> handleResendCodeError(Map<String, Object> response) {
+        response.put(ERROR, "Verification code has already been sent.");
+        return ResponseEntity.badRequest().body(response);
+    }
+
     private ResponseEntity<Map<String, Object>> handleUnauthorized(String message) {
         Map<String, Object> responseMap = new HashMap<>();
         responseMap.put(MESSAGE, message);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-    }
-
-    private String getTokenFromRequest(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                return cookie.getValue();
-            }
-        }
-        return null;
     }
 
     private boolean checkSignUpDto(SignUpDto signUpDto) {
