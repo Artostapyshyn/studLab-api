@@ -8,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Transactional
     @Override
-    @CacheEvict(value = "messagesByStudentId", beforeInvocation = true)
+    @CachePut(value = "messagesByStudentId")
     public Message save(Message message) {
         return messageRepository.save(message);
     }
@@ -44,7 +45,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @CacheEvict(value = "messagesByStudentId")
+    @CachePut(value = "messagesByStudentId")
     public void addMessageToStudent(Long studentId) {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
@@ -68,7 +69,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @CacheEvict(value = "messagesByStudentId")
+    @CachePut(value = "messagesByStudentId")
     public void updateNewMessageStatus(Long studentId, boolean hasNewMessages) {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));

@@ -8,8 +8,6 @@ import com.artostapyshyn.studlabapi.repository.StudentStatisticsRepository;
 import com.artostapyshyn.studlabapi.repository.UpdateDatesRepository;
 import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -34,7 +32,6 @@ public class StudentStatisticServiceImpl implements StudentStatisticsService {
         return studentRepository.countByEnabled(true);
     }
 
-    @Cacheable(value = "registrationData")
     public Map<String, Integer> getRegistrationData() {
         Map<String, Integer> registrationData = new HashMap<>();
 
@@ -54,7 +51,6 @@ public class StudentStatisticServiceImpl implements StudentStatisticsService {
     }
 
     @Override
-    @CacheEvict(value = {"registrationData", "dailyStatistics", "weeklyStatistics", "monthlyStatistics", "allTimeStatistics"}, allEntries = true)
     public void updateStatistics(LocalDateTime registrationDate) {
         LocalDateTime now = LocalDateTime.now();
         LocalDate currentDate = now.toLocalDate();
@@ -96,25 +92,21 @@ public class StudentStatisticServiceImpl implements StudentStatisticsService {
         studentStatisticsRepository.save(studentStatistics);
     }
 
-    @Cacheable(value = "dailyStatistics")
     @Override
     public int getDailyStatistics() {
         return studentStatisticsRepository.getDailyStatistics();
     }
 
-    @Cacheable(value = "weeklyStatistics")
     @Override
     public int getWeeklyStatistics() {
         return studentStatisticsRepository.getWeeklyStatistics();
     }
 
-    @Cacheable(value = "monthlyStatistics")
     @Override
     public int getMonthlyStatistics() {
         return studentStatisticsRepository.getMonthlyStatistics();
     }
 
-    @Cacheable(value = "allTimeStatistics")
     @Override
     public int getAllTimeStatistics() {
         return studentStatisticsRepository.getAllTimeStatistics();

@@ -5,7 +5,6 @@ import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundExcepti
 import com.artostapyshyn.studlabapi.service.FileService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +65,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "studentsById")
     public ResponseEntity<Map<String, Object>> deleteDocument(Long studentId,
                                                               String fileName, Set<String> documents, Set<String> documentFilenames,
                                                               String documentType) {

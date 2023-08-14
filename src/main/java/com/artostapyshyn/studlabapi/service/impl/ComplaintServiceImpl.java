@@ -9,6 +9,7 @@ import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,6 @@ public class ComplaintServiceImpl implements ComplaintService {
     private final StudentService studentService;
 
     @Transactional
-    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"}, allEntries = true)
     @Override
     public void processComplaints(Complaint newComplaintData) {
         Optional<Complaint> existingComplaint = complaintRepository.findById(newComplaintData.getId());
@@ -59,7 +59,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"}, allEntries = true)
+    @CachePut(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public Complaint saveComplaint(ComplaintDto complaintDto) {
         Complaint savedComplaint = new Complaint();
@@ -86,7 +86,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"}, allEntries = true)
+    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public void delete(Complaint complaint) {
         complaintRepository.delete(complaint);
@@ -111,7 +111,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allComplaints", "complaintById", "closedComplaints"}, allEntries = true)
+    @CachePut(value = {"allComplaints", "complaintById", "closedComplaints"})
     @Override
     public Complaint save(Complaint complaint) {
         return complaintRepository.save(complaint);

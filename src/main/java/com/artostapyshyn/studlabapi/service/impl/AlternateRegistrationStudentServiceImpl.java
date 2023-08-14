@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.AlternateRegistrationStudentRepos
 import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,14 +31,14 @@ public class AlternateRegistrationStudentServiceImpl implements AlternateRegistr
         return alternateRegistrationStudentRepository.findById(id);
     }
 
-    @CacheEvict(value = {"allAlternateRegistrationStudents", "alternateRegistrationStudentById"}, allEntries = true)
+    @CachePut(value = {"allAlternateRegistrationStudents", "alternateRegistrationStudentById"})
     @Transactional
     @Override
     public AlternateRegistrationStudent save(AlternateRegistrationStudent alternateRegistrationStudent) {
         return alternateRegistrationStudentRepository.save(alternateRegistrationStudent);
     }
 
-    @CacheEvict(value = {"allAlternateRegistrationStudents", "alternateRegistrationStudentById"}, allEntries = true)
+    @CacheEvict(value = {"allAlternateRegistrationStudents", "alternateRegistrationStudentById"})
     @Transactional
     @Override
     public void delete(AlternateRegistrationStudent alternateRegistrationStudent) {

@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.CourseService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +33,14 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allCourses", "courseById"}, allEntries = true)
+    @CachePut(value = {"allCourses", "courseById"})
     @Override
     public Course save(Course course) {
         return courseRepository.save(course);
     }
 
     @Transactional
-    @CacheEvict(value = {"allCourses", "courseById"}, allEntries = true)
+    @CacheEvict(value = {"allCourses", "courseById"})
     @Override
     public void deleteById(Long id) {
         courseRepository.deleteById(id);
@@ -52,7 +53,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Transactional
-    @CacheEvict(value = {"allCourses", "courseById", "coursesByCreationDate"}, allEntries = true)
+    @CacheEvict(value = {"allCourses", "courseById", "coursesByCreationDate"})
     @Override
     public void updateCourse(Course existingCourse, Course updatedCourse) {
         ModelMapper modelMapper = new ModelMapper();

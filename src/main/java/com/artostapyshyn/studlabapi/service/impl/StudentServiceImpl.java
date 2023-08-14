@@ -7,8 +7,6 @@ import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,20 +24,17 @@ public class StudentServiceImpl implements StudentService {
     private final StudentStatisticsService studentStatisticsService;
 
     @Override
-    @Cacheable("students")
     public Optional<Student> findById(Long id) {
         return studentRepository.findById(id);
     }
 
     @Override
-    @Cacheable("students")
     public Student findByEmail(String email) {
         return studentRepository.findByEmail(email);
     }
 
     @Transactional
     @Override
-    @CacheEvict(value = "students", allEntries = true)
     public Student save(Student student) {
         return studentRepository.save(student);
     }
@@ -51,7 +46,6 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     @Override
-    @CacheEvict(value = "students", allEntries = true)
     public void deleteById(Long id) {
         studentRepository.deleteById(id);
     }
@@ -92,7 +86,6 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @CacheEvict(value = "students", allEntries = true)
     public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
         existingStudent.setFirstName(signUpDto.getFirstName());
         existingStudent.setLastName(signUpDto.getLastName());

@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.SliderRepository;
 import com.artostapyshyn.studlabapi.service.SliderService;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,14 +33,14 @@ public class SliderServiceImpl implements SliderService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {"sliders", "slidersById"}, allEntries = true)
+    @CachePut(value = {"sliders", "slidersById"})
     public Slider save(Slider slider) {
         return sliderRepository.save(slider);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = {"sliders", "slidersById"}, allEntries = true)
+    @CacheEvict(value = {"sliders", "slidersById"})
     public void deleteById(Long id) {
         sliderRepository.deleteById(id);
     }
