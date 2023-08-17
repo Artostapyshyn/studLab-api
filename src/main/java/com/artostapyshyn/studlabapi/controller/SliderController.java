@@ -48,8 +48,10 @@ public class SliderController {
     @Operation(summary = "Add images to slider.")
     @PostMapping("/add")
     public ResponseEntity<Slider> addSliderImages(@RequestBody @NotNull Slider slider) {
-        byte[] imageBytes = slider.getSliderPhoto();
-        slider.setSliderPhoto(imageBytes);
+        if (slider.getSliderPhoto() != null) {
+            byte[] imageBytes = slider.getSliderPhoto();
+            slider.setSliderPhoto(imageBytes);
+        }
 
         try {
             Slider savedSlider = sliderService.save(slider);

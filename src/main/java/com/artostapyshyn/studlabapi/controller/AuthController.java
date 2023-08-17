@@ -101,7 +101,7 @@ public class AuthController {
                 return handleResendCodeError(response);
             }
 
-            sendVerificationCode(email, response);
+            sendCode(email, response, false);
             return ResponseEntity.ok(response);
         }
 
@@ -116,7 +116,7 @@ public class AuthController {
         String email = resendCodeDto.getEmail();
 
         deleteExpiredCodeForEmail(email);
-        sendVerificationCode(email, response);
+        sendCode(email, response, false);
         return ResponseEntity.ok(response);
     }
 
@@ -188,8 +188,13 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         String email = forgotPasswordDto.getEmail();
 
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
+        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
+            return handleResendCodeError(response);
+        }
+
         deleteExpiredCodeForEmail(email);
-        sendVerificationCode(email, response);
+        sendCode(email, response, true);
         return ResponseEntity.ok(response);
     }
 
@@ -228,9 +233,15 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    private void sendVerificationCode(String email, Map<String, Object> response) {
+    private void sendCode(String email, Map<String, Object> response, boolean isResetPassword) {
         int verificationCode = verificationCodeService.generateCode(email).getCode();
-        emailService.sendVerificationCode(email, verificationCode);
+
+        if (isResetPassword) {
+            emailService.sendResetPasswordCode(email, verificationCode);
+        } else {
+            emailService.sendVerificationCode(email, verificationCode);
+        }
+
         submitVerificationCode(email, verificationCode);
 
         response.put(MESSAGE, "Email sent successfully");
