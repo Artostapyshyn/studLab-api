@@ -1,14 +1,14 @@
 package com.artostapyshyn.studlabapi.controller;
 
-import com.artostapyshyn.studlabapi.entity.AlternateRegistrationStudent;
-import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
-import com.artostapyshyn.studlabapi.service.FileService;
+import com.artostapyshyn.studlabapi.service.CertificateService;
+import com.artostapyshyn.studlabapi.service.ResumeService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +31,9 @@ public class StudentController {
 
     private final AlternateRegistrationStudentService alternateRegistrationStudentService;
 
-    private final FileService fileService;
+    private final ResumeService resumeService;
+
+    private final CertificateService certificateService;
 
     @Operation(summary = "Get personal information")
     @GetMapping("/personal-info")
@@ -88,27 +90,90 @@ public class StudentController {
         return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Upload resume to personal account")
-    @PostMapping("/resumes")
-    public ResponseEntity<Map<String, Object>> addResume(Authentication authentication,
-                                                         @RequestParam("resume") MultipartFile file) throws IOException {
+    @Operation(summary = "Get student resumes by token")
+    @GetMapping("/resumes")
+    public ResponseEntity<List<Resume>> getStudentResumes(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
-        return fileService.addResume(studentId, file);
+
+        if (studentId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Resume> resumes = resumeService.findByStudentId(studentId);
+        return ResponseEntity.ok(resumes);
+    }
+
+    @Operation(summary = "Get student certificates by token")
+    @GetMapping("/certificates")
+    public ResponseEntity<List<Certificate>> getStudentCertificates(Authentication authentication) {
+        Long studentId = studentService.getAuthStudentId(authentication);
+
+        if (studentId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Certificate> certificates = certificateService.findByStudentId(studentId);
+        return ResponseEntity.ok(certificates);
+    }
+
+    @Operation(summary = "Upload resume to personal account")
+    @PostMapping("/add/resume")
+    public ResponseEntity<Resume> addResume(Authentication authentication,
+                                            @RequestParam("resume") MultipartFile file) throws IOException {
+        Long studentId = studentService.getAuthStudentId(authentication);
+        Optional<Student> studentOptional = studentService.findById(studentId);
+
+        if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
+            Student student = studentOptional.get();
+            Resume resume = new Resume();
+            resume.setName(file.getOriginalFilename());
+            resume.setData(file.getBytes());
+            resume.setStudentId(student.getId());
+
+            resumeService.save(resume);
+            return ResponseEntity.ok(resume);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Operation(summary = "Upload certificate to personal account")
-    @PostMapping("/certificates")
-    public ResponseEntity<Map<String, Object>> addCertificate(Authentication authentication,
-                                                              @RequestParam("certificate") MultipartFile file) throws IOException {
+    @PostMapping("/add/certificate")
+    public ResponseEntity<Certificate> addCertificate(Authentication authentication,
+                                                      @RequestParam("certificate") MultipartFile file) throws IOException {
         Long studentId = studentService.getAuthStudentId(authentication);
-        return fileService.addCertificate(studentId, file);
+        Optional<Student> studentOptional = studentService.findById(studentId);
+
+        if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
+            Student student = studentOptional.get();
+            Certificate certificate = new Certificate();
+            certificate.setName(file.getOriginalFilename());
+            certificate.setData(file.getBytes());
+            certificate.setStudentId(student.getId());
+
+            certificateService.save(certificate);
+            return ResponseEntity.ok(certificate);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
+    @Operation(summary = "Delete resume from personal account")
     @DeleteMapping("/remove-resume")
     public ResponseEntity<Map<String, Object>> deleteResume(Authentication authentication,
                                                             @RequestParam("fileName") String fileName) {
         Long studentId = studentService.getAuthStudentId(authentication);
-        return fileService.deleteResume(studentId, fileName);
+        Resume resume = resumeService.findByName(fileName);
+
+        if (resume != null && resume.getStudentId().equals(studentId)) {
+            Map<String, Object> response = new HashMap<>();
+            resumeService.deleteById(resume.getId());
+
+            response.put(MESSAGE, "Resume deleted successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Delete certificate from personal account")
@@ -116,7 +181,61 @@ public class StudentController {
     public ResponseEntity<Map<String, Object>> deleteCertificate(Authentication authentication,
                                                                  @RequestParam("fileName") String fileName) {
         Long studentId = studentService.getAuthStudentId(authentication);
-        return fileService.deleteCertificate(studentId, fileName);
+        Certificate certificate = certificateService.findByName(fileName);
+
+        if (certificate != null && certificate.getStudentId().equals(studentId)) {
+            Map<String, Object> response = new HashMap<>();
+            certificateService.deleteById(certificate.getId());
+
+            response.put(MESSAGE, "Certificate deleted successfully");
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Download resumes")
+    @GetMapping("/download-resume")
+    public ResponseEntity<byte[]> downloadResume(@RequestParam("fileName") String filename) {
+        Resume resume = resumeService.findByName(filename);
+
+        if (resume == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] fileContent = resume.getData();
+
+        if (fileContent == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/pdf"));
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(filename).build());
+
+        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Download certificates")
+    @GetMapping("/download-certificate")
+    public ResponseEntity<byte[]> downloadCertificate(@RequestParam("fileName") String filename) {
+        Certificate certificate = certificateService.findByName(filename);
+
+        if (certificate == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] fileContent = certificate.getData();
+
+        if (fileContent == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(filename).build());
+
+        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
 
     @Operation(summary = "Edit student account.")

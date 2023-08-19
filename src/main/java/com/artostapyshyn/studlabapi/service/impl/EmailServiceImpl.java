@@ -17,7 +17,7 @@ public class EmailServiceImpl implements EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("studlabbot@gmail.com");
         message.setTo(toEmail);
-        message.setSubject("Підтвердження реєстрації");
+        message.setSubject("Код підтвердження");
         message.setText("Верифікаційни код: " + code);
         mailSender.send(message);
     }

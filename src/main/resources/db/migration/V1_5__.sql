@@ -14,3 +14,34 @@ CREATE TABLE IF NOT EXISTS update_dates
     last_update_week  DATE,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE IF NOT EXISTS RESUMES
+(
+    id         BIGSERIAL,
+    data       BYTEA,
+    name      VARCHAR(255),
+    student_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT FK_RESUMES_STUDENT_ID
+        FOREIGN KEY (student_id) REFERENCES STUDENTS
+);
+
+CREATE TABLE IF NOT EXISTS CERTIFICATES
+(
+    id         BIGSERIAL,
+    data       BYTEA,
+    name       VARCHAR(255),
+    student_id BIGINT,
+    PRIMARY KEY (id),
+    CONSTRAINT FK_CERTIFICATES_STUDENT_ID
+        FOREIGN KEY (student_id) REFERENCES STUDENTS
+);
+
+DROP TABLE student_certificates;
+
+DROP TABLE student_certificates_filenames;
+
+DROP TABLE student_resume_filenames;
+
+DROP TABLE student_resumes;
+

@@ -56,26 +56,6 @@ public class Student {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "student_resumes")
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "student_resumes")
-    private Set<String> resumes = new HashSet<>();
-
-    @Column(name = "student_resume_filenames")
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "student_resume_filenames")
-    private Set<String> resumeFilenames = new HashSet<>();
-
-    @Column(name = "student_certificates")
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "student_certificates")
-    private Set<String> certificates = new HashSet<>();
-
-    @Column(name = "student_certificates_filenames")
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "student_certificates_filenames")
-    private Set<String> certificatesFilenames = new HashSet<>();
-
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Message> messages;
 
