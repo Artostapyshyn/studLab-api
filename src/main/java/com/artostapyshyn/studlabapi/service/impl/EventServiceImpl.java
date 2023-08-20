@@ -1,7 +1,9 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Event;
+import com.artostapyshyn.studlabapi.entity.EventCounter;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
+import com.artostapyshyn.studlabapi.repository.EventCounterRepository;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
@@ -12,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class EventServiceImpl implements EventService {
 
     private final FavouriteEventRepository favouriteEventRepository;
 
-    private AtomicInteger createdEventCount;
+    private final EventCounterRepository eventCounterRepository;
 
     @Override
     public List<Event> findAll() {
@@ -37,12 +38,14 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public Event save(Event event) {
-        createdEventCount.incrementAndGet();
+        EventCounter counter = eventCounterRepository.findById(1L).orElse(new EventCounter());
+        counter.increment();
+        eventCounterRepository.save(counter);
         return eventRepository.save(event);
     }
 
     public int getCreatedEventCount() {
-        return createdEventCount.get();
+        return eventCounterRepository.findById(1L).map(EventCounter::getCounter).orElse(0);
     }
 
     @Override

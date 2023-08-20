@@ -38,6 +38,7 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findAllMessagesByStudentId(id);
     }
 
+    @Transactional
     @Override
     public void addMessageToStudent(Long studentId) {
         Student student = studentService.findById(studentId)
@@ -49,7 +50,7 @@ public class MessageServiceImpl implements MessageService {
         message.setStudent(student);
 
         student.getMessages().add(message);
-
+        messageRepository.save(message);
         studentService.save(student);
         updateNewMessageStatus(studentId, true);
     }

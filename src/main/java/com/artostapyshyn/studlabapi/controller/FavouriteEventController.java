@@ -75,7 +75,7 @@ public class FavouriteEventController {
     }
 
     @Operation(summary = "Get student favourite events")
-    @GetMapping("/getFavourite")
+    @GetMapping("/get")
     public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
 

@@ -8,8 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 @SpringBootApplication
 @EnableCaching
 @OpenAPIDefinition(info = @Info(title="studLab-api"))
@@ -23,7 +21,4 @@ public class StudLabApiApplication {
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
-
-	@Bean
-	public AtomicInteger atomicInteger(){return new AtomicInteger();}
 }

@@ -115,8 +115,10 @@ public class AuthController {
         Map<String, Object> response = new HashMap<>();
         String email = resendCodeDto.getEmail();
 
-        deleteExpiredCodeForEmail(email);
         sendCode(email, response, false);
+        response.put(MESSAGE, "Email sent successfully");
+
+        log.info("Verification code sent to - " + email);
         return ResponseEntity.ok(response);
     }
 
@@ -193,7 +195,6 @@ public class AuthController {
             return handleResendCodeError(response);
         }
 
-        deleteExpiredCodeForEmail(email);
         sendCode(email, response, true);
         return ResponseEntity.ok(response);
     }
@@ -233,7 +234,31 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
+    private void submitVerificationCode(String email, int verificationCode) {
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
+        if (existingCode != null) {
+            LocalDateTime expirationDate = existingCode.getExpirationDate();
+            LocalDateTime currentTime = LocalDateTime.now();
+            if (expirationDate.isAfter(currentTime)) {
+                return;
+            }
+            verificationCodeService.delete(existingCode);
+        }
+
+        VerificationCode verification = new VerificationCode();
+        verification.setCode(verificationCode);
+        verification.setExpirationDate(LocalDateTime.now().plusMinutes(2));
+        verification.setEmail(email);
+        verificationCodeService.save(verification);
+    }
+
     private void sendCode(String email, Map<String, Object> response, boolean isResetPassword) {
+        VerificationCode existingCode = verificationCodeService.findByEmail(email);
+        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
+            response.put(ERROR, "Verification code has already been sent.");
+            return;
+        }
+
         int verificationCode = verificationCodeService.generateCode(email).getCode();
 
         if (isResetPassword) {
@@ -246,24 +271,6 @@ public class AuthController {
 
         response.put(MESSAGE, "Email sent successfully");
         log.info("Verification code sent to - " + email);
-    }
-
-    public void deleteExpiredCodeForEmail(String email) {
-        VerificationCode existingCode = verificationCodeService.findByEmail(email);
-        if (existingCode != null) {
-            LocalDateTime expirationDate = existingCode.getExpirationDate();
-            LocalDateTime currentTime = LocalDateTime.now();
-            if (expirationDate.isBefore(currentTime)) {
-                verificationCodeService.delete(existingCode);
-            }
-        }
-    }
-
-    private void submitVerificationCode(String email, int verificationCode) {
-        VerificationCode verification = new VerificationCode();
-        verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(2));
-        verification.setEmail(email);
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
