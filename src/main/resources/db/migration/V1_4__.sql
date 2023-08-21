@@ -68,8 +68,11 @@ DROP TABLE IF EXISTS student_resumes;
 ALTER TABLE students
     DROP COLUMN IF EXISTS city;
 
-ALTER TABLE events
+ALTER TABLE IF EXISTS events
     ALTER COLUMN date_of_event SET NOT NULL;
 
-ALTER TABLE events
+ALTER TABLE IF EXISTS events
     ADD end_date_of_event TIMESTAMP WITHOUT TIME ZONE;
+
+ALTER TABLE universities
+    ADD registration_date TIMESTAMP WITHOUT TIME ZONE;

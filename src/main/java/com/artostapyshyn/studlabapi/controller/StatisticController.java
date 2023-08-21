@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class StatisticController {
     @GetMapping("/universities")
     public ResponseEntity<Map<String, Object>> getTotalUniversities() {
         Map<String, Object> response = new HashMap<>();
-        int totalUniversities = universityService.findAll().size();
+        int totalUniversities = universityService.countRegistered(LocalDateTime.of(2023, 8, 1,0,0));
         response.put(TOTAL, totalUniversities);
         return ResponseEntity.ok(response);
     }

@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.UniversityService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,5 +29,10 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public List<University> findAll() {
         return universityRepository.findAll();
+    }
+
+    @Override
+    public int countRegistered(LocalDateTime date) {
+        return universityRepository.countRegistered(date);
     }
 }

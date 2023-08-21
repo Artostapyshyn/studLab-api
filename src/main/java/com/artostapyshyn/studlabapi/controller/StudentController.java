@@ -92,9 +92,7 @@ public class StudentController {
 
     @Operation(summary = "Get student resumes by token")
     @GetMapping("/resumes")
-    public ResponseEntity<List<Resume>> getStudentResumes(Authentication authentication) {
-        Long studentId = studentService.getAuthStudentId(authentication);
-
+    public ResponseEntity<List<Resume>> getStudentResumes(@RequestParam("studentId") Long studentId) {
         if (studentId == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -103,11 +101,9 @@ public class StudentController {
         return ResponseEntity.ok(resumes);
     }
 
-    @Operation(summary = "Get student certificates by token")
+    @Operation(summary = "Get student certificates by id")
     @GetMapping("/certificates")
-    public ResponseEntity<List<Certificate>> getStudentCertificates(Authentication authentication) {
-        Long studentId = studentService.getAuthStudentId(authentication);
-
+    public ResponseEntity<List<Certificate>> getStudentCertificates(@RequestParam("studentId") Long studentId) {
         if (studentId == null) {
             return ResponseEntity.badRequest().build();
         }
