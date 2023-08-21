@@ -90,6 +90,7 @@ public class AuthController {
         }
 
         Student student = modelMapper.map(verificationDto, Student.class);
+        student.setPassword("tempPass1");
 
         if (isValidEmailDomain(email, student)) {
             student.setEnabled(false);
@@ -234,29 +235,15 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    private void submitVerificationCode(String email, int verificationCode) {
+    private void sendCode(String email, Map<String, Object> response, boolean isResetPassword) {
         VerificationCode existingCode = verificationCodeService.findByEmail(email);
         if (existingCode != null) {
             LocalDateTime expirationDate = existingCode.getExpirationDate();
             LocalDateTime currentTime = LocalDateTime.now();
             if (expirationDate.isAfter(currentTime)) {
-                return;
+                handleResendCodeError(response);
             }
             verificationCodeService.delete(existingCode);
-        }
-
-        VerificationCode verification = new VerificationCode();
-        verification.setCode(verificationCode);
-        verification.setExpirationDate(LocalDateTime.now().plusMinutes(2));
-        verification.setEmail(email);
-        verificationCodeService.save(verification);
-    }
-
-    private void sendCode(String email, Map<String, Object> response, boolean isResetPassword) {
-        VerificationCode existingCode = verificationCodeService.findByEmail(email);
-        if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
-            response.put(ERROR, "Verification code has already been sent.");
-            return;
         }
 
         int verificationCode = verificationCodeService.generateCode(email).getCode();
@@ -266,8 +253,6 @@ public class AuthController {
         } else {
             emailService.sendVerificationCode(email, verificationCode);
         }
-
-        submitVerificationCode(email, verificationCode);
 
         response.put(MESSAGE, "Email sent successfully");
         log.info("Verification code sent to - " + email);

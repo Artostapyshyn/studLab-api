@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,7 +123,7 @@ class StudentRepositoryTest {
         entityManager.flush();
 
         student1.setEnabled(false);
-        int count = studentRepository.countByEnabled(true);
+        int count = studentRepository.countByEnabled(true, LocalDateTime.of(2023,8,20,0,0,0));
 
         Assertions.assertEquals(2, count);
         Assertions.assertNotEquals(0, count);

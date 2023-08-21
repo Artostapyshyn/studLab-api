@@ -70,3 +70,6 @@ ALTER TABLE students
 
 ALTER TABLE events
     ALTER COLUMN date_of_event SET NOT NULL;
+
+ALTER TABLE events
+    ADD end_date_of_event TIMESTAMP WITHOUT TIME ZONE;

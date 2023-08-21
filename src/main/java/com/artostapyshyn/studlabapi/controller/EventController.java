@@ -64,6 +64,10 @@ public class EventController {
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
 
+        if(event.getEndDate().isAfter(event.getDate()) || imageBytes == null){
+            return ResponseEntity.badRequest().build();
+        }
+
         try {
             Event savedEvent = eventService.save(event);
             log.info("New event added with id - " + savedEvent.getId());

@@ -2,9 +2,11 @@ package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
+import com.artostapyshyn.studlabapi.validation.Password;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -49,9 +51,11 @@ public class Student {
     @Column(name = "student_photo")
     private byte[] photoBytes;
 
+    @Email
     @Column(name = "email", unique = true)
     private String email;
 
+    @Password
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;

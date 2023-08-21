@@ -35,6 +35,11 @@ public class Event {
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
+    @Column(name = "end_date_of_event")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    private LocalDateTime endDate;
+
     @Column(name = "venue", nullable = false)
     private String venue;
 
@@ -45,7 +50,7 @@ public class Event {
     private String nameOfEvent;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "event_type")
+    @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
     @Basic(fetch=FetchType.LAZY)

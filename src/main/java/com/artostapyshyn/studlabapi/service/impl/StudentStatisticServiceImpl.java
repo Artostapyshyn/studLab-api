@@ -29,7 +29,8 @@ public class StudentStatisticServiceImpl implements StudentStatisticsService {
 
     @Override
     public int countByEnabled(boolean enabled) {
-        return studentRepository.countByEnabled(true);
+        LocalDateTime date = LocalDateTime.of(2023, 8, 1, 0, 0);
+        return studentRepository.countByEnabled(true, date);
     }
 
     public Map<String, Integer> getRegistrationData() {
