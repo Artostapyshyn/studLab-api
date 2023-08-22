@@ -1,0 +1,35 @@
+name: StudLab CD
+
+on:
+  workflow_run:
+    workflows: [StudLab CI]
+    types:
+      - completed
+
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DDL_AUTO: ${{ secrets.DDL_AUTO }}
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+    steps:
+      - name: Pull Docker Image
+        run: sudo docker pull ghcr.io/artostapyshyn/stud-lab-api:latest
+      - name: Delete Old docker container
+        run: sudo docker rm -f stud-lab-api-container || true
+      - name: Run Docker Container
+        run: |
+          sudo docker run -d -p 8080:8080 \
+          -e spring.datasource.url=${{ env.DB_URL }} \
+          -e spring.datasource.username=${{ env.DB_USERNAME }} \
+          -e spring.datasource.password=${{ env.DB_PASSWORD }} \
+          -e spring.jpa.hibernate.ddl-auto=${{ env.DDL_AUTO }} \
+          -e spring.mail.host=${{ env.MAIL_HOST }} \
+          -e spring.mail.username=${{ env.MAIL_USERNAME }} \
+          -e spring.mail.password=${{ env.MAIL_PASSWORD }} \
+          --name stud-lab-api-container ghcr.io/artostapyshyn/stud-lab-api

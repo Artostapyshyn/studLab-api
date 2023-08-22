@@ -12,4 +12,3 @@ jobs:
           docker login --username artostapyshyn --password ${{ secrets.GH_PAT }} ghcr.io
           docker build . --tag ghcr.io/artostapyshyn/stud-lab-api:latest
           docker push ghcr.io/artostapyshyn/stud-lab-api:latest
-
