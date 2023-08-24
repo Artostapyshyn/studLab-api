@@ -64,7 +64,7 @@ public class EventController {
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
 
-        if(event.getEndDate().isAfter(event.getDate()) || imageBytes == null){
+        if(!event.getDate().isBefore(event.getEndDate()) || imageBytes == null){
             return ResponseEntity.badRequest().build();
         }
 
