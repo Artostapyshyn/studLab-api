@@ -12,6 +12,7 @@ import com.artostapyshyn.studlabapi.service.EventService;
 import com.artostapyshyn.studlabapi.service.ReplyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -43,7 +44,8 @@ public class CommentController {
 
     private final ReplyService replyService;
 
-    @Operation(summary = "Add comment to an existing event")
+    @Operation(summary = "Add comment to an existing event",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
     public ResponseEntity<List<Object>> addCommentToEvent(@RequestParam("eventId") Long eventId,
                                                           @RequestBody @NotNull CommentDto commentDto,
@@ -67,7 +69,8 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Find comment by id.")
+    @Operation(summary = "Find comment by id.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/find-by-id")
     public ResponseEntity<Comment> getCommentById(@RequestParam("commentId") Long commentId) {
         Comment comment = commentService.findById(commentId)
@@ -75,7 +78,8 @@ public class CommentController {
         return ResponseEntity.ok().body(comment);
     }
 
-    @Operation(summary = "Reply to comment")
+    @Operation(summary = "Reply to comment",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/reply")
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull ReplyDto replyDto,
                                                                  @RequestParam("commentId") Long commentId, Authentication authentication) {
@@ -90,7 +94,8 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Find comment by id.")
+    @Operation(summary = "Find comment by id.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/reply/find-by-id")
     public ResponseEntity<Reply> getReplyById(@RequestParam("replyId") Long replyId) {
         Reply reply = replyService.findById(replyId)
@@ -98,7 +103,8 @@ public class CommentController {
         return ResponseEntity.ok().body(reply);
     }
 
-    @Operation(summary = "Get all event comments")
+    @Operation(summary = "Get all event comments",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
@@ -116,21 +122,24 @@ public class CommentController {
         return new ArrayList<>(comments);
     }
 
-    @Operation(summary = "Get all replies")
+    @Operation(summary = "Get all replies",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all-replies")
     public ResponseEntity<List<Reply>> getAllRepliesForComment(@RequestParam("commentId") Long commentId) {
         List<Reply> replies = replyService.findReplyByCommentId(commentId);
         return ResponseEntity.ok().body(replies);
     }
 
-    @Operation(summary = "Like comment")
+    @Operation(summary = "Like comment",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/like-comment")
     public ResponseEntity<Map<String, Object>> likeComment(@RequestParam("commentId") Long commentId,
                                                            Authentication authentication) {
         return handleLikeUnlikeComment(commentId, authentication, true);
     }
 
-    @Operation(summary = "Unlike comment")
+    @Operation(summary = "Unlike comment",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/unlike-comment")
     public ResponseEntity<Map<String, Object>> unlikeComment(@RequestParam("commentId") Long commentId,
                                                              Authentication authentication) {
@@ -167,7 +176,8 @@ public class CommentController {
         return ResponseEntity.badRequest().body(responseMap);
     }
 
-    @Operation(summary = "Delete comment by student")
+    @Operation(summary = "Delete comment by student",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteCommentByStudent(@RequestParam("commentId") Long commentId,
                                                                       Authentication authentication) {
@@ -187,7 +197,8 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Delete reply by student")
+    @Operation(summary = "Delete reply by student",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete-reply")
     public ResponseEntity<Map<String, Object>> deleteReplyByStudent(@RequestParam("replyId") Long replyId,
                                                                     Authentication authentication) {

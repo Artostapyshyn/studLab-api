@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,7 +55,8 @@ public class AuthController {
 
     private final ModelMapper modelMapper;
 
-    @Operation(summary = "Login to student system")
+    @Operation(summary = "Login to student system",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginDto loginDto) {
         Map<String, Object> responseMap = new HashMap<>();
@@ -78,7 +80,8 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    @Operation(summary = "Join to the student service")
+    @Operation(summary = "Join to the student service",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/join")
     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody VerificationDto verificationDto) {
         Map<String, Object> response = new HashMap<>();
@@ -110,7 +113,8 @@ public class AuthController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    @Operation(summary = "Resend verification code")
+    @Operation(summary = "Resend verification code",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, Object>> resendVerificationCode(@RequestBody ResendCodeDto resendCodeDto) {
         Map<String, Object> response = new HashMap<>();
@@ -123,7 +127,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Check student status")
+    @Operation(summary = "Check student status",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/check-status")
     public ResponseEntity<Map<String, Object>> checkStatus(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
@@ -144,13 +149,15 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Verify student email")
+    @Operation(summary = "Verify student email",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyCode(@RequestBody VerificationCode verificationCode) {
         return verify(verificationCode);
     }
 
-    @Operation(summary = "Sign-up after verification")
+    @Operation(summary = "Sign-up after verification",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody SignUpDto signUpDto) {
         String email = signUpDto.getEmail();
@@ -167,7 +174,8 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "Reset password with the new password")
+    @Operation(summary = "Reset password with the new password",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
         Map<String, Object> response = new HashMap<>();
@@ -185,7 +193,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Forgot password")
+    @Operation(summary = "Forgot password",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, Object>> resetUserPassword(@RequestBody ForgotPasswordDto forgotPasswordDto) {
         Map<String, Object> response = new HashMap<>();
@@ -200,13 +209,15 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Verify student email to reset password")
+    @Operation(summary = "Verify student email to reset password",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/reset-password/verify")
     public ResponseEntity<Map<String, Object>> verifyResetPasswordCode(@RequestBody VerificationCode verificationCode) {
         return verify(verificationCode);
     }
 
-    @Operation(summary = "Logout from account")
+    @Operation(summary = "Logout from account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();

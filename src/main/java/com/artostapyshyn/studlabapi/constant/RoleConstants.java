@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RoleConstants {
-    public static final String STUDENT = "ROLE_STUDENT";
-    public static final String ADMIN = "ROLE_ADMIN";
-    public static final String MODERATOR = "ROLE_MODERATOR";
+    public static final String STUDENT = "STUDENT";
+    public static final String ADMIN = "ADMIN";
+    public static final String MODERATOR = "MODERATOR";
 }

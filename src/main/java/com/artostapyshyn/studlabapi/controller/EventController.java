@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -25,14 +26,16 @@ public class EventController {
 
     private final EventService eventService;
 
-    @Operation(summary = "Get all events")
+    @Operation(summary = "Get all events",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<Event>> getAllEvents() {
         List<Event> events = eventService.findAll();
         return ResponseEntity.ok(events);
     }
 
-    @Operation(summary = "Sort events by popularity")
+    @Operation(summary = "Sort events by popularity",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/popular")
     public ResponseEntity<List<Event>> getEventsByPopularity() {
         List<Event> events = eventService.findPopularEvents();
@@ -40,7 +43,8 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @Operation(summary = "Sort events by creation date")
+    @Operation(summary = "Sort events by creation date",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/newest")
     public ResponseEntity<List<Event>> getEventsByNewestDate() {
         List<Event> events = eventService.findAllEventsByCreationDateDesc();
@@ -48,7 +52,8 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @Operation(summary = "Get upcoming events")
+    @Operation(summary = "Get upcoming events",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/upcoming")
     public ResponseEntity<List<Event>> getUpcomingEvents() {
         List<Event> events = eventService.findAllEventsByDateDesc();
@@ -57,7 +62,8 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Add an event.")
+    @Operation(summary = "Add an event.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
     public ResponseEntity<Event> addEvent(@RequestBody @NotNull Event event) {
         event.setEventType(event.getEventType());
@@ -79,7 +85,8 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Edit an event.")
+    @Operation(summary = "Edit an event.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/edit")
     public ResponseEntity<Event> editEvent(@RequestBody @NotNull Event event) {
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
@@ -95,7 +102,8 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Delete an event by id.")
+    @Operation(summary = "Delete an event by id.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> existingEvent = eventService.findEventById(eventId);

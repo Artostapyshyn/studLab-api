@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,8 @@ public class FavouriteEventController {
 
     private final EventServiceImpl eventService;
 
-    @Operation(summary = "Add event to favourite")
+    @Operation(summary = "Add event to favourite",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add-to-favorites")
     public ResponseEntity<Object> addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -50,7 +52,8 @@ public class FavouriteEventController {
         return ResponseEntity.notFound().build();
     }
 
-    @Operation(summary = "Remove event from favourite")
+    @Operation(summary = "Remove event from favourite",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/remove")
     public ResponseEntity<Map<String, Object>> removeFavouriteEvent(Authentication authentication,
                                                                     @RequestParam("eventId") Long eventId) {
@@ -74,7 +77,8 @@ public class FavouriteEventController {
         return favouriteEvent;
     }
 
-    @Operation(summary = "Get student favourite events")
+    @Operation(summary = "Get student favourite events",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/get")
     public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);

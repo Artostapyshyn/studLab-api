@@ -6,6 +6,7 @@ import com.artostapyshyn.studlabapi.service.CertificateService;
 import com.artostapyshyn.studlabapi.service.ResumeService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.*;
@@ -35,7 +36,8 @@ public class StudentController {
 
     private final CertificateService certificateService;
 
-    @Operation(summary = "Get personal information")
+    @Operation(summary = "Get personal information",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/personal-info")
     public ResponseEntity<List<Student>> getPersonalInfo(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -46,7 +48,8 @@ public class StudentController {
         return ResponseEntity.ok(studentList);
     }
 
-    @Operation(summary = "Get personal information")
+    @Operation(summary = "Get personal information",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping(value = "/profile")
     public ResponseEntity<Map<String, Object>> getProfile(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
@@ -60,7 +63,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Get all students")
+    @Operation(summary = "Get all students",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<Map<String, String>>> getAllStudents() {
         List<Map<String, String>> studentData = studentService.findAll().stream()
@@ -75,7 +79,8 @@ public class StudentController {
         return ResponseEntity.ok(studentData);
     }
 
-    @Operation(summary = "Find student by id")
+    @Operation(summary = "Find student by id",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/find-by-id")
     public ResponseEntity<Student> getStudentById(@RequestParam("studentId") Long id) {
         Optional<Student> student = studentService.findById(id);
@@ -83,14 +88,16 @@ public class StudentController {
         return ResponseEntity.of(student);
     }
 
-    @Operation(summary = "Find alternate registration student by code")
+    @Operation(summary = "Find alternate registration student by code",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/alternate/find-by-id")
     public ResponseEntity<AlternateRegistrationStudent> getAlternateStudentByCode(@RequestParam("code") String code) {
         Optional<AlternateRegistrationStudent> student = alternateRegistrationStudentService.findByCode(code);
         return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Get student resumes by token")
+    @Operation(summary = "Get student resumes by token",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/resumes")
     public ResponseEntity<List<Resume>> getStudentResumes(@RequestParam("studentId") Long studentId) {
         if (studentId == null) {
@@ -101,7 +108,8 @@ public class StudentController {
         return ResponseEntity.ok(resumes);
     }
 
-    @Operation(summary = "Get student certificates by id")
+    @Operation(summary = "Get student certificates by id",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/certificates")
     public ResponseEntity<List<Certificate>> getStudentCertificates(@RequestParam("studentId") Long studentId) {
         if (studentId == null) {
@@ -112,7 +120,8 @@ public class StudentController {
         return ResponseEntity.ok(certificates);
     }
 
-    @Operation(summary = "Upload resume to personal account")
+    @Operation(summary = "Upload resume to personal account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add/resume")
     public ResponseEntity<Resume> addResume(Authentication authentication,
                                             @RequestParam("resume") MultipartFile file) throws IOException {
@@ -133,7 +142,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Upload certificate to personal account")
+    @Operation(summary = "Upload certificate to personal account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add/certificate")
     public ResponseEntity<Certificate> addCertificate(Authentication authentication,
                                                       @RequestParam("certificate") MultipartFile file) throws IOException {
@@ -154,7 +164,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Delete resume from personal account")
+    @Operation(summary = "Delete resume from personal account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/remove-resume")
     public ResponseEntity<Map<String, Object>> deleteResume(Authentication authentication,
                                                             @RequestParam("fileName") String fileName) {
@@ -172,7 +183,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Delete certificate from personal account")
+    @Operation(summary = "Delete certificate from personal account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/remove-certificate")
     public ResponseEntity<Map<String, Object>> deleteCertificate(Authentication authentication,
                                                                  @RequestParam("fileName") String fileName) {
@@ -190,7 +202,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Download resumes")
+    @Operation(summary = "Download resumes",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/download-resume")
     public ResponseEntity<byte[]> downloadResume(@RequestParam("fileName") String filename) {
         Resume resume = resumeService.findByName(filename);
@@ -212,7 +225,8 @@ public class StudentController {
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
 
-    @Operation(summary = "Download certificates")
+    @Operation(summary = "Download certificates",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/download-certificate")
     public ResponseEntity<byte[]> downloadCertificate(@RequestParam("fileName") String filename) {
         Certificate certificate = certificateService.findByName(filename);
@@ -234,7 +248,8 @@ public class StudentController {
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
 
-    @Operation(summary = "Edit student account.")
+    @Operation(summary = "Edit student account.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/edit")
     public ResponseEntity<Student> editStudent(@RequestBody Student student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
@@ -249,7 +264,8 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Delete student account")
+    @Operation(summary = "Delete student account",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete-account")
     public ResponseEntity<Map<String, Object>> deleteStudent(Authentication authentication) {
         Long studentIdToDelete = studentService.getAuthStudentId(authentication);

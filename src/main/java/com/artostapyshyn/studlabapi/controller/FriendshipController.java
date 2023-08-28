@@ -3,6 +3,8 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.Friendship;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -29,12 +31,16 @@ public class FriendshipController {
 
     private final StudentService studentService;
 
+    @Operation(summary = "Get all friends by student id",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<Friendship>> getAllFriendsByStudentId(@RequestParam("studentId") Long studentId) {
        List<Friendship> friends = friendshipService.findAllByStudentId(studentId);
        return ResponseEntity.ok(friends);
     }
 
+    @Operation(summary = "Delete friend by id",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete-friend")
     public ResponseEntity<Map<String, Object>> deleteFriendById(@RequestParam("friendId") Long friendId, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();

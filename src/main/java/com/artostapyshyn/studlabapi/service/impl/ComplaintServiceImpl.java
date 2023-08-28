@@ -102,6 +102,11 @@ public class ComplaintServiceImpl implements ComplaintService {
         return complaintRepository.findClosedComplaints();
     }
 
+    @Override
+    public List<Complaint> findOpenedComplaints() {
+        return complaintRepository.findOpenedComplaints();
+    }
+
     @Transactional
     @Override
     public Complaint save(Complaint complaint) {

@@ -12,6 +12,6 @@ public interface UniversityRepository extends JpaRepository<University, Long> {
     @Query("SELECT u FROM University u WHERE u.domain = :domain")
     University findByDomain(String domain);
 
-    @Query("SELECT u FROM University u WHERE u.registrationDate > :date")
+    @Query("SELECT COUNT(u) FROM University u WHERE u.registrationDate > :date")
     int countRegistered(LocalDateTime date);
 }

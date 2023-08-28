@@ -3,6 +3,8 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.FriendRequest;
 import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.StudentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,8 @@ public class FriendRequestController {
 
     private final StudentService studentService;
 
+    @Operation(summary = "Send friend request",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping
     public ResponseEntity<Map<String, Object>> sendFriendRequest(@RequestBody FriendRequest request, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -47,6 +51,8 @@ public class FriendRequestController {
         }
     }
 
+    @Operation(summary = "Get received friend requests with status 'PENDING'",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/received")
     public ResponseEntity<?> getAllFriendRequests(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -61,6 +67,8 @@ public class FriendRequestController {
         }
     }
 
+    @Operation(summary = "Accept friend request",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/accept")
     public ResponseEntity<Map<String, Object>> acceptFriendRequest(@RequestParam("requestId") Long requestId) {
         Map<String, Object> response = new HashMap<>();
@@ -80,6 +88,8 @@ public class FriendRequestController {
         }
     }
 
+    @Operation(summary = "Decline friend request",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/decline")
     public ResponseEntity<Map<String, Object>> declineFriendRequest(@RequestParam("requestId") Long requestId) {
         Map<String, Object> response = new HashMap<>();

@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.Course;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
@@ -28,14 +29,16 @@ public class CourseController {
 
     private final CourseService courseService;
 
-    @Operation(summary = "Get all courses")
+    @Operation(summary = "Get all courses",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
     public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.findAll();
         return ResponseEntity.ok(courses);
     }
 
-    @Operation(summary = "Sort courses by creation date")
+    @Operation(summary = "Sort courses by creation date",
+            security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/newest")
     public ResponseEntity<List<Course>> getCoursesByNewestDate() {
         List<Course> courses = courseService.findAllCoursesByCreationDateDesc();
@@ -44,7 +47,8 @@ public class CourseController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Add a course.")
+    @Operation(summary = "Add a course.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
     public ResponseEntity<Course> addCourse(@RequestBody @NonNull Course course) {
         byte[] imageBytes = course.getCoursePhoto();
@@ -61,7 +65,8 @@ public class CourseController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Edit a course.")
+    @Operation(summary = "Edit a course.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/edit")
     public ResponseEntity<Course> editCourse(@RequestBody @NonNull Course course) {
         Optional<Course> editedCourse = courseService.findById(course.getId());
@@ -78,7 +83,8 @@ public class CourseController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
-    @Operation(summary = "Delete a course by id.")
+    @Operation(summary = "Delete a course by id.",
+            security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteCourse(@RequestParam("courseId") Long courseId) {
         Optional<Course> existingCourse = courseService.findById(courseId);

@@ -11,4 +11,7 @@ import java.util.List;
 public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     @Query("SELECT c FROM Complaint c WHERE c.status = 'Закрито'")
     List<Complaint> findClosedComplaints();
+
+    @Query("SELECT c FROM Complaint c WHERE c.status = 'Відкрито'")
+    List<Complaint> findOpenedComplaints();
 }
