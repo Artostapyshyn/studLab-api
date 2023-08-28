@@ -32,11 +32,11 @@ public class CertificateServiceImpl implements CertificateService {
 
     @Override
     public Certificate save(Certificate certificate) {
-        return null;
+        return certificateRepository.save(certificate);
     }
 
     @Override
     public void deleteById(Long id) {
-
+        certificateRepository.deleteById(id);
     }
 }
