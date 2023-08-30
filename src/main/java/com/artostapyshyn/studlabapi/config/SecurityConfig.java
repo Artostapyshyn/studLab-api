@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable).cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/v1/**", "api/v1/auth/**", "api/v1/auth/alternative/**").permitAll()
-                        .requestMatchers("api/v1/vacancies/**",
+                        .requestMatchers("api/v1/vacancies/**", "api/v1/achievements/**",
                                 "api/v1/comments/**", "api/v1/favourites/**",
                                 "api/v1/messages/**", "api/v1/events/**",
                                 "api/v1/friends/**", "api/v1/friend-request",
