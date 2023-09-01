@@ -9,6 +9,7 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +51,7 @@ public class CourseController {
     @Operation(summary = "Add a course.",
             security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
-    public ResponseEntity<Course> addCourse(@RequestBody @NonNull Course course) {
+    public ResponseEntity<Course> addCourse(@RequestBody @NonNull Course course, Authentication authentication) {
         byte[] imageBytes = course.getCoursePhoto();
         course.setCoursePhoto(imageBytes);
 
@@ -68,7 +69,7 @@ public class CourseController {
     @Operation(summary = "Edit a course.",
             security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/edit")
-    public ResponseEntity<Course> editCourse(@RequestBody @NonNull Course course) {
+    public ResponseEntity<Course> editCourse(@RequestBody @NonNull Course course, Authentication authentication) {
         Optional<Course> editedCourse = courseService.findById(course.getId());
 
         if (editedCourse.isPresent()) {
@@ -86,7 +87,7 @@ public class CourseController {
     @Operation(summary = "Delete a course by id.",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> deleteCourse(@RequestParam("courseId") Long courseId) {
+    public ResponseEntity<Map<String, Object>> deleteCourse(@RequestParam("courseId") Long courseId, Authentication authentication) {
         Optional<Course> existingCourse = courseService.findById(courseId);
         Map<String, Object> response = new HashMap<>();
 

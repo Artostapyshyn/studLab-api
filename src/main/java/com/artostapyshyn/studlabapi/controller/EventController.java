@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,7 +66,7 @@ public class EventController {
     @Operation(summary = "Add an event.",
             security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
-    public ResponseEntity<Event> addEvent(@RequestBody @NotNull Event event) {
+    public ResponseEntity<Event> addEvent(@RequestBody @NotNull Event event, Authentication authentication) {
         event.setEventType(event.getEventType());
         byte[] imageBytes = event.getEventPhoto();
         event.setEventPhoto(imageBytes);
@@ -88,7 +89,7 @@ public class EventController {
     @Operation(summary = "Edit an event.",
             security = @SecurityRequirement(name = "basicAuth"))
     @PutMapping("/edit")
-    public ResponseEntity<Event> editEvent(@RequestBody @NotNull Event event) {
+    public ResponseEntity<Event> editEvent(@RequestBody @NotNull Event event, Authentication authentication) {
         Optional<Event> editedEvent = eventService.findEventById(event.getId());
 
         if (editedEvent.isPresent()) {
@@ -105,7 +106,7 @@ public class EventController {
     @Operation(summary = "Delete an event by id.",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId) {
+    public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Optional<Event> existingEvent = eventService.findEventById(eventId);
         if (existingEvent.isPresent()) {
             Map<String, Object> response = new HashMap<>();

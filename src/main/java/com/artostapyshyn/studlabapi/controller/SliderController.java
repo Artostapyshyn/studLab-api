@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class SliderController {
     @Operation(summary = "Get slider image by id.",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/find-by-id")
-    public ResponseEntity<Slider> getSliderById(@RequestParam("sliderImageId") Long sliderImageId) {
+    public ResponseEntity<Slider> getSliderById(@RequestParam("sliderImageId") Long sliderImageId, Authentication authentication) {
         Optional<Slider> slider = sliderService.findById(sliderImageId);
         return slider.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -51,7 +52,7 @@ public class SliderController {
     @Operation(summary = "Add images to slider.",
             security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
-    public ResponseEntity<Slider> addSliderImages(@RequestBody @NotNull Slider slider) {
+    public ResponseEntity<Slider> addSliderImages(@RequestBody @NotNull Slider slider, Authentication authentication) {
         if (slider.getSliderPhoto() != null) {
             byte[] imageBytes = slider.getSliderPhoto();
             slider.setSliderPhoto(imageBytes);
@@ -70,7 +71,7 @@ public class SliderController {
     @Operation(summary = "Delete image from slider by id.",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete-by-id")
-    public ResponseEntity<Map<String, Object>> deleteSliderImage(@RequestParam("sliderId") Long sliderId) {
+    public ResponseEntity<Map<String, Object>> deleteSliderImage(@RequestParam("sliderId") Long sliderId, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
         Optional<Slider> existingSliderImage = sliderService.findById(sliderId);
         if (existingSliderImage.isPresent()) {

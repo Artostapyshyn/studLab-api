@@ -35,7 +35,7 @@ public class ComplaintController {
             security = @SecurityRequirement(name = "basicAuth"))
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/all")
-    public ResponseEntity<List<Complaint>> getAllComplaints() {
+    public ResponseEntity<List<Complaint>> getAllComplaints(Authentication authentication) {
         List<Complaint> complaints = complaintService.findAll();
         return ResponseEntity.ok(complaints);
     }
@@ -44,7 +44,7 @@ public class ComplaintController {
             security = @SecurityRequirement(name = "basicAuth"))
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/opened")
-    public ResponseEntity<List<Complaint>> getOpenedComplaints() {
+    public ResponseEntity<List<Complaint>> getOpenedComplaints(Authentication authentication) {
         List<Complaint> complaints = complaintService.findOpenedComplaints();
         return ResponseEntity.ok(complaints);
     }
@@ -53,7 +53,7 @@ public class ComplaintController {
             security = @SecurityRequirement(name = "basicAuth"))
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @GetMapping("/closed")
-    public ResponseEntity<List<Complaint>> getAllClosedComplaints() {
+    public ResponseEntity<List<Complaint>> getAllClosedComplaints(Authentication authentication) {
         List<Complaint> complaints = complaintService.findClosedComplaints();
         return ResponseEntity.ok(complaints);
     }
@@ -85,7 +85,7 @@ public class ComplaintController {
             security = @SecurityRequirement(name = "basicAuth"))
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @DeleteMapping("/remove")
-    public ResponseEntity<Map<String, Object>> removeComplaints(@RequestParam("complaintId") Long complaintId) {
+    public ResponseEntity<Map<String, Object>> removeComplaints(@RequestParam("complaintId") Long complaintId, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
         Optional<Complaint> complaint = complaintService.findById(complaintId);
         if (complaint.isPresent()) {
