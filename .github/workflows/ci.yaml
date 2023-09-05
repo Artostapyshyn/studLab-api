@@ -5,8 +5,6 @@ on: push
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
-    env:
-        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
     steps:
       - uses: actions/checkout@v3
       - name: Build and push stud-lab-api image
@@ -14,10 +12,3 @@ jobs:
           docker login --username artostapyshyn --password ${{ secrets.GH_PAT }} ghcr.io
           docker build . --tag ghcr.io/artostapyshyn/stud-lab-api:latest
           docker push ghcr.io/artostapyshyn/stud-lab-api:latest
-      - name: Login and run command on Google Cloud VM
-        run: |
-          echo "$GCP_SA_KEY" > sa_key.json
-          gcloud auth activate-service-account --key-file=sa_key.json
-          gcloud config set project zinc-computer-396910
-          echo 'yes' | gcloud compute ssh instance-1 --zone=us-central1-c --command='cd actions-runner && ./run.sh'
-          rm sa_key.json

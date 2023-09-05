@@ -35,6 +35,14 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+    @Operation(summary = "Get events by id",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @GetMapping("/find-by-id")
+    public ResponseEntity<Event> getEventById(@RequestParam("eventId") Long eventId) {
+        Optional<Event> event = eventService.findEventById(eventId);
+        return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
+    }
+
     @Operation(summary = "Sort events by popularity",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/popular")
