@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
 import com.artostapyshyn.studlabapi.service.CertificateService;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +31,8 @@ import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 public class StudentController {
 
     private final StudentService studentService;
+
+    private final ModelMapper modelMapper;
 
     private final AlternateRegistrationStudentService alternateRegistrationStudentService;
 
@@ -56,7 +60,8 @@ public class StudentController {
         Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
-            response.put("student", existingStudent);
+            StudentDto studentDto = convertToDto(existingStudent);
+            response.put("student", studentDto);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound().build();
@@ -275,4 +280,9 @@ public class StudentController {
         response.put(MESSAGE, "Student account deleted successfully");
         return ResponseEntity.ok().body(response);
     }
+
+    public StudentDto convertToDto(Student student) {
+        return modelMapper.map(student, StudentDto.class);
+    }
+
 }
