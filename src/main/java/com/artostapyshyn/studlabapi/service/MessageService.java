@@ -15,7 +15,7 @@ public interface MessageService {
 
     void updateNewMessageStatus(Long studentId, boolean hasNewMessages);
 
-    void addMessageToStudent(Long studentId);
+    void addMessageToStudent(Long studentId, String messageContent);
 
     void deleteById(Long id);
 }

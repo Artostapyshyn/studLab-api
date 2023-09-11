@@ -53,7 +53,7 @@ public class ReplyServiceImpl implements ReplyService {
             replyRepository.save(reply);
 
             Long studentId = parentComment.getStudent().getId();
-            messageService.addMessageToStudent(studentId);
+            messageService.addMessageToStudent(studentId, "Вам надійшла відповідь на ваш коментар.");
             messageService.updateNewMessageStatus(studentId, true);
         }
     }

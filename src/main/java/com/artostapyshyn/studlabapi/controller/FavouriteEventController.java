@@ -83,6 +83,17 @@ public class FavouriteEventController {
     public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
 
+        return getListResponseEntity(studentId);
+    }
+
+    @Operation(summary = "Get student favourite events by id",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @GetMapping("/get-by-id")
+    public ResponseEntity<List<Event>> getEventsByStudentId(@RequestParam("studentId") Long studentId) {
+        return getListResponseEntity(studentId);
+    }
+
+    private ResponseEntity<List<Event>> getListResponseEntity(@RequestParam("studentId") Long studentId) {
         if(studentId == null){
             return ResponseEntity.badRequest().build();
         }

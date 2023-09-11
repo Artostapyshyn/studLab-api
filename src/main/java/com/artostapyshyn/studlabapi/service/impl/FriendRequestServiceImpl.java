@@ -9,6 +9,7 @@ import com.artostapyshyn.studlabapi.repository.FriendRequestRepository;
 import com.artostapyshyn.studlabapi.repository.FriendshipRepository;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.FriendRequestService;
+import com.artostapyshyn.studlabapi.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     private final FriendshipRepository friendshipRepository;
 
     private final StudentRepository studentRepository;
+
+    private final MessageService messageService;
 
     @Override
     @Transactional
@@ -50,7 +53,8 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setStatus(RequestStatus.PENDING);
-
+        messageService.addMessageToStudent(receiverId, "У вас нові сповіщення у профілі.");
+        messageService.updateNewMessageStatus(receiverId, true);
         return friendRequestRepository.save(request);
     }
 

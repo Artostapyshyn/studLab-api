@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.FriendshipDTO;
 import com.artostapyshyn.studlabapi.entity.Friendship;
 import com.artostapyshyn.studlabapi.repository.FriendshipRepository;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
@@ -16,10 +17,24 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     private final FriendshipRepository friendshipRepository;
 
-    @Override
-    public List<Friendship> findAllByStudentId(Long studentId) {
-        return friendshipRepository.findAllByStudentId(studentId);
+    public List<FriendshipDTO> findAllByStudentId(Long studentId) {
+        List<Friendship> friendships = friendshipRepository.findAllByStudentId(studentId);
+        return friendships.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
+
+    private FriendshipDTO convertToDTO(Friendship friendship) {
+        FriendshipDTO dto = new FriendshipDTO();
+        dto.setId(friendship.getId());
+        dto.setStudentId(friendship.getStudent().getId());
+        dto.setFriendId(friendship.getFriend().getId());
+        dto.setFriendFirstName(friendship.getFriend().getFirstName());
+        dto.setFriendLastName(friendship.getFriend().getLastName());
+        dto.setFriendPhoto(friendship.getFriend().getPhotoBytes());
+        return dto;
+    }
+
 
     @Override
     public Optional<Friendship> findFriendshipByStudentId(Long studentId) {

@@ -40,12 +40,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Transactional
     @Override
-    public void addMessageToStudent(Long studentId) {
+    public void addMessageToStudent(Long studentId, String messageContent) {
         Student student = studentService.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
         Message message = new Message();
-        message.setContent("Вам надійшла відповідь на ваш коментар події ");
+        message.setContent("messageContent");
         message.setSentTime(LocalDateTime.now());
         message.setStudent(student);
 

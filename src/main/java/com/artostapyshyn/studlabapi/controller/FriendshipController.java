@@ -1,6 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
-import com.artostapyshyn.studlabapi.entity.Friendship;
+import com.artostapyshyn.studlabapi.dto.FriendshipDTO;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,9 +34,9 @@ public class FriendshipController {
     @Operation(summary = "Get all friends by student id",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
-    public ResponseEntity<List<Friendship>> getAllFriendsByStudentId(@RequestParam("studentId") Long studentId) {
-       List<Friendship> friends = friendshipService.findAllByStudentId(studentId);
-       return ResponseEntity.ok(friends);
+    public ResponseEntity<List<FriendshipDTO>> getAllFriendsByStudentId(@RequestParam("studentId") Long studentId) {
+        List<FriendshipDTO> friendDTOs = friendshipService.findAllByStudentId(studentId);
+        return ResponseEntity.ok(friendDTOs);
     }
 
     @Operation(summary = "Delete friend by id",

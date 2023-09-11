@@ -1,6 +1,5 @@
 package com.artostapyshyn.studlabapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +21,6 @@ public class Friendship {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    @JsonIgnore
     private Student student;
 
     @ManyToOne

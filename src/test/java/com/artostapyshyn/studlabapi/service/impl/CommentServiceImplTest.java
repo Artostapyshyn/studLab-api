@@ -70,7 +70,7 @@ class CommentServiceImplTest {
         verify(commentRepository, times(1)).save(parentComment);
         verify(replyRepository, times(1)).save(reply);
 
-        verify(messageService, times(1)).addMessageToStudent(parentComment.getStudent().getId());
+        verify(messageService, times(1)).addMessageToStudent(parentComment.getStudent().getId(), "Вам надійшла відповідь на ваш коментар.");
         verify(messageService, times(1)).updateNewMessageStatus(parentComment.getStudent().getId(), true);
     }
 
