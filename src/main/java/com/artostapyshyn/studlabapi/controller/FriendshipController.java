@@ -39,6 +39,25 @@ public class FriendshipController {
         return ResponseEntity.ok(friendDTOs);
     }
 
+    @Operation(summary = "Get friendship status",
+            security = @SecurityRequirement(name = "basicAuth"))
+    @GetMapping("/status")
+    public ResponseEntity<Map<String, Object>> getFriendShipStatus(Authentication authentication, @RequestParam("studentId") Long studentId) {
+        Map<String, Object> response = new HashMap<>();
+        Long authStudentId = studentService.getAuthStudentId(authentication);
+
+        List<FriendshipDTO> friendships = friendshipService.findAllByStudentId(authStudentId);
+
+        boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getId().equals(studentId));
+
+        if(isFriend) {
+            response.put("status", "You are friends");
+        } else {
+            response.put("status", "You are not friends");
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Delete friend by id",
             security = @SecurityRequirement(name = "basicAuth"))
     @DeleteMapping("/delete-friend")

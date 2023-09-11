@@ -1,4 +1,5 @@
 package com.artostapyshyn.studlabapi.dto;
+import com.artostapyshyn.studlabapi.entity.University;
 import com.artostapyshyn.studlabapi.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class StudentDto {
     private String course;
     private String city;
     private byte[] photoBytes;
+    private University university;
     private String email;
     private Role role;
 }
