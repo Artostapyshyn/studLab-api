@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.FriendRequestDto;
 import com.artostapyshyn.studlabapi.entity.FriendRequest;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface FriendRequestService {
 
     Optional<FriendRequest> findBySenderIdAndReceiverId(Long senderId, Long receiverId);
 
-    List<FriendRequest> getReceivedFriendRequests(Long studentId);
+    List<FriendRequestDto> getReceivedFriendRequests(Long studentId);
 
     void deleteUnusedRequests();
 

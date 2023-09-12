@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.FriendRequestDto;
 import com.artostapyshyn.studlabapi.entity.FriendRequest;
 import com.artostapyshyn.studlabapi.entity.Friendship;
 import com.artostapyshyn.studlabapi.entity.Student;
@@ -64,8 +65,22 @@ public class FriendRequestServiceImpl implements FriendRequestService {
     }
 
     @Override
-    public List<FriendRequest> getReceivedFriendRequests(Long studentId) {
-        return friendRequestRepository.findAllByReceiverIdAndStatus(studentId, RequestStatus.PENDING);
+    public List<FriendRequestDto> getReceivedFriendRequests(Long studentId) {
+         List<FriendRequest> friendRequests = friendRequestRepository.findAllByReceiverIdAndStatus(studentId, RequestStatus.PENDING);
+        return friendRequests.stream()
+                .map(this::convertToDTO)
+                .toList();
+    }
+
+    private FriendRequestDto convertToDTO(FriendRequest friendRequest) {
+        FriendRequestDto dto = new FriendRequestDto();
+        dto.setId(friendRequest.getId());
+        dto.setReceiverId(friendRequest.getReceiver().getId());
+        dto.setSenderId(friendRequest.getSender().getId());
+        dto.setSenderFirstName(friendRequest.getSender().getFirstName());
+        dto.setSenderLastName(friendRequest.getSender().getLastName());
+        dto.setSenderPhoto(friendRequest.getSender().getPhotoBytes());
+        return dto;
     }
 
     @Override

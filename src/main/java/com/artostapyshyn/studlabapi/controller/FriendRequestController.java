@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.FriendRequestDto;
 import com.artostapyshyn.studlabapi.entity.FriendRequest;
 import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.StudentService;
@@ -59,7 +60,7 @@ public class FriendRequestController {
 
         Map<String, Object> response = new HashMap<>();
         if (studentId != null && authentication != null) {
-            List<FriendRequest> requests = friendRequestService.getReceivedFriendRequests(studentId);
+            List<FriendRequestDto> requests = friendRequestService.getReceivedFriendRequests(studentId);
             return ResponseEntity.ok(requests);
         } else {
             response.put(ERROR, "Error while sending friend request.");
