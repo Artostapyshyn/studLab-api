@@ -106,6 +106,11 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         friendship.setStudent(request.getSender());
         friendship.setFriend(request.getReceiver());
         friendshipRepository.save(friendship);
+
+        Friendship secondFriendship = new Friendship();
+        secondFriendship.setStudent(request.getReceiver());
+        secondFriendship.setFriend(request.getSender());
+        friendshipRepository.save(secondFriendship);
     }
 
     @Override

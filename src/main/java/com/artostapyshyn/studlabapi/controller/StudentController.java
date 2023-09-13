@@ -43,13 +43,14 @@ public class StudentController {
     @Operation(summary = "Get personal information",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/personal-info")
-    public ResponseEntity<List<Student>> getPersonalInfo(Authentication authentication) {
+    public ResponseEntity<List<StudentDto>> getPersonalInfo(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(studentId);
 
-        List<Student> studentList = student.map(Collections::singletonList).orElse(Collections.emptyList());
+        List<StudentDto> studentDtoList = student.map(stud -> Collections.singletonList(convertToDto(stud)))
+                .orElse(Collections.emptyList());
 
-        return ResponseEntity.ok(studentList);
+        return ResponseEntity.ok(studentDtoList);
     }
 
     @Operation(summary = "Get personal information",
