@@ -139,4 +139,9 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         List<FriendRequest> toDelete = friendRequestRepository.findAllByStatusIn(Arrays.asList(RequestStatus.DECLINED, RequestStatus.ACCEPTED));
         friendRequestRepository.deleteAll(toDelete);
     }
+
+    @Override
+    public boolean isSentRequest(Long studentId, Long receiverId) {
+        return friendRequestRepository.existsBySenderIdAndReceiverId(studentId, receiverId);
+    }
 }

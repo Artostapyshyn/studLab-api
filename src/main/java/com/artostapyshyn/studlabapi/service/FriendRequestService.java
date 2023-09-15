@@ -22,6 +22,8 @@ public interface FriendRequestService {
 
     void deleteUnusedRequests();
 
+    boolean isSentRequest(Long studentId, Long receiverId);
+
     FriendRequest save(FriendRequest friendRequest);
 
     Optional<FriendRequest> findById(Long id);

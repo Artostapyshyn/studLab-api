@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.FriendshipDTO;
+import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.ERROR;
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
 @Validated
@@ -30,6 +30,8 @@ public class FriendshipController {
     private final FriendshipService friendshipService;
 
     private final StudentService studentService;
+
+    private final FriendRequestService friendRequestService;
 
     @Operation(summary = "Get all friends by student id",
             security = @SecurityRequirement(name = "basicAuth"))
@@ -48,12 +50,15 @@ public class FriendshipController {
 
         List<FriendshipDTO> friendships = friendshipService.findAllByStudentId(authStudentId);
 
-        boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getId().equals(studentId));
+        boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getStudentId().equals(studentId));
+        boolean hasSentFriendRequest = friendRequestService.isSentRequest(authStudentId, studentId);
 
         if(isFriend) {
             response.put("status", "You are friends");
+        } else if(hasSentFriendRequest) {
+            response.put(STATUS, "Friend request sent");
         } else {
-            response.put("status", "You are not friends");
+            response.put(STATUS, "You are not friends");
         }
         return ResponseEntity.ok(response);
     }
