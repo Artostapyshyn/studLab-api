@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface AchievementRepository extends JpaRepository<Achievement, Long> {
-    List<Achievement> findByStudentId(Long StudentId);
+    List<Achievement> findByStudentId(Long studentId);
 }

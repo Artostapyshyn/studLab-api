@@ -21,7 +21,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final StudentService studentService;
 
-    private final Random random = new Random();
+    private Random random;
 
     @Override
     public VerificationCode generateCode(String email) {

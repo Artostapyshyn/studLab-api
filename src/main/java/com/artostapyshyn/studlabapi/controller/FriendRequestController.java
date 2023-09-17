@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.ERROR;
-import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
+import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
 
 @Log4j2
 @Validated
@@ -47,7 +46,7 @@ public class FriendRequestController {
             response.put("requestId", savedRequest.getId());
             return ResponseEntity.ok(response);
         } else {
-            response.put(ERROR, "Error while sending friend request.");
+            response.put(ERROR, REQUEST_ERROR);
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -63,7 +62,7 @@ public class FriendRequestController {
             List<FriendRequestDto> requests = friendRequestService.getReceivedFriendRequests(studentId);
             return ResponseEntity.ok(requests);
         } else {
-            response.put(ERROR, "Error while sending friend request.");
+            response.put(ERROR, REQUEST_ERROR);
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -79,12 +78,11 @@ public class FriendRequestController {
                 response.put(MESSAGE, "Friend request accepted successfully");
                 return ResponseEntity.ok(response);
             } catch (Exception ex) {
-                log.error("Error while declining the friend request with id: " + requestId, ex);
                 response.put(ERROR, "Error while declining friend request.");
                 return ResponseEntity.internalServerError().body(response);
             }
         } else {
-            response.put(ERROR, "Error while sending friend request.");
+            response.put(ERROR, REQUEST_ERROR);
             return ResponseEntity.internalServerError().body(response);
         }
     }
@@ -100,7 +98,6 @@ public class FriendRequestController {
                 response.put(MESSAGE, "Friend request declined successfully");
                 return ResponseEntity.ok(response);
             } catch (Exception ex) {
-                log.error("Error while declining the friend request with id: " + requestId, ex);
                 response.put(ERROR, "Error while declining friend request.");
                 return ResponseEntity.internalServerError().body(response);
             }

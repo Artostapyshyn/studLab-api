@@ -50,7 +50,7 @@ public class FriendshipController {
 
         List<FriendshipDTO> friendships = friendshipService.findAllByStudentId(authStudentId);
 
-        boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getStudentId().equals(studentId));
+        boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getFriendId().equals(studentId));
         boolean hasSentFriendRequest = friendRequestService.isSentRequest(authStudentId, studentId);
 
         if(isFriend) {

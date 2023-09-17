@@ -12,6 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
+import java.util.Random;
+
 @SpringBootApplication
 @EnableCaching
 @OpenAPIDefinition(
@@ -33,5 +35,10 @@ public class StudLabApiApplication {
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
+	}
+
+	@Bean
+	public Random random() {
+		return new Random();
 	}
 }

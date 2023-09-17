@@ -60,7 +60,7 @@ class SliderServiceImplTest {
         when(sliderRepository.findAll()).thenReturn(sliders);
 
         List<Slider> resultList = sliderService.findAll();
-        assertNotEquals(sliders.size(), 1);
+        assertNotEquals(1, sliders.size());
         assertEquals(sliders.size(), resultList.size());
         assertNotNull(sliders);
 
