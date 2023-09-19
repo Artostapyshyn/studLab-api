@@ -2,6 +2,7 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.CommentDto;
 import com.artostapyshyn.studlabapi.dto.ReplyDto;
+import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Reply;
@@ -13,9 +14,11 @@ import com.artostapyshyn.studlabapi.service.ReplyService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -44,6 +47,21 @@ public class CommentController {
 
     private final ReplyService replyService;
 
+    private final ModelMapper modelMapper;
+
+    @PostConstruct
+    public void initModelMapper() {
+        modelMapper.createTypeMap(Comment.class, CommentDto.class).addMappings(mapper -> {
+            mapper.map(Comment::getStudent, CommentDto::setStudent);
+            mapper.map(Comment::getReplies, CommentDto::setReplies);
+        });
+
+        modelMapper.createTypeMap(Reply.class, ReplyDto.class).addMappings(mapper -> {
+            mapper.map(Reply::getStudent, ReplyDto::setStudent);
+            mapper.map(src -> src.getComment().getId(), ReplyDto::setCommentId);
+        });
+    }
+
     @Operation(summary = "Add comment to an existing event",
             security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/add")
@@ -55,8 +73,8 @@ public class CommentController {
         if (event.isPresent()) {
             Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
             if (optionalStudent.isPresent()) {
-                Student student = optionalStudent.get();
-                Comment savedComment = commentService.addCommentToEvent(event.get(), commentDto, student);
+                StudentDto studentDto = modelMapper.map(optionalStudent.get(), StudentDto.class);
+                Comment savedComment = commentService.addCommentToEvent(event.get(), commentDto, studentDto);
                 response.add(savedComment);
                 return ResponseEntity.ok().body(response);
             } else {
@@ -69,17 +87,16 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Find comment by id.",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Find comment by id.", security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/find-by-id")
-    public ResponseEntity<Comment> getCommentById(@RequestParam("commentId") Long commentId) {
+    public ResponseEntity<CommentDto> getCommentById(@RequestParam("commentId") Long commentId) {
         Comment comment = commentService.findById(commentId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't find comment by id - " + commentId));
-        return ResponseEntity.ok().body(comment);
+        CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
+        return ResponseEntity.ok().body(commentDto);
     }
 
-    @Operation(summary = "Reply to comment",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Reply to comment", security = @SecurityRequirement(name = "basicAuth"))
     @PostMapping("/reply")
     public ResponseEntity<Map<String, Object>> addReplyToComment(@RequestBody @NotNull ReplyDto replyDto,
                                                                  @RequestParam("commentId") Long commentId, Authentication authentication) {
@@ -94,24 +111,25 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Find comment by id.",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Find comment by id.", security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/reply/find-by-id")
-    public ResponseEntity<Reply> getReplyById(@RequestParam("replyId") Long replyId) {
+    public ResponseEntity<ReplyDto> getReplyById(@RequestParam("replyId") Long replyId) {
         Reply reply = replyService.findById(replyId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Couldn't find reply by id - " + replyId));
-        return ResponseEntity.ok().body(reply);
+        ReplyDto replyDto = modelMapper.map(reply, ReplyDto.class);
+        return ResponseEntity.ok().body(replyDto);
     }
 
-    @Operation(summary = "Get all event comments",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all event comments", security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
-    public ResponseEntity<List<Comment>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
+    public ResponseEntity<List<CommentDto>> getCommentsForEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> optionalEvent = eventService.findEventById(eventId);
         if (optionalEvent.isPresent()) {
-            Event event = optionalEvent.get();
-            List<Comment> commentList = getCommentsForEvent(event);
-            return ResponseEntity.ok(commentList);
+            List<Comment> commentList = getCommentsForEvent(optionalEvent.get());
+            List<CommentDto> commentDtoList = commentList.stream()
+                    .map(comment -> modelMapper.map(comment, CommentDto.class))
+                    .toList();
+            return ResponseEntity.ok(commentDtoList);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -122,12 +140,14 @@ public class CommentController {
         return new ArrayList<>(comments);
     }
 
-    @Operation(summary = "Get all replies",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all replies", security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all-replies")
-    public ResponseEntity<List<Reply>> getAllRepliesForComment(@RequestParam("commentId") Long commentId) {
+    public ResponseEntity<List<ReplyDto>> getAllRepliesForComment(@RequestParam("commentId") Long commentId) {
         List<Reply> replies = replyService.findReplyByCommentId(commentId);
-        return ResponseEntity.ok().body(replies);
+        List<ReplyDto> replyDtoList = replies.stream()
+                .map(reply -> modelMapper.map(reply, ReplyDto.class))
+                .toList();
+        return ResponseEntity.ok().body(replyDtoList);
     }
 
     @Operation(summary = "Like comment",

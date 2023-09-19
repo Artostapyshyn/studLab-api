@@ -11,4 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReplyDto {
     private String replyText;
+    private Long commentId;
+    private StudentDto student;
 }

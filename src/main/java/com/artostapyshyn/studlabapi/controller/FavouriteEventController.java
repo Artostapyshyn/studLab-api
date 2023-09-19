@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
 import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,8 @@ public class FavouriteEventController {
     private final StudentServiceImpl studentService;
 
     private final EventServiceImpl eventService;
+
+    private final ModelMapper modelMapper;
 
     @Operation(summary = "Add event to favourite",
             security = @SecurityRequirement(name = "basicAuth"))
@@ -80,7 +84,7 @@ public class FavouriteEventController {
     @Operation(summary = "Get student favourite events",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/get")
-    public ResponseEntity<List<Event>> getFavouriteEventsByStudentId(Authentication authentication) {
+    public ResponseEntity<List<EventDto>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
 
         return getListResponseEntity(studentId);
@@ -89,18 +93,19 @@ public class FavouriteEventController {
     @Operation(summary = "Get student favourite events by id",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/get-by-id")
-    public ResponseEntity<List<Event>> getEventsByStudentId(@RequestParam("studentId") Long studentId) {
+    public ResponseEntity<List<EventDto>> getEventsByStudentId(@RequestParam("studentId") Long studentId) {
         return getListResponseEntity(studentId);
     }
 
-    private ResponseEntity<List<Event>> getListResponseEntity(@RequestParam("studentId") Long studentId) {
-        if(studentId == null){
+    private ResponseEntity<List<EventDto>> getListResponseEntity(Long studentId) {
+        if (studentId == null) {
             return ResponseEntity.badRequest().build();
         }
 
         List<FavouriteEvent> favouriteEvents = favouriteEventService.findByStudentId(studentId);
-        List<Event> events = favouriteEvents.stream()
+        List<EventDto> events = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
+                .map(event -> modelMapper.map(event, EventDto.class))
                 .toList();
 
         return ResponseEntity.ok(events);

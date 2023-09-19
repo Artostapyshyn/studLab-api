@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.CommentDto;
+import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.Comment;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Reply;
@@ -11,6 +12,7 @@ import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ public class CommentServiceImpl implements CommentService {
 
     private final ReplyRepository replyRepository;
 
+    private final ModelMapper modelMapper;
+
     @Transactional
     @Override
     public Comment save(Comment comment) {
@@ -34,12 +38,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addCommentToEvent(Event commentedEvent, CommentDto commentDto, Student student) {
+    public Comment addCommentToEvent(Event commentedEvent, CommentDto commentDto, StudentDto studentDto) {
         Event event = eventService.findEventById(commentedEvent.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
 
         Comment comment = new Comment();
         comment.setCommentText(commentDto.getCommentText());
+        Student student = modelMapper.map(studentDto, Student.class);
         comment.setStudent(student);
         event.addComment(comment);
         commentRepository.save(comment);
