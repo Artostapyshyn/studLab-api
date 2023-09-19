@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class VerificationCodeServiceImpl implements VerificationCodeService {
 
     private final StudentService studentService;
 
-    private Random random;
+    private SecureRandom random;
 
     @Override
     public VerificationCode generateCode(String email) {

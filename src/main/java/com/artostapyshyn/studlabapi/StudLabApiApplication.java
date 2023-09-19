@@ -12,7 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 @SpringBootApplication
 @EnableCaching
@@ -38,7 +38,7 @@ public class StudLabApiApplication {
 	}
 
 	@Bean
-	public Random random() {
-		return new Random();
+	public SecureRandom random() {
+		return new SecureRandom();
 	}
 }

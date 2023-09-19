@@ -1,24 +1,25 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface EventService {
-    List<Event> findAll();
+    List<EventDto> findAll();
 
-    Optional<Event> findEventById(Long id);
+   Optional<Event> findEventById(Long id);
 
     Event save(Event event);
 
     int getCreatedEventCount();
 
-    List<Event> findPopularEvents();
+    List<EventDto> findPopularEvents();
 
-    List<Event> findAllEventsByDateDesc();
+    List<EventDto> findAllEventsByDateDesc();
 
-    List<Event> findAllEventsByCreationDateDesc();
+    List<EventDto> findAllEventsByCreationDateDesc();
 
     void deleteById(Long id);
 

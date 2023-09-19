@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +31,8 @@ public class EventController {
     @Operation(summary = "Get all events",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/all")
-    public ResponseEntity<List<Event>> getAllEvents() {
-        List<Event> events = eventService.findAll();
+    public ResponseEntity<List<EventDto>> getAllEvents() {
+        List<EventDto> events = eventService.findAll();
         return ResponseEntity.ok(events);
     }
 
@@ -46,8 +47,8 @@ public class EventController {
     @Operation(summary = "Sort events by popularity",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/popular")
-    public ResponseEntity<List<Event>> getEventsByPopularity() {
-        List<Event> events = eventService.findPopularEvents();
+    public ResponseEntity<List<EventDto>> getEventsByPopularity() {
+        List<EventDto> events = eventService.findPopularEvents();
         log.info("Listing events by popularity");
         return ResponseEntity.ok(events);
     }
@@ -55,8 +56,8 @@ public class EventController {
     @Operation(summary = "Sort events by creation date",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/newest")
-    public ResponseEntity<List<Event>> getEventsByNewestDate() {
-        List<Event> events = eventService.findAllEventsByCreationDateDesc();
+    public ResponseEntity<List<EventDto>> getEventsByNewestDate() {
+        List<EventDto> events = eventService.findAllEventsByCreationDateDesc();
         log.info("Listing newest events");
         return ResponseEntity.ok(events);
     }
@@ -64,8 +65,8 @@ public class EventController {
     @Operation(summary = "Get upcoming events",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/upcoming")
-    public ResponseEntity<List<Event>> getUpcomingEvents() {
-        List<Event> events = eventService.findAllEventsByDateDesc();
+    public ResponseEntity<List<EventDto>> getUpcomingEvents() {
+        List<EventDto> events = eventService.findAllEventsByDateDesc();
         log.info("Listing upcoming events");
         return ResponseEntity.ok(events);
     }
@@ -103,7 +104,7 @@ public class EventController {
         if (editedEvent.isPresent()) {
             Event existingEvent = editedEvent.get();
             eventService.updateEvent(existingEvent, event);
-            eventService.save(existingEvent);
+            eventService.save(event);
             return ResponseEntity.ok(existingEvent);
         } else {
             return ResponseEntity.notFound().build();

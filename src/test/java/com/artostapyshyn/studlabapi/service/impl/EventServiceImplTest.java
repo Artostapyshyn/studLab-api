@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class EventServiceImplTest {
         );
         when(eventRepository.findAll()).thenReturn(expectedEvents);
 
-        List<Event> actualEvents = eventService.findAll();
+        List<EventDto> actualEvents = eventService.findAll();
 
         assertEquals(expectedEvents.size(), actualEvents.size());
         assertTrue(actualEvents.containsAll(expectedEvents));
@@ -73,7 +74,7 @@ class EventServiceImplTest {
         );
         when(eventRepository.findPopularEvents()).thenReturn(expectedPopularEvents);
 
-        List<Event> actualPopularEvents = eventService.findPopularEvents();
+        List<EventDto> actualPopularEvents = eventService.findPopularEvents();
 
         assertEquals(expectedPopularEvents.size(), actualPopularEvents.size());
         assertTrue(actualPopularEvents.containsAll(expectedPopularEvents));
@@ -88,7 +89,7 @@ class EventServiceImplTest {
         );
         when(eventRepository.findAllEventsByDateDesc()).thenReturn(expectedEventsByDateDesc);
 
-        List<Event> actualEventsByDateDesc = eventService.findAllEventsByDateDesc();
+        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateDesc();
 
         assertEquals(expectedEventsByDateDesc.size(), actualEventsByDateDesc.size());
         assertTrue(actualEventsByDateDesc.containsAll(expectedEventsByDateDesc));
@@ -103,7 +104,7 @@ class EventServiceImplTest {
         );
         when(eventRepository.findAllEventsByCreationDateDesc()).thenReturn(expectedEventsByCreationDateDesc);
 
-        List<Event> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateDesc();
+        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateDesc();
 
         assertEquals(expectedEventsByCreationDateDesc.size(), actualEventsByCreationDateDesc.size());
         assertTrue(actualEventsByCreationDateDesc.containsAll(expectedEventsByCreationDateDesc));

@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventWithStudentDto {
+public class EventDto {
     private Long id;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
@@ -23,5 +23,4 @@ public class EventWithStudentDto {
     private String description;
     private String nameOfEvent;
     private byte[] eventPhoto;
-    private StudentDto student;
 }

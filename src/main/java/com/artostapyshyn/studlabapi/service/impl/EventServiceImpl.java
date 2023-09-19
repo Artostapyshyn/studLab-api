@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.EventCounter;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
@@ -25,9 +26,14 @@ public class EventServiceImpl implements EventService {
 
     private final EventCounterRepository eventCounterRepository;
 
+    private final ModelMapper modelMapper;
+
     @Override
-    public List<Event> findAll() {
-        return eventRepository.findAll();
+    public List<EventDto> findAll() {
+        List<Event> events  = eventRepository.findAll();
+        return events.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Override
@@ -49,18 +55,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> findPopularEvents() {
-        return eventRepository.findPopularEvents();
+    public List<EventDto> findPopularEvents() {
+        List<Event> events  = eventRepository.findPopularEvents();
+        return events.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Override
-    public List<Event> findAllEventsByDateDesc() {
-        return eventRepository.findAllEventsByDateDesc();
+    public List<EventDto> findAllEventsByDateDesc() {
+        List<Event> events  = eventRepository.findAllEventsByDateDesc();
+        return events.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Override
-    public List<Event> findAllEventsByCreationDateDesc() {
-        return eventRepository.findAllEventsByCreationDateDesc();
+    public List<EventDto> findAllEventsByCreationDateDesc() {
+        List<Event> events  = eventRepository.findAllEventsByCreationDateDesc();
+        return events.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Transactional
@@ -77,5 +92,10 @@ public class EventServiceImpl implements EventService {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedEvent, existingEvent);
+    }
+
+    private EventDto convertToDTO(Event event){
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        return modelMapper.map(event, EventDto.class);
     }
 }
