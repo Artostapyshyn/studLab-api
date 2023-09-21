@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.service.EventService;
+import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -33,6 +34,8 @@ public class EventController {
 
     private final TagService tagService;
 
+    private final StudentService studentService;
+
     private final ModelMapper modelMapper;
 
     @Operation(summary = "Get all events",
@@ -42,6 +45,18 @@ public class EventController {
         List<EventDto> events = eventService.findAll();
         return ResponseEntity.ok(events);
     }
+
+    @Operation(summary = "Get recommended events")
+    @GetMapping("/recommended")
+    public ResponseEntity<List<EventDto>> getRecommendedEvents(Authentication authentication) {
+        Long studentId = studentService.getAuthStudentId(authentication);
+        List<Event> events = eventService.getRecommendedEvents(studentId);
+        List<EventDto> eventDtos = events.stream()
+                .map(eventService::convertToDTO)
+                .toList();
+        return ResponseEntity.ok(eventDtos);
+    }
+
 
     @Operation(summary = "Get events by id",
             security = @SecurityRequirement(name = "basicAuth"))

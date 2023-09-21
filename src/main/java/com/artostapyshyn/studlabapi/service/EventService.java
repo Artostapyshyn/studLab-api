@@ -19,6 +19,8 @@ public interface EventService {
 
     EventDto convertToDTO(Event event);
 
+    List<Event> getRecommendedEvents(Long studentId);
+
     List<EventDto> findPopularEvents();
 
     List<EventDto> findAllEventsByDateDesc();

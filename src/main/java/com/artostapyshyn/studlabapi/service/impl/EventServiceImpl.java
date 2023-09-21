@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.EventCounter;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
+import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.repository.EventCounterRepository;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
@@ -13,8 +14,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> findAll() {
-        List<Event> events  = eventRepository.findAll();
+        List<Event> events = eventRepository.findAll();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -62,7 +62,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> findPopularEvents() {
-        List<Event> events  = eventRepository.findPopularEvents();
+        List<Event> events = eventRepository.findPopularEvents();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -70,7 +70,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> findAllEventsByDateDesc() {
-        List<Event> events  = eventRepository.findAllEventsByDateDesc();
+        List<Event> events = eventRepository.findAllEventsByDateDesc();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -78,7 +78,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> findAllEventsByCreationDateDesc() {
-        List<Event> events  = eventRepository.findAllEventsByCreationDateDesc();
+        List<Event> events = eventRepository.findAllEventsByCreationDateDesc();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -101,8 +101,38 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDto convertToDTO(Event event){
+    public EventDto convertToDTO(Event event) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         return modelMapper.map(event, EventDto.class);
+    }
+
+    @Override
+    public List<Event> getRecommendedEvents(Long studentId) {
+        List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
+
+        Map<Tag, Integer> tagCount = new HashMap<>();
+        for (FavouriteEvent favouriteEvent : favouriteEvents) {
+            for (Tag tag : favouriteEvent.getEvent().getTags()) {
+                tagCount.put(tag, tagCount.getOrDefault(tag, 0) + 1);
+            }
+        }
+
+        List<Map.Entry<Tag, Integer>> sortedTags = new ArrayList<>(tagCount.entrySet());
+        sortedTags.sort(Map.Entry.<Tag, Integer>comparingByValue().reversed());
+
+        List<Event> recommendedEvents = new ArrayList<>();
+        for (Map.Entry<Tag, Integer> entry : sortedTags) {
+            Tag tag = entry.getKey();
+            List<Event> eventsByTag = eventRepository.findEventByTags(tag);
+            recommendedEvents.addAll(eventsByTag);
+        }
+
+        List<Event> favouriteEventsOnly = favouriteEvents.stream()
+                .map(FavouriteEvent::getEvent)
+                .toList();
+
+        recommendedEvents.removeAll(favouriteEventsOnly);
+
+        return recommendedEvents;
     }
 }
