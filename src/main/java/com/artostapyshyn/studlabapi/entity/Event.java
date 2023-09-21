@@ -66,10 +66,10 @@ public class Event {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
-    @OneToMany(mappedBy = "eventId")
+    @OneToMany(mappedBy = "eventId", fetch = FetchType.LAZY)
     private Set<Comment> eventComments;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "event_tags",
             joinColumns = @JoinColumn(name = "event_id"),
