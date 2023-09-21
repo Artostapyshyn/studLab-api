@@ -122,9 +122,10 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         request.setStatus(RequestStatus.DECLINED);
         friendRequestRepository.save(request);
 
-        Friendship friendship = friendshipRepository.findFriendshipByStudentId(request.getSender().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Friendship not found!"));
-        friendRequestRepository.deleteById(friendship.getId());
+        Optional<Friendship> friendship = friendshipRepository.findFriendshipByStudentId(request.getSender().getId());
+        if(friendship.isPresent()){
+           throw new IllegalArgumentException("Friendship found!");
+        }
     }
 
     @Override

@@ -69,6 +69,14 @@ public class Event {
     @OneToMany(mappedBy = "eventId")
     private Set<Comment> eventComments;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "event_tags",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
+
     public void addComment(Comment comment) {
         eventComments.add(comment);
         comment.setEventId(this.getId());
