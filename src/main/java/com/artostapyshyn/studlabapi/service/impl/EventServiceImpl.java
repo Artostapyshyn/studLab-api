@@ -41,6 +41,12 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findEventById(id);
     }
 
+    @Override
+    public Optional<EventDto> findEventDtoById(Long id) {
+        Optional<Event> event = eventRepository.findById(id);
+        return event.map(this::convertToDTO);
+    }
+
     @Transactional
     @Override
     public Event save(Event event) {
@@ -94,7 +100,8 @@ public class EventServiceImpl implements EventService {
         modelMapper.map(updatedEvent, existingEvent);
     }
 
-    private EventDto convertToDTO(Event event){
+    @Override
+    public EventDto convertToDTO(Event event){
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         return modelMapper.map(event, EventDto.class);
     }

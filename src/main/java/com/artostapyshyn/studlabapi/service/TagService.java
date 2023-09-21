@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.service;
 import com.artostapyshyn.studlabapi.entity.Tag;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 
 public interface TagService {
@@ -11,6 +12,8 @@ public interface TagService {
     Tag save(Tag tag);
 
     List<Tag> findAll();
+
+    Set<Tag> resolveAndAddTags(Set<Tag> tagsFromEvent);
 
     void deleteById(Long id);
 }

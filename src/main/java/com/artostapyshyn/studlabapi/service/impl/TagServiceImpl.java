@@ -6,8 +6,10 @@ import com.artostapyshyn.studlabapi.service.TagService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +25,22 @@ public class TagServiceImpl implements TagService {
     @Override
     public Tag save(Tag tag) {
         return tagRepository.save(tag);
+    }
+
+    @Override
+    public Set<Tag> resolveAndAddTags(Set<Tag> tagsFromEvent) {
+        Set<Tag> resolvedTags = new HashSet<>();
+        for (Tag tagFromEvent : tagsFromEvent) {
+            Tag existingTag = tagRepository.findByName(tagFromEvent.getName());
+            if (existingTag != null) {
+                resolvedTags.add(existingTag);
+            } else {
+                Tag newTag = new Tag();
+                newTag.setName(tagFromEvent.getName());
+                resolvedTags.add(tagRepository.save(newTag));
+            }
+        }
+        return resolvedTags;
     }
 
     @Override
