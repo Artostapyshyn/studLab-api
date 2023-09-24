@@ -57,7 +57,6 @@ public class EventController {
         return ResponseEntity.ok(eventDtos);
     }
 
-
     @Operation(summary = "Get events by id",
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/find-by-id")

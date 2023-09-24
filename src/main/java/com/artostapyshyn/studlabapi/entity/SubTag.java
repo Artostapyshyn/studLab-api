@@ -2,22 +2,14 @@ package com.artostapyshyn.studlabapi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Cacheable
 @Entity
-@Table(name = "tags")
-public class Tag {
+@Table(name = "sub_tags")
+public class SubTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -27,10 +19,7 @@ public class Tag {
     private String name;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "tags")
-    private Set<Event> events;
-
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<SubTag> subTags = new HashSet<>();
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "main_tag_id")
+    private Tag tag;
 }

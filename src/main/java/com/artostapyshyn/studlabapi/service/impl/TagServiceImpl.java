@@ -1,7 +1,9 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.entity.SubTag;
 import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.repository.TagRepository;
+import com.artostapyshyn.studlabapi.service.SubTagService;
 import com.artostapyshyn.studlabapi.service.TagService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import java.util.Set;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+
+    private SubTagService subTagService;
 
     @Override
     public Optional<Tag> findById(Long id) {
@@ -35,12 +39,23 @@ public class TagServiceImpl implements TagService {
             if (existingTag != null) {
                 resolvedTags.add(existingTag);
             } else {
-                Tag newTag = new Tag();
-                newTag.setName(tagFromEvent.getName());
-                resolvedTags.add(tagRepository.save(newTag));
+                resolvedTags.add(tagRepository.save(tagFromEvent));
             }
+            addSubTagsToTag(existingTag != null ? existingTag : tagFromEvent);
         }
         return resolvedTags;
+    }
+
+    public void addSubTagsToTag(Tag tag) {
+        Set<SubTag> newSubTags = tag.getSubTags();
+        for (SubTag newSubTag : newSubTags) {
+            Optional<SubTag> optionalExistingSubTag = subTagService.findByNameAndTag(newSubTag.getName(), tag);
+            if (optionalExistingSubTag.isEmpty()) {
+                tag.getSubTags().add(newSubTag);
+                newSubTag.setTag(tag);
+            }
+        }
+        tagRepository.save(tag);
     }
 
     @Override
