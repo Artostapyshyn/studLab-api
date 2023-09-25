@@ -17,11 +17,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e ORDER BY e.favoriteCount DESC")
     List<Event> findPopularEvents();
 
-    @Query("SELECT e FROM Event e ORDER BY e.date DESC")
-    List<Event> findAllEventsByDateDesc();
+    @Query("SELECT e FROM Event e ORDER BY e.date ASC")
+    List<Event> findAllEventsByDateAsc();
 
-    @Query("SELECT e FROM Event e ORDER BY e.creationDate DESC")
-    List<Event> findAllEventsByCreationDateDesc();
+    @Query("SELECT e FROM Event e ORDER BY e.creationDate ASC")
+    List<Event> findAllEventsByCreationDateAsc();
 
     @Query("SELECT e FROM Event e JOIN e.tags t WHERE t = :tag")
     List<Event> findEventByTags(@Param("tag") Tag tag);

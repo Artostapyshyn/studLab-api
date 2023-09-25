@@ -87,9 +87,9 @@ class EventServiceImplTest {
                 createRandomEvent(),
                 createRandomEvent()
         );
-        when(eventRepository.findAllEventsByDateDesc()).thenReturn(expectedEventsByDateDesc);
+        when(eventRepository.findAllEventsByDateAsc()).thenReturn(expectedEventsByDateDesc);
 
-        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateDesc();
+        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateAsc();
 
         assertEquals(expectedEventsByDateDesc.size(), actualEventsByDateDesc.size());
         assertTrue(actualEventsByDateDesc.containsAll(expectedEventsByDateDesc));
@@ -102,9 +102,9 @@ class EventServiceImplTest {
                 createRandomEvent(),
                 createRandomEvent()
         );
-        when(eventRepository.findAllEventsByCreationDateDesc()).thenReturn(expectedEventsByCreationDateDesc);
+        when(eventRepository.findAllEventsByCreationDateAsc()).thenReturn(expectedEventsByCreationDateDesc);
 
-        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateDesc();
+        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateAsc();
 
         assertEquals(expectedEventsByCreationDateDesc.size(), actualEventsByCreationDateDesc.size());
         assertTrue(actualEventsByCreationDateDesc.containsAll(expectedEventsByCreationDateDesc));

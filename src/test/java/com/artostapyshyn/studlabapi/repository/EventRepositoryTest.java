@@ -86,7 +86,7 @@ class EventRepositoryTest {
         entityManager.persist(event2);
         entityManager.flush();
 
-        List<Event> eventsByDateDesc = eventRepository.findAllEventsByDateDesc();
+        List<Event> eventsByDateDesc = eventRepository.findAllEventsByDateAsc();
 
         Assertions.assertEquals(2, eventsByDateDesc.size());
         Assertions.assertEquals(event2.getDate(), eventsByDateDesc.get(0).getDate());
@@ -105,7 +105,7 @@ class EventRepositoryTest {
         entityManager.persist(event2);
         entityManager.flush();
 
-        List<Event> eventsByCreationDateDesc = eventRepository.findAllEventsByCreationDateDesc();
+        List<Event> eventsByCreationDateDesc = eventRepository.findAllEventsByCreationDateAsc();
 
         Assertions.assertEquals(2, eventsByCreationDateDesc.size());
         Assertions.assertEquals(event2.getCreationDate(), eventsByCreationDateDesc.get(0).getCreationDate());

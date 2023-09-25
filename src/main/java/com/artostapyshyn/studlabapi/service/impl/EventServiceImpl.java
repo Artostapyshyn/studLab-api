@@ -69,16 +69,16 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDto> findAllEventsByDateDesc() {
-        List<Event> events = eventRepository.findAllEventsByDateDesc();
+    public List<EventDto> findAllEventsByDateAsc() {
+        List<Event> events = eventRepository.findAllEventsByDateAsc();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
     @Override
-    public List<EventDto> findAllEventsByCreationDateDesc() {
-        List<Event> events = eventRepository.findAllEventsByCreationDateDesc();
+    public List<EventDto> findAllEventsByCreationDateAsc() {
+        List<Event> events = eventRepository.findAllEventsByCreationDateAsc();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();

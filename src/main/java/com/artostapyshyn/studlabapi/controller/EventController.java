@@ -78,7 +78,7 @@ public class EventController {
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/newest")
     public ResponseEntity<List<EventDto>> getEventsByNewestDate() {
-        List<EventDto> events = eventService.findAllEventsByCreationDateDesc();
+        List<EventDto> events = eventService.findAllEventsByCreationDateAsc();
         log.info("Listing newest events");
         return ResponseEntity.ok(events);
     }
@@ -87,7 +87,7 @@ public class EventController {
             security = @SecurityRequirement(name = "basicAuth"))
     @GetMapping("/upcoming")
     public ResponseEntity<List<EventDto>> getUpcomingEvents() {
-        List<EventDto> events = eventService.findAllEventsByDateDesc();
+        List<EventDto> events = eventService.findAllEventsByDateAsc();
         log.info("Listing upcoming events");
         return ResponseEntity.ok(events);
     }
