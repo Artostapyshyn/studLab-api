@@ -13,7 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "friend_requests")
+@Table(name = "friend_requests", indexes = {
+        @Index(name = "idx_sender", columnList = "sender_id"),
+        @Index(name = "idx_receiver", columnList = "receiver_id")
+})
 public class FriendRequest {
 
     @Id

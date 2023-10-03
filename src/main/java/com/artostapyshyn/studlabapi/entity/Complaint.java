@@ -14,17 +14,21 @@ import java.util.Objects;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "complaints")
+@Table(name = "complaints",
+        indexes = {
+                @Index(name = "index_complaints_student_id", columnList = "student_id"),
+                @Index(name = "index_comment_id", columnList = "comment_id"),
+        })
 public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "student_Id", nullable = false)
+    @Column(name = "student_id", nullable = false)
     private Long studentId;
 
-    @Column(name = "comment_Id", nullable = false)
+    @Column(name = "comment_id", nullable = false)
     private Long commentId;
 
     @Column(name = "status")

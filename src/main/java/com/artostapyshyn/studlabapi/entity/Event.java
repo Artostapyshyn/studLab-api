@@ -24,6 +24,11 @@ import java.util.Set;
 @Cacheable
 @Entity
 @Table(name = "events")
+@SecondaryTable(name = "event_tags",
+        indexes = {
+                @Index(name = "index_event_tags_event_id", columnList = "event_id"),
+                @Index(name = "index_event_tags_tag_id", columnList = "tag_id")
+        })
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +36,12 @@ public class Event {
     private Long id;
 
     @Column(name = "date_of_event", nullable = false)
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
     @Column(name = "end_date_of_event")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime endDate;
 
@@ -53,7 +58,7 @@ public class Event {
     @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
-    @Basic(fetch=FetchType.LAZY)
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "event_photo", nullable = false)
     private byte[] eventPhoto;
 
@@ -62,7 +67,7 @@ public class Event {
     private int favoriteCount;
 
     @Column(name = "date_of_creation")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @CreationTimestamp
     private LocalDateTime creationDate;
 

@@ -14,7 +14,11 @@ import java.util.Objects;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "favourite_events")
+@Table(name = "favourite_events",
+        indexes = {
+                @Index(name = "index_fav_student_id", columnList = "student_id"),
+                @Index(name = "index_fav_event_id", columnList = "event_id")
+        })
 public class FavouriteEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

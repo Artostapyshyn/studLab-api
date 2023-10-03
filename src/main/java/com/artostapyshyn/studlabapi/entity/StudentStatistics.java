@@ -1,6 +1,5 @@
 package com.artostapyshyn.studlabapi.entity;
 
-import com.artostapyshyn.studlabapi.enums.Interval;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,10 +19,6 @@ public class StudentStatistics {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_interval")
-    private Interval interval;
-
     @Column(name = "count")
     private int count;
 
@@ -32,20 +27,18 @@ public class StudentStatistics {
         if (this == o) return true;
         if (!(o instanceof StudentStatistics that)) return false;
         return getCount() == that.getCount()
-                && Objects.equals(getId(), that.getId())
-                && getInterval() == that.getInterval();
+                && Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getInterval(), getCount());
+        return Objects.hash(getId(), getCount());
     }
 
     @Override
     public String toString() {
         return "StudentStatistics{" +
                 "id=" + id +
-                ", interval=" + interval +
                 ", count=" + count +
                 '}';
     }

@@ -17,7 +17,10 @@ import java.util.Objects;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "replies")
+@Table(name = "replies", indexes = {
+        @Index(name = "idx_student_replies", columnList = "student_id"),
+        @Index(name = "idx_comment_replies", columnList = "comment_id")
+})
 public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

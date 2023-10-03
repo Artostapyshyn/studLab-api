@@ -8,7 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "sub_tags")
+@Table(name = "sub_tags", indexes = {
+        @Index(name = "idx_main_tag", columnList = "main_tag_id")
+})
 public class SubTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

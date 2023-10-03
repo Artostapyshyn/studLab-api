@@ -18,7 +18,9 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Cacheable
-@Table(name = "verification_codes")
+@Table(name = "verification_codes", indexes = {
+        @Index(name = "idx_student_codes", columnList = "student_id")
+})
 public class VerificationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

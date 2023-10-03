@@ -12,7 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "resumes")
+@Table(name = "resumes", indexes = {
+        @Index(name = "idx_student_resumes", columnList = "student_id")
+})
 public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

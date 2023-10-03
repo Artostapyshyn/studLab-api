@@ -4,7 +4,6 @@ import com.artostapyshyn.studlabapi.dto.SignUpDto;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
-import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
@@ -20,8 +19,6 @@ import java.util.*;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
-
-    private final StudentStatisticsService studentStatisticsService;
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -101,6 +98,5 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setPassword(encodedPassword);
 
         studentRepository.save(existingStudent);
-        studentStatisticsService.updateStatistics(existingStudent.getRegistrationDate());
     }
 }

@@ -21,7 +21,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "event_comments")
+@Table(name = "event_comments",
+        indexes = {
+                @Index(name = "index_comments_student_id", columnList = "student_id"),
+                @Index(name = "index_event_id", columnList = "event_id")
+        })
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

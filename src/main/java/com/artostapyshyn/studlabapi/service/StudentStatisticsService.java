@@ -9,13 +9,11 @@ public interface StudentStatisticsService {
 
     Map<String, Integer> getRegistrationData();
 
-    void updateStatistics(LocalDateTime registrationDate);
-
     int getDailyStatistics();
 
-    int getWeeklyStatistics();
+    int getWeeklyStatistics(LocalDateTime startDate, LocalDateTime endDate);
 
-    int getMonthlyStatistics();
+    int getMonthlyStatistics(LocalDateTime startDate, LocalDateTime endDate);
 
     int getAllTimeStatistics();
 }
