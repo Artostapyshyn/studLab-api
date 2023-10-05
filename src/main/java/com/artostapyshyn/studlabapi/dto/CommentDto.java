@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentDto {
+    private Long id;
     private Long eventId;
     private String commentText;
     private int likes;

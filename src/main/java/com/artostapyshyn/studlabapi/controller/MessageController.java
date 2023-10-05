@@ -4,7 +4,6 @@ import com.artostapyshyn.studlabapi.entity.Message;
 import com.artostapyshyn.studlabapi.service.MessageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -27,16 +26,14 @@ public class MessageController {
 
     private final StudentService studentService;
 
-    @Operation(summary = "Get all messages by student id",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all messages by student id")
     @GetMapping("/all")
     public ResponseEntity<List<Message>> getAllMessages(Authentication authentication) {
         List<Message> messages = messageService.findAllMessagesByStudentId(studentService.getAuthStudentId(authentication));
         return ResponseEntity.ok(messages);
     }
 
-    @Operation(summary = "Mark messages as read",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Mark messages as read")
     @PostMapping("/mark-as-read")
     public ResponseEntity<Map<String, Object>> markAllMessagesAsRead(Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
@@ -46,8 +43,7 @@ public class MessageController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete message by id",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Delete message by id")
     @DeleteMapping("/delete-by-id")
     public ResponseEntity<Map<String, Object>> deleteMessage(@RequestParam("messageId") Long messageId) {
         Map<String, Object> response = new HashMap<>();

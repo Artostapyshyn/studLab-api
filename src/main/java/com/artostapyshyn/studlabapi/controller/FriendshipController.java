@@ -5,7 +5,6 @@ import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -33,16 +32,14 @@ public class FriendshipController {
 
     private final FriendRequestService friendRequestService;
 
-    @Operation(summary = "Get all friends by student id",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all friends by student id")
     @GetMapping("/all")
     public ResponseEntity<List<FriendshipDTO>> getAllFriendsByStudentId(@RequestParam("studentId") Long studentId) {
         List<FriendshipDTO> friendDTOs = friendshipService.findAllByStudentId(studentId);
         return ResponseEntity.ok(friendDTOs);
     }
 
-    @Operation(summary = "Get friendship status",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get friendship status")
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getFriendShipStatus(Authentication authentication, @RequestParam("studentId") Long studentId) {
         Map<String, Object> response = new HashMap<>();
@@ -63,8 +60,7 @@ public class FriendshipController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Delete friend by id",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Delete friend by id")
     @DeleteMapping("/delete-friend")
     public ResponseEntity<Map<String, Object>> deleteFriendById(@RequestParam("friendId") Long friendId, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();

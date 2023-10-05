@@ -4,7 +4,6 @@ import com.artostapyshyn.studlabapi.service.EventService;
 import com.artostapyshyn.studlabapi.service.StudentStatisticsService;
 import com.artostapyshyn.studlabapi.service.UniversityService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +33,7 @@ public class StatisticController {
 
     private final EventService eventService;
 
-    @Operation(summary = "Get all registered students number",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all registered students number")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/registered-amount")
     public ResponseEntity<Map<String, Object>> getTotalEnabledUsers(Authentication authentication) {
@@ -45,8 +43,7 @@ public class StatisticController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get registration statistic",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get registration statistic")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/registration-data")
     public ResponseEntity<Map<String, Object>> getRegistrationData(Authentication authentication) {
@@ -60,8 +57,7 @@ public class StatisticController {
         }
     }
 
-    @Operation(summary = "Get total universities",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get total universities")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/universities")
     public ResponseEntity<Map<String, Object>> getTotalUniversities(Authentication authentication) {
@@ -71,8 +67,7 @@ public class StatisticController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Get total amount of created events",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get total amount of created events")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/created-events")
     public ResponseEntity<Map<String, Object>> getTotalCreatedEvents(Authentication authentication) {

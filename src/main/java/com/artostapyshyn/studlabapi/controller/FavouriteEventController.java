@@ -7,7 +7,6 @@ import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -34,8 +33,7 @@ public class FavouriteEventController {
 
     private final ModelMapper modelMapper;
 
-    @Operation(summary = "Add event to favourite",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Add event to favourite")
     @PostMapping("/add-to-favorites")
     public ResponseEntity<Object> addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -56,11 +54,9 @@ public class FavouriteEventController {
         return ResponseEntity.notFound().build();
     }
 
-    @Operation(summary = "Remove event from favourite",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Remove event from favourite")
     @DeleteMapping("/remove")
-    public ResponseEntity<Map<String, Object>> removeFavouriteEvent(Authentication authentication,
-                                                                    @RequestParam("eventId") Long eventId) {
+    public ResponseEntity<Map<String, Object>> removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
         Map<String, Object> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
@@ -81,8 +77,7 @@ public class FavouriteEventController {
         return favouriteEvent;
     }
 
-    @Operation(summary = "Get student favourite events",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get student favourite events")
     @GetMapping("/get")
     public ResponseEntity<List<EventDto>> getFavouriteEventsByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
@@ -90,8 +85,7 @@ public class FavouriteEventController {
         return getListResponseEntity(studentId);
     }
 
-    @Operation(summary = "Get student favourite events by id",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get student favourite events by id")
     @GetMapping("/get-by-id")
     public ResponseEntity<List<EventDto>> getEventsByStudentId(@RequestParam("studentId") Long studentId) {
         return getListResponseEntity(studentId);

@@ -3,7 +3,6 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.entity.Vacancy;
 import com.artostapyshyn.studlabapi.service.VacancyService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,16 +26,14 @@ public class VacancyController {
 
     private final VacancyService vacancyService;
 
-    @Operation(summary = "Get all vacancies",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Get all vacancies")
     @GetMapping("/all")
     public ResponseEntity<List<Vacancy>> getAllVacancies(){
         List<Vacancy> vacancies = vacancyService.findAll();
         return ResponseEntity.ok(vacancies);
     }
 
-    @Operation(summary = "Add a vacancy.",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Add a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/add")
     public ResponseEntity<Vacancy> addVacancy(@RequestBody @NotNull Vacancy vacancy, @RequestParam("image") MultipartFile image) {
@@ -44,8 +41,7 @@ public class VacancyController {
         return ResponseEntity.ok(savedVacancy);
     }
 
-    @Operation(summary = "Edit a vacancy.",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Edit a vacancy.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/edit")
     public ResponseEntity<Vacancy> editVacancy(@RequestParam("vacancyId") Long vacancyId, @RequestBody @NotNull Vacancy vacancy) {
@@ -69,8 +65,7 @@ public class VacancyController {
         }
     }
 
-    @Operation(summary = "Delete vacancy by id.",
-            security = @SecurityRequirement(name = "basicAuth"))
+    @Operation(summary = "Delete vacancy by id.")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, Object>> deleteVacancy(@RequestParam("vacancyId") Long vacancyId) {
