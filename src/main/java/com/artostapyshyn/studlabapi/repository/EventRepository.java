@@ -1,7 +1,7 @@
 package com.artostapyshyn.studlabapi.repository;
 
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.entity.Tag;
+import com.artostapyshyn.studlabapi.entity.SubTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +23,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e ORDER BY e.creationDate ASC")
     List<Event> findAllEventsByCreationDateAsc();
 
-    @Query("SELECT e FROM Event e JOIN e.tags t WHERE t = :tag")
-    List<Event> findEventByTags(@Param("tag") Tag tag);
+    @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t JOIN t.subTags st WHERE st = :subTag")
+    List<Event> findEventBySubTag(@Param("subTag") SubTag subTag);
 }

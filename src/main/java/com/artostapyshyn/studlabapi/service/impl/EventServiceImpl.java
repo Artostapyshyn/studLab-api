@@ -1,10 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.EventDto;
-import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.entity.EventCounter;
-import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
-import com.artostapyshyn.studlabapi.entity.Tag;
+import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.repository.EventCounterRepository;
 import com.artostapyshyn.studlabapi.repository.EventRepository;
 import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
@@ -123,8 +120,13 @@ public class EventServiceImpl implements EventService {
         List<Event> recommendedEvents = new ArrayList<>();
         for (Map.Entry<Tag, Integer> entry : sortedTags) {
             Tag tag = entry.getKey();
-            List<Event> eventsByTag = eventRepository.findEventByTags(tag);
-            recommendedEvents.addAll(eventsByTag);
+
+            Set<SubTag> subTags = tag.getSubTags();
+
+            for (SubTag subTag : subTags) {
+                List<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag);
+                recommendedEvents.addAll(eventsBySubTag);
+            }
         }
 
         List<Event> favouriteEventsOnly = favouriteEvents.stream()
@@ -135,4 +137,5 @@ public class EventServiceImpl implements EventService {
 
         return recommendedEvents;
     }
+
 }

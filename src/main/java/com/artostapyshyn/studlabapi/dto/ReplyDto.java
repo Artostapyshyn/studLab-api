@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReplyDto {
+    private Long id;
     private String replyText;
     private Long commentId;
     private StudentDto student;
