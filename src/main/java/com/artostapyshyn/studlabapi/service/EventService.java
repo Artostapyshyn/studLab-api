@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.entity.Event;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EventService {
     List<EventDto> findAll();
@@ -19,7 +20,7 @@ public interface EventService {
 
     EventDto convertToDTO(Event event);
 
-    List<Event> getRecommendedEvents(Long studentId);
+    Set<Event> getRecommendedEvents(Long studentId);
 
     List<EventDto> findPopularEvents();
 

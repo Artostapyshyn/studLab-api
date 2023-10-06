@@ -48,7 +48,7 @@ public class EventController {
     @GetMapping("/recommended")
     public ResponseEntity<List<EventDto>> getRecommendedEvents(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
-        List<Event> events = eventService.getRecommendedEvents(studentId);
+        Set<Event> events = eventService.getRecommendedEvents(studentId);
         List<EventDto> eventDtos = events.stream()
                 .map(eventService::convertToDTO)
                 .toList();

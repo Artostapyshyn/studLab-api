@@ -9,12 +9,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findEventById(Long id);
 
-    @Query("SELECT e FROM Event e ORDER BY e.favoriteCount DESC")
+    @Query("SELECT e FROM Event e JOIN FETCH e.tags t ORDER BY e.favoriteCount DESC")
     List<Event> findPopularEvents();
 
     @Query("SELECT e FROM Event e ORDER BY e.date ASC")
@@ -24,5 +25,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllEventsByCreationDateAsc();
 
     @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t JOIN t.subTags st WHERE st = :subTag")
-    List<Event> findEventBySubTag(@Param("subTag") SubTag subTag);
+    Set<Event> findEventBySubTag(@Param("subTag") SubTag subTag);
 }

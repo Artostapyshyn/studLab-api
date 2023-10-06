@@ -23,7 +23,11 @@ import java.util.Set;
 @NoArgsConstructor
 @Cacheable
 @Entity
-@Table(name = "events")
+@Table(name = "events", indexes = {
+        @Index(name = "index_favoriteCount", columnList = "favorite_count"),
+        @Index(name = "index_date", columnList = "date_of_event"),
+        @Index(name = "index_creationDate", columnList = "date_of_creation")
+})
 @SecondaryTable(name = "event_tags",
         indexes = {
                 @Index(name = "index_event_tags_event_id", columnList = "event_id"),

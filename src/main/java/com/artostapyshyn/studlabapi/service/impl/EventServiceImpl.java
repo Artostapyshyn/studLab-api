@@ -104,7 +104,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> getRecommendedEvents(Long studentId) {
+    public Set<Event> getRecommendedEvents(Long studentId) {
         List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
 
         Map<Tag, Integer> tagCount = new HashMap<>();
@@ -117,14 +117,14 @@ public class EventServiceImpl implements EventService {
         List<Map.Entry<Tag, Integer>> sortedTags = new ArrayList<>(tagCount.entrySet());
         sortedTags.sort(Map.Entry.<Tag, Integer>comparingByValue().reversed());
 
-        List<Event> recommendedEvents = new ArrayList<>();
+        Set<Event> recommendedEvents = new HashSet<>();
         for (Map.Entry<Tag, Integer> entry : sortedTags) {
             Tag tag = entry.getKey();
 
             Set<SubTag> subTags = tag.getSubTags();
 
             for (SubTag subTag : subTags) {
-                List<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag);
+                Set<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag);
                 recommendedEvents.addAll(eventsBySubTag);
             }
         }
@@ -133,7 +133,7 @@ public class EventServiceImpl implements EventService {
                 .map(FavouriteEvent::getEvent)
                 .toList();
 
-        recommendedEvents.removeAll(favouriteEventsOnly);
+        favouriteEventsOnly.forEach(recommendedEvents::remove);
 
         return recommendedEvents;
     }
