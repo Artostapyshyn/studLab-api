@@ -10,6 +10,8 @@ import java.util.Set;
 public interface EventService {
     List<EventDto> findAll();
 
+    List<EventDto> findUpcomingEvents();
+
     Optional<Event> findEventById(Long id);
 
     Optional<EventDto> findEventDtoById(Long id);

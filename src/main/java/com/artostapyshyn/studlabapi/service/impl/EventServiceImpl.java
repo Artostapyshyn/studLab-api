@@ -11,7 +11,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -28,6 +31,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventDto> findAll() {
         List<Event> events = eventRepository.findAll();
+        return events.stream()
+                .map(this::convertToDTO)
+                .toList();
+    }
+
+    @Override
+    public List<EventDto> findUpcomingEvents() {
+        List<Event> events = eventRepository.findUpcomingEvents();
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -106,27 +117,28 @@ public class EventServiceImpl implements EventService {
     public Set<Event> getRecommendedEvents(Long studentId) {
         List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
 
-        Map<Tag, Integer> tagCount = new HashMap<>();
-        for (FavouriteEvent favouriteEvent : favouriteEvents) {
-            for (Tag tag : favouriteEvent.getEvent().getTags()) {
-                tagCount.put(tag, tagCount.getOrDefault(tag, 0) + 1);
-            }
-        }
+        Map<Tag, Integer> tagCount = favouriteEvents.stream()
+                .flatMap(fe -> fe.getEvent().getTags().stream())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
 
-        List<Map.Entry<Tag, Integer>> sortedTags = new ArrayList<>(tagCount.entrySet());
-        sortedTags.sort(Map.Entry.<Tag, Integer>comparingByValue().reversed());
+        List<Tag> sortedTags = tagCount.entrySet().stream()
+                .sorted(Map.Entry.<Tag, Integer>comparingByValue().reversed())
+                .map(Map.Entry::getKey)
+                .toList();
 
         Set<Event> recommendedEvents = new HashSet<>();
-        for (Map.Entry<Tag, Integer> entry : sortedTags) {
-            Tag tag = entry.getKey();
-
+        for (Tag tag : sortedTags) {
             Set<SubTag> subTags = tag.getSubTags();
-
             for (SubTag subTag : subTags) {
                 Set<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag);
                 recommendedEvents.addAll(eventsBySubTag);
             }
         }
+
+        LocalDateTime now = LocalDateTime.now();
+        recommendedEvents = recommendedEvents.stream()
+                .filter(event -> event.getEndDate().isAfter(now))
+                .collect(Collectors.toSet());
 
         List<Event> favouriteEventsOnly = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)

@@ -40,7 +40,7 @@ public class EventController {
     @Operation(summary = "Get all events")
     @GetMapping("/all")
     public ResponseEntity<List<EventDto>> getAllEvents() {
-        List<EventDto> events = eventService.findAll();
+        List<EventDto> events = eventService.findUpcomingEvents();
         return ResponseEntity.ok(events);
     }
 
@@ -133,10 +133,15 @@ public class EventController {
 
         if (existingEvent.isPresent()) {
             Map<String, Object> response = new HashMap<>();
-            eventService.deleteById(eventId);
-
-            response.put(MESSAGE, "Event deleted successfully");
-            return ResponseEntity.ok(response);
+            try {
+                eventService.deleteById(eventId);
+                response.put(MESSAGE, "Event deleted successfully");
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                log.error("Error while deleting event with id: " + eventId, e);
+                response.put(MESSAGE, "Error while deleting event. Please check server logs for details.");
+                return ResponseEntity.internalServerError().body(response);
+            }
         } else {
             return ResponseEntity.notFound().build();
         }

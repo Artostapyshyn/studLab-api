@@ -13,6 +13,7 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.EventService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,5 +63,21 @@ public class CommentServiceImpl implements CommentService {
         List<Reply> replies = replyRepository.findReplyByCommentId(comment.getId());
         replyRepository.deleteAll(replies);
         commentRepository.delete(comment);
+    }
+
+    @Override
+    @Scheduled(fixedRate = 86400000)
+    public void removeDanglingEventComments() {
+        List<Comment> comments = commentRepository.findAll();
+
+        for (Comment comment : comments) {
+            Long eventId = comment.getEventId();
+            Event event = eventService.findEventById(eventId).orElse(null);
+
+            if (event == null) {
+                comment.getReplies().clear();
+                commentRepository.delete(comment);
+            }
+        }
     }
 }

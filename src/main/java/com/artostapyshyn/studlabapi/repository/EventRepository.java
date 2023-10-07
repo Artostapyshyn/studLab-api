@@ -15,6 +15,9 @@ import java.util.Set;
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findEventById(Long id);
 
+    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
+    List<Event> findUpcomingEvents();
+
     @Query("SELECT e FROM Event e JOIN FETCH e.tags t ORDER BY e.favoriteCount DESC")
     List<Event> findPopularEvents();
 
