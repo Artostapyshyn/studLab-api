@@ -15,4 +15,6 @@ public interface CertificateService {
     Certificate save(Certificate certificate);
 
     void deleteById(Long id);
+
+    boolean existsByStudentIdAndName(Long id, String name);
 }

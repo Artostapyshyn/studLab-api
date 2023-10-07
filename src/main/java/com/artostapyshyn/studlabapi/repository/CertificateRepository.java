@@ -11,4 +11,6 @@ public interface CertificateRepository extends JpaRepository<Certificate, Long> 
     List<Certificate> findByStudentId(Long id);
 
     Certificate findByName(String name);
+
+    boolean existsByStudentIdAndName(Long id, String name);
 }

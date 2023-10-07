@@ -39,4 +39,9 @@ public class CertificateServiceImpl implements CertificateService {
     public void deleteById(Long id) {
         certificateRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsByStudentIdAndName(Long id, String name) {
+        return certificateRepository.existsByStudentIdAndName(id, name);
+    }
 }

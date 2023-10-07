@@ -39,4 +39,9 @@ public class ResumeServiceImpl implements ResumeService {
     public void deleteById(Long id) {
         resumeRepository.deleteById(id);
     }
+
+    @Override
+    public boolean existsByStudentIdAndName(Long id, String name) {
+        return resumeRepository.existsByStudentIdAndName(id, name);
+    }
 }

@@ -9,6 +9,7 @@ import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FilenameUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
@@ -127,8 +128,19 @@ public class StudentController {
 
         if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
             Student student = studentOptional.get();
+            String originalFilename = file.getOriginalFilename();
+            String uniqueFilename = originalFilename;
+
+            int fileCounter = 1;
+            while (resumeService.existsByStudentIdAndName(student.getId(), uniqueFilename)) {
+                String fileNameWithoutExtension = FilenameUtils.removeExtension(originalFilename);
+                String fileExtension = FilenameUtils.getExtension(originalFilename);
+                uniqueFilename = fileNameWithoutExtension + "_" + fileCounter + "." + fileExtension;
+                fileCounter++;
+            }
+
             Resume resume = new Resume();
-            resume.setName(file.getOriginalFilename());
+            resume.setName(uniqueFilename);
             resume.setData(file.getBytes());
             resume.setStudentId(student.getId());
 
@@ -148,8 +160,19 @@ public class StudentController {
 
         if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
             Student student = studentOptional.get();
+            String originalFilename = file.getOriginalFilename();
+            String uniqueFilename = originalFilename;
+
+            int fileCounter = 1;
+            while (certificateService.existsByStudentIdAndName(student.getId(), uniqueFilename)) {
+                String fileNameWithoutExtension = FilenameUtils.removeExtension(originalFilename);
+                String fileExtension = FilenameUtils.getExtension(originalFilename);
+                uniqueFilename = fileNameWithoutExtension + "_" + fileCounter + "." + fileExtension;
+                fileCounter++;
+            }
+
             Certificate certificate = new Certificate();
-            certificate.setName(file.getOriginalFilename());
+            certificate.setName(uniqueFilename);
             certificate.setData(file.getBytes());
             certificate.setStudentId(student.getId());
 

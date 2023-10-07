@@ -17,6 +17,8 @@ public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
 
+    private final ModelMapper modelMapper;
+
     @Override
     public List<Course> findAll() {
         return courseRepository.findAll();
@@ -47,7 +49,6 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     @Override
     public void updateCourse(Course existingCourse, Course updatedCourse) {
-        ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedCourse, existingCourse);
     }

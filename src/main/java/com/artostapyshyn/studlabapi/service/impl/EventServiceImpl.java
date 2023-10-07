@@ -92,7 +92,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     @Override
     public void updateEvent(Event existingEvent, Event updatedEvent) {
-        ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedEvent, existingEvent);
     }

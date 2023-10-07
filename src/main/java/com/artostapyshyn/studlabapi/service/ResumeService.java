@@ -15,4 +15,6 @@ public interface ResumeService {
     Resume save(Resume resume);
 
     void deleteById(Long id);
+
+    boolean existsByStudentIdAndName(Long id, String name);
 }

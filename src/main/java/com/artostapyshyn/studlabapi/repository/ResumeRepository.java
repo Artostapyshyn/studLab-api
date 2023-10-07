@@ -11,4 +11,6 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     List<Resume> findByStudentId(Long id);
 
     Resume findByName(String name);
+
+    boolean existsByStudentIdAndName(Long id, String name);
 }
