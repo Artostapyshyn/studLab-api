@@ -18,13 +18,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     List<Event> findUpcomingEvents();
 
-    @Query("SELECT e FROM Event e JOIN FETCH e.tags t ORDER BY e.favoriteCount DESC")
+    @Query("SELECT e FROM Event e JOIN FETCH e.tags t WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.favoriteCount DESC")
     List<Event> findPopularEvents();
 
-    @Query("SELECT e FROM Event e ORDER BY e.date ASC")
+    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.date ASC")
     List<Event> findAllEventsByDateAsc();
 
-    @Query("SELECT e FROM Event e ORDER BY e.creationDate ASC")
+    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.creationDate ASC")
     List<Event> findAllEventsByCreationDateAsc();
 
     @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t JOIN t.subTags st WHERE st = :subTag")

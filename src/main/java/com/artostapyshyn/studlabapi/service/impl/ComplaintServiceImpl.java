@@ -8,6 +8,7 @@ import com.artostapyshyn.studlabapi.service.CommentService;
 import com.artostapyshyn.studlabapi.service.ComplaintService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,6 +86,20 @@ public class ComplaintServiceImpl implements ComplaintService {
     @Override
     public void delete(Complaint complaint) {
         complaintRepository.delete(complaint);
+    }
+
+    @Override
+    @Scheduled(fixedRate = 86400000)
+    public void removeExpiredTickets() {
+        List<Complaint> complaints = complaintRepository.findAll();
+            for(Complaint complaint : complaints){
+                Long commentId = complaint.getCommentId();
+                Comment comment = commentService.findById(commentId).orElse(null);
+
+                if(comment == null){
+                    complaintRepository.delete(complaint);
+                }
+            }
     }
 
     @Override
