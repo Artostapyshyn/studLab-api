@@ -78,7 +78,7 @@ public class Event {
     @OneToMany(mappedBy = "eventId", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<Comment> eventComments;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "event_tags",
             joinColumns = @JoinColumn(name = "event_id"),
