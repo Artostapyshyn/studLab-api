@@ -42,8 +42,8 @@ public class Student {
     private String major;
 
     @Column(name = "course")
-    @Min(1)
-    @Max(5)
+//    @Min(1)
+//    @Max(5)
     private String course;
 
     @Column(name = "student_city")
@@ -57,7 +57,7 @@ public class Student {
     @Column(name = "email", unique = true)
     private String email;
 
-    @Password
+//    @Password
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;
