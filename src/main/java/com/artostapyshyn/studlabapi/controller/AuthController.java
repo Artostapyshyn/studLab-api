@@ -78,13 +78,15 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
-    @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody VerificationDto verificationDto) {
+        log.info("Attempting to verify email for: {}", verificationDto.getEmail());
+
         Map<String, Object> response = new HashMap<>();
         String email = verificationDto.getEmail();
 
         if (studentService.findByEmail(email) != null) {
+            log.warn("Email {} is already registered", email);
             response.put(ERROR, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
@@ -103,6 +105,7 @@ public class AuthController {
             }
 
             sendCode(email, response, false);
+            log.info("Email verification initiated for: {}", email);
             return ResponseEntity.ok(response);
         }
 
@@ -153,17 +156,25 @@ public class AuthController {
     @Operation(summary = "Sign-up after verification")
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody SignUpDto signUpDto) {
-        String email = signUpDto.getEmail();
-        Student existingStudent = studentService.findByEmail(email);
+        try {
+            log.info("SignUp attempt for email: {}", signUpDto.getEmail());
+            String email = signUpDto.getEmail();
+            Student existingStudent = studentService.findByEmail(email);
 
-        if (existingStudent == null) {
-            return handleBadRequest("Invalid email address");
-        }
+            if (existingStudent == null) {
+                return handleBadRequest("Invalid email address");
+            }
 
-        if (existingStudent.isEnabled()) {
-            return registerStudent(signUpDto, existingStudent);
-        } else {
-            return handleBadRequest("Student not verified");
+            if (existingStudent.isEnabled()) {
+                return registerStudent(signUpDto, existingStudent);
+            } else {
+                return handleBadRequest("Student not verified");
+            }
+        } catch (Exception e) {
+            log.error("Error occurred while signing up for email: {}", signUpDto.getEmail(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR, "An unexpected error occurred");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
@@ -273,6 +284,7 @@ public class AuthController {
     }
 
     private ResponseEntity<Map<String, Object>> verify(VerificationCode code) {
+        log.info("Verifying code for email: {}", code.getEmail());
         Map<String, Object> response = new HashMap<>();
         String email = code.getEmail();
         int verificationCode = code.getCode();
@@ -296,28 +308,35 @@ public class AuthController {
         student.setEnabled(true);
         studentService.save(student);
         response.put(MESSAGE, "User successfully verified");
-        log.info("User successfully verified with email - " + email);
+        log.info("User successfully verified with email: {}", code.getEmail());
         return ResponseEntity.ok(response);
     }
 
     private ResponseEntity<Map<String, Object>> registerStudent(SignUpDto signUpDto, Student existingStudent) {
-        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            log.info("Registering student for email: {}", signUpDto.getEmail());
+            Map<String, Object> responseMap = new HashMap<>();
 
-        boolean isValid = checkSignUpDto(signUpDto);
-        if (!isValid) {
-            return handleBadRequest("Required fields are missing");
+            boolean isValid = checkSignUpDto(signUpDto);
+            if (!isValid) {
+                return handleBadRequest("Required fields are missing");
+            }
+
+            studentService.signUpStudent(signUpDto, existingStudent);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
+            String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
+
+            responseMap.put("email", signUpDto.getEmail());
+            responseMap.put(MESSAGE, "Account created successfully");
+            responseMap.put("token", token);
+            log.info("Account registered with email: {}", signUpDto.getEmail());
+            return ResponseEntity.ok(responseMap);
+        } catch (Exception e) {
+            log.error("Error occurred while registering student for email: {}", signUpDto.getEmail(), e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put(ERROR, "An unexpected error occurred while registering");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
-
-        studentService.signUpStudent(signUpDto, existingStudent);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
-        String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
-
-        responseMap.put("email", signUpDto.getEmail());
-        responseMap.put(MESSAGE, "Account created successfully");
-        log.info("Account registered with email - " + signUpDto.getEmail());
-        responseMap.put("token", token);
-
-        return ResponseEntity.ok(responseMap);
     }
 
     private ResponseEntity<Map<String, Object>> handleBadRequest(String message) {
