@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.service;
 
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
+import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.Student;
 import org.springframework.security.core.Authentication;
 
@@ -22,7 +23,7 @@ public interface StudentService {
 
     Long getAuthStudentId(Authentication authentication);
 
-    void updateStudent(Student existingStudent, Student updatedStudent);
+    void updateStudent(Student existingStudent, StudentDto updatedStudent);
 
     void updatePassword(Student student, String password);
 

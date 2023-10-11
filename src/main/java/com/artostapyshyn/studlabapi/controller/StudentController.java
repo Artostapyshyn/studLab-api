@@ -265,7 +265,7 @@ public class StudentController {
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
-    public ResponseEntity<Student> editStudent(@RequestBody Student student, Authentication authentication) {
+    public ResponseEntity<Student> editStudent(@RequestBody StudentDto student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
 
         if (optionalStudent.isPresent()) {

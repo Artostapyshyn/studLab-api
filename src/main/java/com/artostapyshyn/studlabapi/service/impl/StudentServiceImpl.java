@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
+import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
@@ -70,16 +71,11 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     @Override
-    public void updateStudent(Student existingStudent, Student updatedStudent) {
+    public void updateStudent(Student existingStudent, StudentDto updatedStudent) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 
         modelMapper.map(updatedStudent, existingStudent);
-
-        if (updatedStudent.getPassword() != null) {
-            String hashedPassword = new BCryptPasswordEncoder().encode(updatedStudent.getPassword());
-            existingStudent.setPassword(hashedPassword);
-        }
     }
 
     @Override
