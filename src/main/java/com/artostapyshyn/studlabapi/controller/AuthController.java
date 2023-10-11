@@ -84,15 +84,18 @@ public class AuthController {
 
         Map<String, Object> response = new HashMap<>();
         String email = verificationDto.getEmail();
-        Student joinedStudent = studentService.findByEmail(email);
+        Student existingStudent = studentService.findByEmail(email);
 
-        if (joinedStudent.getFirstName() != null && joinedStudent.getLastName() != null) {
+        if (existingStudent != null && existingStudent.getFirstName() != null && existingStudent.getLastName() != null) {
             log.warn("Email {} is already registered", email);
             response.put(ERROR, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
 
-        Student student = modelMapper.map(verificationDto, Student.class);
+        Student student = new Student();
+        if (existingStudent != null) {
+            student = existingStudent;
+        }
 
         if (isValidEmailDomain(email, student)) {
             student.setEnabled(false);
