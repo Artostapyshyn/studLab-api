@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignUpDto {
+    @NotNull
     private Long id;
     private String firstName;
     private String lastName;

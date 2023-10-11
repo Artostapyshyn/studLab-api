@@ -321,10 +321,11 @@ public class AuthController {
             if (!isValid) {
                 return handleBadRequest("Required fields are missing");
             }
-
+            log.info("SignUpDto received: {}", signUpDto);
             studentService.signUpStudent(signUpDto, existingStudent);
             UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
             String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
+            log.info("Token received: {}", token);
 
             responseMap.put("email", signUpDto.getEmail());
             responseMap.put(MESSAGE, "Account created successfully");
@@ -361,6 +362,7 @@ public class AuthController {
                 signUpDto.getLastName() != null &&
                 signUpDto.getPassword() != null &&
                 signUpDto.getCity() != null &&
-                signUpDto.getMajor() != null;
+                signUpDto.getMajor() != null &&
+                signUpDto.getCourse() != null;
     }
 }
