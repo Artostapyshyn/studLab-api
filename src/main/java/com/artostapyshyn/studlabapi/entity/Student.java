@@ -84,7 +84,6 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private Set<Friendship> friendships = new HashSet<>();
 
-    @JsonManagedReference
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
