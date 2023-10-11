@@ -2,13 +2,10 @@ package com.artostapyshyn.studlabapi.entity;
 
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
-import com.artostapyshyn.studlabapi.validation.Password;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -87,6 +84,7 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private Set<Friendship> friendships = new HashSet<>();
 
+    @JsonManagedReference
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
@@ -108,10 +106,7 @@ public class Student {
                 "id=" + id +
                 ", lastName='" + lastName + '\'' +
                 ", firstName='" + firstName + '\'' +
-                ", photoBytes=" + Arrays.toString(photoBytes) +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", university=" + university +
                 ", role=" + role +
                 '}';
     }

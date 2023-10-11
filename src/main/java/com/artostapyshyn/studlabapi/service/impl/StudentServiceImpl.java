@@ -1,7 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.EditDto;
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
-import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
@@ -71,7 +71,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Transactional
     @Override
-    public void updateStudent(Student existingStudent, StudentDto updatedStudent) {
+    public void updateStudent(Student existingStudent, EditDto updatedStudent) {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 

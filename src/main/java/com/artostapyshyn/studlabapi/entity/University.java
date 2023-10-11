@@ -57,7 +57,6 @@ public class University {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", domain='" + domain + '\'' +
-                ", students=" + students +
                 '}';
     }
 

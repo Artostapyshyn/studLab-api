@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.EditDto;
 import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
@@ -265,14 +266,16 @@ public class StudentController {
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
-    public ResponseEntity<Student> editStudent(@RequestBody StudentDto student, Authentication authentication) {
+    public ResponseEntity<StudentDto> editStudent(@RequestBody EditDto student, Authentication authentication) {
         Optional<Student> optionalStudent = studentService.findById(studentService.getAuthStudentId(authentication));
 
         if (optionalStudent.isPresent()) {
             Student existingStudent = optionalStudent.get();
             studentService.updateStudent(existingStudent, student);
             studentService.save(existingStudent);
-            return ResponseEntity.ok(existingStudent);
+            StudentDto studentDto = modelMapper.map(existingStudent, StudentDto.class);
+
+            return ResponseEntity.ok(studentDto);
         } else {
             return ResponseEntity.notFound().build();
         }
