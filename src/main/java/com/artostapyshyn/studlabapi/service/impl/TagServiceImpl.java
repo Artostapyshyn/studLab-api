@@ -38,21 +38,23 @@ public class TagServiceImpl implements TagService {
             Tag existingTag = tagRepository.findByName(tagFromEvent.getName());
             if (existingTag != null) {
                 resolvedTags.add(existingTag);
+                addSubTagsToTag(existingTag);
             } else {
-                resolvedTags.add(tagRepository.save(tagFromEvent));
+                Tag savedTag = tagRepository.save(tagFromEvent);
+                resolvedTags.add(savedTag);
+                addSubTagsToTag(savedTag);
             }
-            addSubTagsToTag(existingTag != null ? existingTag : tagFromEvent);
         }
         return resolvedTags;
     }
 
     public void addSubTagsToTag(Tag tag) {
-        Set<SubTag> newSubTags = tag.getSubTags();
+        Set<SubTag> newSubTags = new HashSet<>(tag.getSubTags());
         for (SubTag newSubTag : newSubTags) {
             Optional<SubTag> optionalExistingSubTag = subTagService.findByNameAndTag(newSubTag.getName(), tag);
             if (optionalExistingSubTag.isEmpty()) {
-                tag.getSubTags().add(newSubTag);
                 newSubTag.setTag(tag);
+                subTagService.save(newSubTag);
             }
         }
         tagRepository.save(tag);

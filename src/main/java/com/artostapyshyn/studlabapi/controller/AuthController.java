@@ -78,10 +78,9 @@ public class AuthController {
         return ResponseEntity.ok(responseMap);
     }
 
+    @Operation(summary = "Join to the student service")
     @PostMapping("/join")
     public ResponseEntity<Map<String, Object>> verifyEmail(@RequestBody VerificationDto verificationDto) {
-        log.info("Attempting to verify email for: {}", verificationDto.getEmail());
-
         Map<String, Object> response = new HashMap<>();
         String email = verificationDto.getEmail();
         Student existingStudent = studentService.findByEmail(email);
@@ -92,15 +91,19 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        Student student = new Student();
-        if (existingStudent != null) {
-            student = existingStudent;
-        }
+        Student student = modelMapper.map(verificationDto, Student.class);
 
         if (isValidEmailDomain(email, student)) {
             student.setEnabled(false);
             student.setRole(Role.ROLE_STUDENT);
-            studentService.save(student);
+
+            if (existingStudent == null) {
+                studentService.save(student);
+            } else if (existingStudent.getFirstName() == null && existingStudent.getLastName() == null) {
+                existingStudent.setEnabled(false);
+                existingStudent.setRole(Role.ROLE_STUDENT);
+                studentService.save(existingStudent);
+            }
 
             VerificationCode existingCode = verificationCodeService.findByEmail(email);
             if (existingCode != null && existingCode.getExpirationDate().isAfter(LocalDateTime.now())) {
@@ -108,13 +111,13 @@ public class AuthController {
             }
 
             sendCode(email, response, false);
-            log.info("Email verification initiated for: {}", email);
             return ResponseEntity.ok(response);
         }
 
         response.put(MESSAGE, "Invalid email");
         return ResponseEntity.badRequest().body(response);
     }
+
 
     @Operation(summary = "Resend verification code")
     @PostMapping("/resend-code")

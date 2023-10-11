@@ -68,8 +68,6 @@ ALTER TABLE certificates
 ALTER TABLE resumes
     DROP CONSTRAINT fk_resumes_student_id;
 
-DROP TABLE user_tokens CASCADE;
-
 ALTER TABLE students
     DROP COLUMN can_write_comments;
 
