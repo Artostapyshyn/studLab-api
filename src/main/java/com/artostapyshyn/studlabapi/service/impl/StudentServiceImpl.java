@@ -78,6 +78,7 @@ public class StudentServiceImpl implements StudentService {
         modelMapper.map(updatedStudent, existingStudent);
     }
 
+    @Transactional
     @Override
     public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
         existingStudent.setFirstName(signUpDto.getFirstName());

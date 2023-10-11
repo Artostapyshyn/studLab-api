@@ -84,15 +84,15 @@ public class AuthController {
 
         Map<String, Object> response = new HashMap<>();
         String email = verificationDto.getEmail();
+        Student joinedStudent = studentService.findByEmail(email);
 
-        if (studentService.findByEmail(email) != null) {
+        if (joinedStudent.getFirstName() != null && joinedStudent.getLastName() != null) {
             log.warn("Email {} is already registered", email);
             response.put(ERROR, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
 
         Student student = modelMapper.map(verificationDto, Student.class);
-        student.setPassword("tempPass1");
 
         if (isValidEmailDomain(email, student)) {
             student.setEnabled(false);
@@ -157,7 +157,7 @@ public class AuthController {
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody SignUpDto signUpDto) {
         try {
-            log.info("SignUp attempt for email: {}", signUpDto.getEmail());
+            log.info("Sign-Up attempt for email: {}", signUpDto.getEmail());
             String email = signUpDto.getEmail();
             Student existingStudent = studentService.findByEmail(email);
 
