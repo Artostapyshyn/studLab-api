@@ -236,7 +236,17 @@ public class StudentController {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/pdf"));
+        String contentType;
+
+        String fileExtension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+
+        contentType = switch (fileExtension) {
+            case "pdf" -> "application/pdf";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            default -> "application/octet-stream";
+        };
+
+        headers.setContentType(MediaType.parseMediaType(contentType));
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename(filename).build());
 
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
@@ -258,11 +268,24 @@ public class StudentController {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG);
+        String contentType;
+
+        String fileExtension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+
+        contentType = switch (fileExtension) {
+            case "jpeg", "jpg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "bmp" -> "image/bmp";
+            default -> "application/octet-stream";
+        };
+
+        headers.setContentType(MediaType.parseMediaType(contentType));
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename(filename).build());
 
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
+
 
     @Operation(summary = "Edit student account.")
     @PutMapping("/edit")
