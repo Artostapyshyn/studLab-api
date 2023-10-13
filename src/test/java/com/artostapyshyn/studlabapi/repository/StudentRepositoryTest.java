@@ -105,7 +105,7 @@ class StudentRepositoryTest {
         entityManager.persist(student);
         entityManager.flush();
 
-        Student result = studentRepository.findByFirstNameAndLastName(firstName, lastName);
+        Student result = studentRepository.findByFirstAndLastName(firstName, lastName);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(firstName, result.getFirstName());

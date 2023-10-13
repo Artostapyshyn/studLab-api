@@ -50,7 +50,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student findByFirstNameAndLastName(String firstName, String lastName) {
-        return studentRepository.findByFirstNameAndLastName(firstName, lastName);
+        return studentRepository.findByFirstAndLastName(firstName, lastName);
     }
 
     @Override

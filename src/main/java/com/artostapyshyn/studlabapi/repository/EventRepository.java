@@ -2,31 +2,32 @@ package com.artostapyshyn.studlabapi.repository;
 
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.SubTag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findEventById(Long id);
 
-    @Query("SELECT e FROM Event e LEFT JOIN FETCH e.tags WHERE e.endDate > CURRENT_TIMESTAMP")
-    List<Event> findUpcomingEvents();
+    @Query("SELECT e FROM Event e LEFT JOIN e.tags WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 1 WHEN e.eventType = 'UNIVERSITY_EVENT' THEN 2 ELSE 3 END")
+    Page<Event> findUpcomingEvents(Pageable pageable);
 
     @Query("SELECT e FROM Event e JOIN FETCH e.tags t WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.favoriteCount DESC")
-    List<Event> findPopularEvents();
+    List<Event> findPopularEvents(Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.date ASC")
-    List<Event> findAllEventsByDateAsc();
+    Page<Event> findAllEventsByDateAsc(Pageable pageable);
 
     @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.creationDate ASC")
-    List<Event> findAllEventsByCreationDateAsc();
+    Page<Event> findAllEventsByCreationDateAsc(Pageable pageable);
 
     @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t JOIN t.subTags st WHERE st = :subTag")
-    Set<Event> findEventBySubTag(@Param("subTag") SubTag subTag);
+    Page<Event> findEventBySubTag(SubTag subTag, Pageable pageable);
 }

@@ -2,15 +2,15 @@ package com.artostapyshyn.studlabapi.service;
 
 import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface EventService {
     List<EventDto> findAll();
 
-    List<EventDto> findUpcomingEvents();
+    List<EventDto> findUpcomingEvents(Pageable pageable);
 
     Optional<Event> findEventById(Long id);
 
@@ -22,13 +22,13 @@ public interface EventService {
 
     EventDto convertToDTO(Event event);
 
-    Set<Event> getRecommendedEvents(Long studentId);
+    List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable);
 
-    List<EventDto> findPopularEvents();
+    List<EventDto> findPopularEvents(Pageable pageable);
 
-    List<EventDto> findAllEventsByDateAsc();
+    List<EventDto> findAllEventsByDateAsc(Pageable pageable);
 
-    List<EventDto> findAllEventsByCreationDateAsc();
+    List<EventDto> findAllEventsByCreationDateAsc(Pageable pageable);
 
     void deleteById(Long id);
 

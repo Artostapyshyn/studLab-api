@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -39,20 +41,63 @@ public class EventController {
 
     @Operation(summary = "Get all events")
     @GetMapping("/all")
-    public ResponseEntity<List<EventDto>> getAllEvents() {
-        List<EventDto> events = eventService.findUpcomingEvents();
+    public ResponseEntity<List<EventDto>> getAllEvents(@RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<EventDto> events = eventService.findUpcomingEvents(pageable);
         return ResponseEntity.ok(events);
     }
 
-    @Operation(summary = "Get recommended events")
+    @Operation(summary = "Get recommended events with pagination")
     @GetMapping("/recommended")
-    public ResponseEntity<List<EventDto>> getRecommendedEvents(Authentication authentication) {
+    public ResponseEntity<List<EventDto>> getRecommendedEvents(Authentication authentication,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "25") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
         Long studentId = studentService.getAuthStudentId(authentication);
-        Set<Event> events = eventService.getRecommendedEvents(studentId);
-        List<EventDto> eventDtos = events.stream()
-                .map(eventService::convertToDTO)
-                .toList();
+        List<EventDto> eventDtos = eventService.getRecommendedEvents(studentId, pageable);
+
         return ResponseEntity.ok(eventDtos);
+    }
+
+    @Operation(summary = "Sort events by popularity with pagination")
+    @GetMapping("/popular")
+    public ResponseEntity<List<EventDto>> getEventsByPopularity(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<EventDto> events = eventService.findPopularEvents(pageable);
+
+        log.info("Listing events by popularity");
+        return ResponseEntity.ok(events);
+    }
+
+    @Operation(summary = "Sort events by creation date with pagination")
+    @GetMapping("/newest")
+    public ResponseEntity<List<EventDto>> getEventsByNewestDate(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<EventDto> events = eventService.findAllEventsByCreationDateAsc(pageable);
+
+        log.info("Listing newest events");
+        return ResponseEntity.ok(events);
+    }
+
+    @Operation(summary = "Get upcoming events with pagination")
+    @GetMapping("/upcoming")
+    public ResponseEntity<List<EventDto>> getUpcomingEvents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<EventDto> events = eventService.findAllEventsByDateAsc(pageable);
+
+        log.info("Listing upcoming events");
+        return ResponseEntity.ok(events);
     }
 
     @Operation(summary = "Get events by id")
@@ -62,57 +107,38 @@ public class EventController {
         return event.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @Operation(summary = "Sort events by popularity")
-    @GetMapping("/popular")
-    public ResponseEntity<List<EventDto>> getEventsByPopularity() {
-        List<EventDto> events = eventService.findPopularEvents();
-        log.info("Listing events by popularity");
-        return ResponseEntity.ok(events);
-    }
-
-    @Operation(summary = "Sort events by creation date")
-    @GetMapping("/newest")
-    public ResponseEntity<List<EventDto>> getEventsByNewestDate() {
-        List<EventDto> events = eventService.findAllEventsByCreationDateAsc();
-        log.info("Listing newest events");
-        return ResponseEntity.ok(events);
-    }
-
-    @Operation(summary = "Get upcoming events")
-    @GetMapping("/upcoming")
-    public ResponseEntity<List<EventDto>> getUpcomingEvents() {
-        List<EventDto> events = eventService.findAllEventsByDateAsc();
-        log.info("Listing upcoming events");
-        return ResponseEntity.ok(events);
-    }
-
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Add an event.")
     @PostMapping("/add")
-    public ResponseEntity<Event> addEvent(@RequestBody @NotNull EventDto eventDto, Authentication authentication) {
-        try {
-            if (!eventDto.getDate().isBefore(eventDto.getEndDate()) || eventDto.getEventPhoto() == null) {
-                return ResponseEntity.badRequest().build();
-            }
+    public ResponseEntity<Event> addEvent(@RequestBody @NotNull EventDto eventDto) {
 
+        if (!isValidEventDto(eventDto)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
             Event event = modelMapper.map(eventDto, Event.class);
 
             Set<Tag> resolvedTags = tagService.resolveAndAddTags(eventDto.getTags());
             event.setTags(resolvedTags);
+
             Event savedEvent = eventService.save(event);
 
             log.info("New event added with id - " + savedEvent.getId());
             return ResponseEntity.ok(savedEvent);
         } catch (Exception e) {
-            log.warn(e.getMessage());
+            log.error("Error adding new event: " + e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    private boolean isValidEventDto(EventDto eventDto) {
+        return !eventDto.getDate().isAfter(eventDto.getEndDate()) && eventDto.getEventPhoto() != null;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Edit an event.")
     @PutMapping("/edit")
-    public ResponseEntity<EventDto> editEvent(@RequestBody @NotNull Event updatedEvent, Authentication authentication) {
+    public ResponseEntity<EventDto> editEvent(@RequestBody @NotNull Event updatedEvent) {
         Optional<Event> existingEventOpt = eventService.findEventById(updatedEvent.getId());
 
         if (existingEventOpt.isPresent()) {
@@ -128,12 +154,13 @@ public class EventController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @Operation(summary = "Delete an event by id.")
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> deleteEvent(@RequestParam("eventId") Long eventId) {
         Optional<Event> existingEvent = eventService.findEventById(eventId);
 
         if (existingEvent.isPresent()) {
             Map<String, Object> response = new HashMap<>();
             try {
+                existingEvent.get().getTags().clear();
                 eventService.deleteById(eventId);
                 response.put(MESSAGE, "Event deleted successfully");
                 return ResponseEntity.ok(response);

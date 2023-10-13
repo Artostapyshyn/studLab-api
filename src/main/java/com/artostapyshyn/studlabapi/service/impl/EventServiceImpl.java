@@ -8,6 +8,8 @@ import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
 import com.artostapyshyn.studlabapi.service.EventService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,8 +39,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDto> findUpcomingEvents() {
-        List<Event> events = eventRepository.findUpcomingEvents();
+    public List<EventDto> findUpcomingEvents(Pageable pageable) {
+        Page<Event> events = eventRepository.findUpcomingEvents(pageable);
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
@@ -69,28 +71,29 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventDto> findPopularEvents() {
-        List<Event> events = eventRepository.findPopularEvents();
+    public List<EventDto> findPopularEvents(Pageable pageable) {
+        List<Event> events = eventRepository.findPopularEvents(pageable);
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
     @Override
-    public List<EventDto> findAllEventsByDateAsc() {
-        List<Event> events = eventRepository.findAllEventsByDateAsc();
+    public List<EventDto> findAllEventsByDateAsc(Pageable pageable) {
+        Page<Event> events = eventRepository.findAllEventsByDateAsc(pageable);
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
     @Override
-    public List<EventDto> findAllEventsByCreationDateAsc() {
-        List<Event> events = eventRepository.findAllEventsByCreationDateAsc();
+    public List<EventDto> findAllEventsByCreationDateAsc(Pageable pageable) {
+        Page<Event> events = eventRepository.findAllEventsByCreationDateAsc(pageable);
         return events.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
+
 
     @Transactional
     @Override
@@ -114,7 +117,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<Event> getRecommendedEvents(Long studentId) {
+    public List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable) {
         List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
 
         Map<Tag, Integer> tagCount = favouriteEvents.stream()
@@ -126,11 +129,11 @@ public class EventServiceImpl implements EventService {
                 .map(Map.Entry::getKey)
                 .toList();
 
-        Set<Event> recommendedEvents = new HashSet<>();
+        Set<Event> recommendedEvents = new LinkedHashSet<>();
         for (Tag tag : sortedTags) {
             Set<SubTag> subTags = tag.getSubTags();
             for (SubTag subTag : subTags) {
-                Set<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag);
+                List<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag, pageable).getContent();
                 recommendedEvents.addAll(eventsBySubTag);
             }
         }
@@ -146,7 +149,9 @@ public class EventServiceImpl implements EventService {
 
         favouriteEventsOnly.forEach(recommendedEvents::remove);
 
-        return recommendedEvents;
+        return recommendedEvents.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 }
