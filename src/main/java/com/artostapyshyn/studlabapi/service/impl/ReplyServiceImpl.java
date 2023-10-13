@@ -56,7 +56,8 @@ public class ReplyServiceImpl implements ReplyService {
             String commentLink = "https://studlab.in.ua/event/" + parentComment.getEventId();
 
             String messageText = student.get().getFirstName() + " " + student.get().getLastName()
-                    + " відповів на ваш <a href='" + commentLink + "'>коментар</a>" + reply.getReplyText();
+                    + " відповів на ваш <a href='" + commentLink + "'>коментар</a>: \""
+                    + reply.getReplyText() + "\"";
 
             messageService.addMessageToStudent(studentId, messageText);
             messageService.updateNewMessageStatus(studentId, true);
