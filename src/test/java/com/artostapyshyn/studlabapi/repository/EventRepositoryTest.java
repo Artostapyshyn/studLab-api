@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -67,7 +68,7 @@ class EventRepositoryTest {
         entityManager.persist(event2);
         entityManager.flush();
 
-        List<Event> popularEvents = eventRepository.findPopularEvents();
+        List<Event> popularEvents = eventRepository.findPopularEvents(Pageable.unpaged());
 
         Assertions.assertEquals(2, popularEvents.size());
         Assertions.assertEquals(event2.getFavoriteCount(), popularEvents.get(0).getFavoriteCount());
@@ -86,7 +87,7 @@ class EventRepositoryTest {
         entityManager.persist(event2);
         entityManager.flush();
 
-        List<Event> eventsByDateDesc = eventRepository.findAllEventsByDateAsc();
+        List<Event> eventsByDateDesc = (List<Event>) eventRepository.findAllEventsByDateAsc(Pageable.unpaged());
 
         Assertions.assertEquals(2, eventsByDateDesc.size());
         Assertions.assertEquals(event2.getDate(), eventsByDateDesc.get(0).getDate());
@@ -105,7 +106,7 @@ class EventRepositoryTest {
         entityManager.persist(event2);
         entityManager.flush();
 
-        List<Event> eventsByCreationDateDesc = eventRepository.findAllEventsByCreationDateAsc();
+        List<Event> eventsByCreationDateDesc = (List<Event>) eventRepository.findAllEventsByCreationDateAsc(Pageable.unpaged());
 
         Assertions.assertEquals(2, eventsByCreationDateDesc.size());
         Assertions.assertEquals(event2.getCreationDate(), eventsByCreationDateDesc.get(0).getCreationDate());

@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -72,9 +74,9 @@ class EventServiceImplTest {
                 createRandomEvent(),
                 createRandomEvent()
         );
-        when(eventRepository.findPopularEvents()).thenReturn(expectedPopularEvents);
+        when(eventRepository.findPopularEvents(Pageable.unpaged())).thenReturn(expectedPopularEvents);
 
-        List<EventDto> actualPopularEvents = eventService.findPopularEvents();
+        List<EventDto> actualPopularEvents = eventService.findPopularEvents(Pageable.unpaged());
 
         assertEquals(expectedPopularEvents.size(), actualPopularEvents.size());
         assertTrue(actualPopularEvents.containsAll(expectedPopularEvents));
@@ -87,9 +89,9 @@ class EventServiceImplTest {
                 createRandomEvent(),
                 createRandomEvent()
         );
-        when(eventRepository.findAllEventsByDateAsc()).thenReturn(expectedEventsByDateDesc);
+        when(eventRepository.findAllEventsByDateAsc(Pageable.unpaged())).thenReturn((Page<Event>) expectedEventsByDateDesc);
 
-        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateAsc();
+        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateAsc(Pageable.unpaged());
 
         assertEquals(expectedEventsByDateDesc.size(), actualEventsByDateDesc.size());
         assertTrue(actualEventsByDateDesc.containsAll(expectedEventsByDateDesc));
@@ -102,9 +104,9 @@ class EventServiceImplTest {
                 createRandomEvent(),
                 createRandomEvent()
         );
-        when(eventRepository.findAllEventsByCreationDateAsc()).thenReturn(expectedEventsByCreationDateDesc);
+        when(eventRepository.findAllEventsByCreationDateAsc(Pageable.unpaged())).thenReturn((Page<Event>) expectedEventsByCreationDateDesc);
 
-        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateAsc();
+        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateAsc(Pageable.unpaged());
 
         assertEquals(expectedEventsByCreationDateDesc.size(), actualEventsByCreationDateDesc.size());
         assertTrue(actualEventsByCreationDateDesc.containsAll(expectedEventsByCreationDateDesc));
@@ -121,13 +123,12 @@ class EventServiceImplTest {
     @Test
     void updateEvent() {
         Event existingEvent = createRandomEvent();
-        Event updatedEvent = existingEvent;
-        updatedEvent.setVenue("Updated Venue");
-        updatedEvent.setNameOfEvent("Updated name");
+        existingEvent.setVenue("Updated Venue");
+        existingEvent.setNameOfEvent("Updated name");
 
-        eventService.updateEvent(existingEvent, updatedEvent);
+        eventService.updateEvent(existingEvent, existingEvent);
 
-        assertEquals(updatedEvent.getVenue(), existingEvent.getVenue());
-        assertEquals(updatedEvent.getDate(), existingEvent.getDate());
+        assertEquals(existingEvent.getVenue(), existingEvent.getVenue());
+        assertEquals(existingEvent.getDate(), existingEvent.getDate());
     }
 }
