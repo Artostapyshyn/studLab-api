@@ -52,7 +52,6 @@ public class StatisticController {
             Map<String, Object> response = new HashMap<>(registrationData);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

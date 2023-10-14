@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.artostapyshyn.studlabapi.enums.AuthStatus;
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.*;
@@ -39,8 +40,6 @@ public class Student {
     private String major;
 
     @Column(name = "course")
-//    @Min(1)
-//    @Max(5)
     private String course;
 
     @Column(name = "student_city")
@@ -54,7 +53,6 @@ public class Student {
     @Column(name = "email", unique = true)
     private String email;
 
-//    @Password
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;
@@ -86,6 +84,10 @@ public class Student {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_status")
+    private AuthStatus authStatus;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)

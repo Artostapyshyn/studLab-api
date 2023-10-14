@@ -58,7 +58,6 @@ public class SliderController {
             Slider savedSlider = sliderService.save(slider);
             return ResponseEntity.ok(savedSlider);
         } catch (Exception e) {
-            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }

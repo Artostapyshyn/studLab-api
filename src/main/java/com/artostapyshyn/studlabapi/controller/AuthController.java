@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.dto.*;
 import com.artostapyshyn.studlabapi.entity.*;
 import com.artostapyshyn.studlabapi.enums.Role;
+import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
 import com.artostapyshyn.studlabapi.service.*;
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
 import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +31,8 @@ import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.ERROR;
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.MESSAGE;
+import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
+import static com.artostapyshyn.studlabapi.enums.AuthStatus.ONLINE;
 
 @Log4j2
 @Validated
@@ -63,15 +67,14 @@ public class AuthController {
             if (foundStudent.getBlockedUntil() != null && foundStudent.getBlockedUntil().isAfter(LocalDateTime.now())) {
                 return handleUnauthorized("User is blocked.");
             }
-
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+            foundStudent.setAuthStatus(ONLINE);
+            studentService.save(foundStudent);
         } catch (BadCredentialsException e) {
-            log.warn(e.getMessage());
             return handleUnauthorized("Invalid Credentials");
         }
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
         String token = jwtTokenUtil.generateToken(userDetails, loginDto.getId());
-        log.info(token);
 
         responseMap.put(MESSAGE, "Logged In");
         responseMap.put("token", token);
@@ -86,7 +89,6 @@ public class AuthController {
         Student existingStudent = studentService.findByEmail(email);
 
         if (existingStudent != null && existingStudent.getFirstName() != null && existingStudent.getLastName() != null) {
-            log.warn("Email {} is already registered", email);
             response.put(ERROR, "User already registered with this email");
             return ResponseEntity.badRequest().body(response);
         }
@@ -128,7 +130,6 @@ public class AuthController {
         sendCode(email, response, false);
         response.put(MESSAGE, "Email sent successfully");
 
-        log.info("Verification code sent to - " + email);
         return ResponseEntity.ok(response);
     }
 
@@ -146,7 +147,6 @@ public class AuthController {
 
         if (checkedStudent.isEnabled() && student.getPassword() != null) {
             response.put(MESSAGE, "Student is verified and signed-in");
-            log.info("Checking verification status for student - " + email);
         } else {
             response.put(MESSAGE, "Student is not verified");
         }
@@ -163,7 +163,6 @@ public class AuthController {
     @PostMapping(value = "/sign-up")
     public ResponseEntity<Map<String, Object>> saveUser(@RequestBody SignUpDto signUpDto) {
         try {
-            log.info("Sign-Up attempt for email: {}", signUpDto.getEmail());
             String email = signUpDto.getEmail();
             Student existingStudent = studentService.findByEmail(email);
 
@@ -177,7 +176,6 @@ public class AuthController {
                 return handleBadRequest("Student not verified");
             }
         } catch (Exception e) {
-            log.error("Error occurred while signing up for email: {}", signUpDto.getEmail(), e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put(ERROR, "An unexpected error occurred");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -225,8 +223,18 @@ public class AuthController {
 
     @Operation(summary = "Logout from account")
     @GetMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpServletResponse response,
+                                                      Authentication authentication) throws ServletException {
         Map<String, Object> responseMap = new HashMap<>();
+
+        if (authentication != null) {
+            Long studentId = studentService.getAuthStudentId(authentication);
+
+            Student foundStudent = studentService.findById(studentId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            foundStudent.setAuthStatus(OFFLINE);
+            studentService.save(foundStudent);
+        }
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -238,14 +246,7 @@ public class AuthController {
                 response.addCookie(cookie);
             }
         }
-        try {
-            request.logout();
-        } catch (ServletException e) {
-            log.warn(e.getMessage());
-            responseMap.put(MESSAGE, "Something went wrong while logging out");
-            return ResponseEntity.internalServerError().body(responseMap);
-        }
-
+        request.logout();
         SecurityContextHolder.clearContext();
         responseMap.put(MESSAGE, "Logged out successfully");
 
@@ -272,7 +273,6 @@ public class AuthController {
         }
 
         response.put(MESSAGE, "Email sent successfully");
-        log.info("Verification code sent to - " + email);
     }
 
     public boolean isValidEmailDomain(String email, Student student) {
@@ -290,7 +290,6 @@ public class AuthController {
     }
 
     private ResponseEntity<Map<String, Object>> verify(VerificationCode code) {
-        log.info("Verifying code for email: {}", code.getEmail());
         Map<String, Object> response = new HashMap<>();
         String email = code.getEmail();
         int verificationCode = code.getCode();
@@ -314,32 +313,30 @@ public class AuthController {
         student.setEnabled(true);
         studentService.save(student);
         response.put(MESSAGE, "User successfully verified");
-        log.info("User successfully verified with email: {}", code.getEmail());
         return ResponseEntity.ok(response);
     }
 
     private ResponseEntity<Map<String, Object>> registerStudent(SignUpDto signUpDto, Student existingStudent) {
         try {
-            log.info("Registering student for email: {}", signUpDto.getEmail());
             Map<String, Object> responseMap = new HashMap<>();
 
             boolean isValid = checkSignUpDto(signUpDto);
             if (!isValid) {
                 return handleBadRequest("Required fields are missing");
             }
-            log.info("SignUpDto received: {}", signUpDto);
+
             studentService.signUpStudent(signUpDto, existingStudent);
             UserDetails userDetails = userDetailsService.loadUserByUsername(signUpDto.getEmail());
             String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
-            log.info("Token received: {}", token);
+
+            existingStudent.setAuthStatus(ONLINE);
+            studentService.save(existingStudent);
 
             responseMap.put("email", signUpDto.getEmail());
             responseMap.put(MESSAGE, "Account created successfully");
             responseMap.put("token", token);
-            log.info("Account registered with email: {}", signUpDto.getEmail());
             return ResponseEntity.ok(responseMap);
         } catch (Exception e) {
-            log.error("Error occurred while registering student for email: {}", signUpDto.getEmail(), e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put(ERROR, "An unexpected error occurred while registering");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

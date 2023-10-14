@@ -12,7 +12,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Object> handleNullPointerException(NullPointerException ex) {
         if (ex.getMessage() != null && ex.getMessage().contains("org.springframework.security.core.Authentication.getName()")) {
-            log.error("Null token received");
             return ResponseEntity.internalServerError().body("Authentication error");
         }
         throw ex;

@@ -70,12 +70,13 @@ public class StudentController {
 
     @Operation(summary = "Get all students")
     @GetMapping("/all")
-    public ResponseEntity<List<Map<String, String>>> getAllStudents() {
-        List<Map<String, String>> studentData = studentService.findAll().stream()
+    public ResponseEntity<List<Map<String, Object>>> getAllStudents() {
+        List<Map<String, Object>> studentData = studentService.findAll().stream()
                 .map(student -> {
-                    Map<String, String> data = new HashMap<>();
+                    Map<String, Object> data = new HashMap<>();
                     data.put("firstName", student.getFirstName());
                     data.put("lastName", student.getLastName());
+                    data.put("photoBytes", student.getPhotoBytes());
                     return data;
                 })
                 .toList();

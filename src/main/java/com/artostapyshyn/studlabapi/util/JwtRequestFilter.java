@@ -1,6 +1,6 @@
 package com.artostapyshyn.studlabapi.util;
+
 import com.artostapyshyn.studlabapi.service.impl.UserDetailsServiceImpl;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +15,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 @Component
@@ -36,18 +37,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         String jwtToken = tokenHeader.substring(7);
-        try {
-            String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-            if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                authenticateUser(jwtToken, userDetails, request);
-            }
-        } catch (IllegalArgumentException e) {
-            log.error("Unable to fetch JWT Token");
-        } catch (ExpiredJwtException e) {
-            log.error("JWT Token is expired");
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+        if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            authenticateUser(jwtToken, userDetails, request);
         }
         chain.doFilter(request, response);
     }

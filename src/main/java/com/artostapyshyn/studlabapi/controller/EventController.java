@@ -70,7 +70,6 @@ public class EventController {
         Pageable pageable = PageRequest.of(page, size);
         List<EventDto> events = eventService.findPopularEvents(pageable);
 
-        log.info("Listing events by popularity");
         return ResponseEntity.ok(events);
     }
 
@@ -83,7 +82,6 @@ public class EventController {
         Pageable pageable = PageRequest.of(page, size);
         List<EventDto> events = eventService.findAllEventsByCreationDateAsc(pageable);
 
-        log.info("Listing newest events");
         return ResponseEntity.ok(events);
     }
 
@@ -96,7 +94,6 @@ public class EventController {
         Pageable pageable = PageRequest.of(page, size);
         List<EventDto> events = eventService.findAllEventsByDateAsc(pageable);
 
-        log.info("Listing upcoming events");
         return ResponseEntity.ok(events);
     }
 
@@ -122,11 +119,8 @@ public class EventController {
             event.setTags(resolvedTags);
 
             Event savedEvent = eventService.save(event);
-
-            log.info("New event added with id - " + savedEvent.getId());
             return ResponseEntity.ok(savedEvent);
         } catch (Exception e) {
-            log.error("Error adding new event: " + e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -165,7 +159,6 @@ public class EventController {
                 response.put(MESSAGE, "Event deleted successfully");
                 return ResponseEntity.ok(response);
             } catch (Exception e) {
-                log.error("Error while deleting event with id: " + eventId, e);
                 response.put(MESSAGE, "Error while deleting event. Please check server logs for details.");
                 return ResponseEntity.internalServerError().body(response);
             }

@@ -40,7 +40,6 @@ public class CourseController {
     @GetMapping("/newest")
     public ResponseEntity<List<Course>> getCoursesByNewestDate() {
         List<Course> courses = courseService.findAllCoursesByCreationDateDesc();
-        log.info("Listing newest courses");
         return ResponseEntity.ok(courses);
     }
 
@@ -53,10 +52,8 @@ public class CourseController {
 
         try {
             Course savedCourse = courseService.save(course);
-            log.info("New event added with id - " + savedCourse.getId());
             return ResponseEntity.ok(savedCourse);
         } catch (Exception e) {
-            log.warn(e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
