@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
@@ -72,9 +74,9 @@ class CourseServiceImplTest {
                 createRandomCourse()
         );
 
-        when(courseRepository.findAllCoursesByCreationDateDesc()).thenReturn(courses);
+        when(courseRepository.findAllCoursesByCreationDateDesc(Pageable.unpaged())).thenReturn((Page<Course>) courses);
 
-        List<Course> foundCourses = courseService.findAllCoursesByCreationDateDesc();
+        List<Course> foundCourses = courseService.findAllCoursesByCreationDateDesc(Pageable.unpaged());
 
         assertNotNull(foundCourses);
         assertEquals(courses.size(), foundCourses.size());

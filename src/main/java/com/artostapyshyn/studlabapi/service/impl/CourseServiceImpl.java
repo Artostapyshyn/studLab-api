@@ -5,6 +5,7 @@ import com.artostapyshyn.studlabapi.repository.CourseRepository;
 import com.artostapyshyn.studlabapi.service.CourseService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,8 +43,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Course> findAllCoursesByCreationDateDesc() {
-        return courseRepository.findAllCoursesByCreationDateDesc();
+    public List<Course> findAllCoursesByCreationDateDesc(Pageable pageable) {
+        return courseRepository.findAllCoursesByCreationDateDesc(pageable).stream().toList();
     }
 
     @Transactional

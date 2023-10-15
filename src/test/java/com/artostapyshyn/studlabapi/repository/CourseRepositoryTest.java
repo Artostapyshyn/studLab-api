@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -62,7 +63,7 @@ class CourseRepositoryTest {
         entityManager.persist(course2);
         entityManager.flush();
 
-        List<Course> coursesByCreationDateDesc = courseRepository.findAllCoursesByCreationDateDesc();
+        List<Course> coursesByCreationDateDesc = courseRepository.findAllCoursesByCreationDateDesc(Pageable.unpaged()).getContent();
 
         Assertions.assertEquals(2, coursesByCreationDateDesc.size());
         Assertions.assertNotNull(coursesByCreationDateDesc);

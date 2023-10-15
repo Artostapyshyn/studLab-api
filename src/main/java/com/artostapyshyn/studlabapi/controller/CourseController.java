@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,15 +33,20 @@ public class CourseController {
 
     @Operation(summary = "Get all courses")
     @GetMapping("/all")
-    public ResponseEntity<List<Course>> getAllCourses() {
-        List<Course> courses = courseService.findAll();
+    public ResponseEntity<List<Course>> getAllCourses(@RequestParam(defaultValue = "0") int page,
+                                                      @RequestParam(defaultValue = "25") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<Course> courses = courseService.findAllCoursesByCreationDateDesc(pageable);
         return ResponseEntity.ok(courses);
     }
 
     @Operation(summary = "Sort courses by creation date")
     @GetMapping("/newest")
-    public ResponseEntity<List<Course>> getCoursesByNewestDate() {
-        List<Course> courses = courseService.findAllCoursesByCreationDateDesc();
+    public ResponseEntity<List<Course>> getCoursesByNewestDate(@RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "25") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Course> courses = courseService.findAllCoursesByCreationDateDesc(pageable);
         return ResponseEntity.ok(courses);
     }
 
