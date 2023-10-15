@@ -1,11 +1,12 @@
 package com.artostapyshyn.studlabapi.repository;
 
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.entity.SubTag;
+import com.artostapyshyn.studlabapi.entity.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.creationDate ASC")
     Page<Event> findAllEventsByCreationDateAsc(Pageable pageable);
 
-    @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t JOIN t.subTags st WHERE st = :subTag")
-    Page<Event> findEventBySubTag(SubTag subTag, Pageable pageable);
+    @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t WHERE t = :tag")
+    Page<Event> findEventByTags(@Param("tag") Tag tag,
+                                Pageable pageable);
 }

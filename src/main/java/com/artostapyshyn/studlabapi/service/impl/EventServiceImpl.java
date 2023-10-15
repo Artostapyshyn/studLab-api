@@ -13,10 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -120,38 +117,30 @@ public class EventServiceImpl implements EventService {
     public List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable) {
         List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
 
-        Map<Tag, Integer> tagCount = favouriteEvents.stream()
-                .flatMap(fe -> fe.getEvent().getTags().stream())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
-
-        List<Tag> sortedTags = tagCount.entrySet().stream()
-                .sorted(Map.Entry.<Tag, Integer>comparingByValue().reversed())
-                .map(Map.Entry::getKey)
-                .toList();
-
-        Set<Event> recommendedEvents = new LinkedHashSet<>();
-        for (Tag tag : sortedTags) {
-            Set<SubTag> subTags = tag.getSubTags();
-            for (SubTag subTag : subTags) {
-                List<Event> eventsBySubTag = eventRepository.findEventBySubTag(subTag, pageable).getContent();
-                recommendedEvents.addAll(eventsBySubTag);
+        Map<Tag, Integer> tagCount = new HashMap<>();
+        for (FavouriteEvent favouriteEvent : favouriteEvents) {
+            for (Tag tag : favouriteEvent.getEvent().getTags()) {
+                tagCount.put(tag, tagCount.getOrDefault(tag, 0) + 1);
             }
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        recommendedEvents = recommendedEvents.stream()
-                .filter(event -> event.getEndDate().isAfter(now))
-                .collect(Collectors.toSet());
+        List<Map.Entry<Tag, Integer>> sortedTags = new ArrayList<>(tagCount.entrySet());
+        sortedTags.sort(Map.Entry.<Tag, Integer>comparingByValue().reversed());
+
+        List<Event> recommendedEvents = new ArrayList<>();
+        for (Map.Entry<Tag, Integer> entry : sortedTags) {
+            Tag tag = entry.getKey();
+            Page<Event> eventsByTag = eventRepository.findEventByTags(tag, pageable);
+            recommendedEvents.addAll(eventsByTag.getContent());
+        }
 
         List<Event> favouriteEventsOnly = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
                 .toList();
 
-        favouriteEventsOnly.forEach(recommendedEvents::remove);
+        recommendedEvents.removeAll(favouriteEventsOnly);
 
-        return recommendedEvents.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return recommendedEvents.stream().map((element) -> modelMapper.map(element, EventDto.class)).toList();
     }
 
 }
