@@ -16,17 +16,24 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findEventById(Long id);
 
-    @Query("SELECT e FROM Event e LEFT JOIN e.tags WHERE e.endDate > CURRENT_TIMESTAMP " +
-            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 1 WHEN e.eventType = 'UNIVERSITY_EVENT' THEN 2 ELSE 3 END")
+    @Query(value = "SELECT e FROM Event e LEFT JOIN e.tags t WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 1 WHEN e.eventType = 'UNIVERSITY_EVENT' THEN 2 ELSE 3 END"
+            , countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     Page<Event> findUpcomingEvents(Pageable pageable);
 
-    @Query("SELECT e FROM Event e JOIN FETCH e.tags t WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.favoriteCount DESC")
+    @Query(value = "SELECT e FROM Event e JOIN FETCH e.tags t WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY e.favoriteCount DESC"
+            , countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     List<Event> findPopularEvents(Pageable pageable);
 
-    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.date ASC")
+    @Query(value = "SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY e.date ASC"
+            , countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     Page<Event> findAllEventsByDateAsc(Pageable pageable);
 
-    @Query("SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP ORDER BY e.creationDate ASC")
+    @Query(value = "SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY e.creationDate ASC"
+            , countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     Page<Event> findAllEventsByCreationDateAsc(Pageable pageable);
 
     @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t WHERE t = :tag")

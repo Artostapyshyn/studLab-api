@@ -1,9 +1,13 @@
 package com.artostapyshyn.studlabapi.util;
 
+import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.service.StudentService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +18,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
+
 @Component
+@Log4j2
 public class JwtTokenUtil implements Serializable {
+
+    @Autowired
+    private StudentService studentService;
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60L;
 
@@ -55,6 +65,15 @@ public class JwtTokenUtil implements Serializable {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        if (username.equals(userDetails.getUsername())) {
+            if (!isTokenExpired(token)) {
+                String foundUsername = getUsernameFromToken(token);
+                log.info(foundUsername);
+                Student student = studentService.findByEmail(foundUsername);
+                student.setAuthStatus(OFFLINE);
+            }
+            return true;
+        }
+        return false;
     }
 }
