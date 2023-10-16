@@ -19,10 +19,10 @@ import java.util.Set;
 @NoArgsConstructor
 public class EventDto {
     private Long id;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern="dd-MM HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime endDate;
     private String venue;
@@ -31,7 +31,7 @@ public class EventDto {
     private String nameOfEvent;
     private byte[] eventPhoto;
     private int favoriteCount;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime creationDate;
     private Set<Tag> tags;

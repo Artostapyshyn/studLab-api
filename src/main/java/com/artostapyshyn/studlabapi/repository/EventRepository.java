@@ -16,10 +16,11 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findEventById(Long id);
 
-    @Query(value = "SELECT e FROM Event e LEFT JOIN e.tags t WHERE e.endDate > CURRENT_TIMESTAMP " +
-            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 1 WHEN e.eventType = 'UNIVERSITY_EVENT' THEN 2 ELSE 3 END"
-            , countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
+    @Query(value = "SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 0 ELSE 1 END, e.endDate ASC, e.id ASC",
+            countQuery = "SELECT COUNT(e) FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP")
     Page<Event> findUpcomingEvents(Pageable pageable);
+
 
     @Query(value = "SELECT e FROM Event e JOIN FETCH e.tags t WHERE e.endDate > CURRENT_TIMESTAMP " +
             "ORDER BY e.favoriteCount DESC"

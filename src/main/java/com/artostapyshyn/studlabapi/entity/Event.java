@@ -40,12 +40,12 @@ public class Event {
     private Long id;
 
     @Column(name = "date_of_event", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
     @Column(name = "end_date_of_event")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "dd-MM HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime endDate;
 
@@ -71,7 +71,7 @@ public class Event {
     private int favoriteCount;
 
     @Column(name = "date_of_creation")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     @CreationTimestamp
     private LocalDateTime creationDate;
 
