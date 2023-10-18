@@ -82,6 +82,9 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private Set<Friendship> friendships = new HashSet<>();
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Meeting> meetings = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
