@@ -40,4 +40,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT DISTINCT e FROM Event e JOIN e.tags t WHERE t = :tag")
     Page<Event> findEventByTags(@Param("tag") Tag tag,
                                 Pageable pageable);
+
+    Event findByNameOfEvent(String eventName);
 }

@@ -49,6 +49,9 @@ public class Meeting {
     @JoinColumn(name = "author_id")
     private Student author;
 
+    @Column(name = "event_name")
+    private String eventName;
+
     @ManyToMany
     @JoinTable(
             name = "meeting_participants",

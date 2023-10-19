@@ -20,6 +20,8 @@ public interface EventService {
 
     int getCreatedEventCount();
 
+    Event findByNameOfEvent(String eventName);
+
     EventDto convertToDTO(Event event);
 
     List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable);

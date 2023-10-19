@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.MeetingDto;
 import com.artostapyshyn.studlabapi.entity.Meeting;
 
 import java.util.List;
@@ -12,11 +13,13 @@ public interface MeetingService {
 
     Optional<Meeting> findById(Long id);
 
-    List<Meeting> findAllByAuthorId(Long id);
+    List<MeetingDto> findAllByAuthorId(Long id);
 
     void updateMeeting(Meeting existingMeeting, Meeting updatedMeeting);
 
-    List<Meeting> findAll();
+    List<MeetingDto> findAll();
 
     void deleteById(Long id);
+
+    MeetingDto convertToDTO(Meeting meeting);
 }

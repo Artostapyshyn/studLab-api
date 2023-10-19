@@ -1,8 +1,9 @@
 package com.artostapyshyn.studlabapi.dto;
 
-import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.enums.MeetingType;
+import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,10 +20,12 @@ public class MeetingDto {
     private Long id;
     private String name;
     @JsonFormat(pattern="dd-MM HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
     private String venue;
     private String description;
     private MeetingType meetingType;
-    private Student author;
-    private Set<Student> participants;
+    private StudentDto author;
+    private Set<StudentDto> participants;
+    private String eventName;
 }

@@ -68,6 +68,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public Event findByNameOfEvent(String eventName) {
+        return eventRepository.findByNameOfEvent(eventName);
+    }
+
+    @Override
     public List<EventDto> findPopularEvents(Pageable pageable) {
         List<Event> events = eventRepository.findPopularEvents(pageable);
         return events.stream()

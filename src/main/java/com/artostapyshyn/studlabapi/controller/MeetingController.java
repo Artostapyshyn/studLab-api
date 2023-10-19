@@ -1,14 +1,18 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.MeetingDto;
+import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Meeting;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.exception.exceptions.ResourceNotFoundException;
+import com.artostapyshyn.studlabapi.service.EventService;
 import com.artostapyshyn.studlabapi.service.MeetingService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+import static com.artostapyshyn.studlabapi.enums.MeetingType.EVENT_BASED;
 
 @Log4j2
 @Validated
@@ -30,33 +35,56 @@ public class MeetingController {
 
     private final StudentService studentService;
 
+    private final EventService eventService;
+
+    private final ModelMapper modelMapper;
+
     @Operation(summary = "Find student created meetings")
     @GetMapping("/find-by-student-id")
-    public ResponseEntity<List<Meeting>> getStudentMeetings(@RequestParam("studentId") Long studentId) {
-        List<Meeting> meetings = meetingService.findAllByAuthorId(studentId);
+    public ResponseEntity<List<MeetingDto>> getStudentMeetings(@NotNull @RequestParam("studentId") Long studentId) {
+        List<MeetingDto> meetings = meetingService.findAllByAuthorId(studentId);
         return ResponseEntity.ok(meetings);
     }
 
     @Operation(summary = "Get all meetings")
     @GetMapping("/all")
-    public ResponseEntity<List<Meeting>> getAllMeetings() {
-        List<Meeting> meetings = meetingService.findAll();
+    public ResponseEntity<List<MeetingDto>> getAllMeetings() {
+        List<MeetingDto> meetings = meetingService.findAll();
         return ResponseEntity.ok(meetings);
     }
 
     @Operation(summary = "Add an meeting.")
     @PostMapping("/add")
-    public ResponseEntity<Meeting> addMeeting(@RequestBody @NotNull Meeting meeting, Authentication authentication) {
-        Long studentId = studentService.getAuthStudentId(authentication);
+    public ResponseEntity<Map<String, String>> addMeeting(@RequestBody @NotNull MeetingDto meetingDTO, Authentication authentication) {
         try {
-            Student author = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            Long studentId = studentService.getAuthStudentId(authentication);
+            if(studentId == null) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap(ERROR, "Invalid student."));
+            }
 
+            Student author = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            if(meetingDTO.getMeetingType().equals(EVENT_BASED)) {
+                Event event = eventService.findByNameOfEvent(meetingDTO.getEventName());
+                if(event == null){
+                    return ResponseEntity.badRequest().body(Collections.singletonMap(ERROR, "Event not found"));
+                }
+                meetingDTO.setEventName(event.getNameOfEvent());
+            }
+
+            Meeting meeting = convertToEntity(meetingDTO);
             meeting.setAuthor(author);
-            Meeting savedMeeting = meetingService.save(meeting);
-            return ResponseEntity.ok(savedMeeting);
+            meetingService.save(meeting);
+
+            return ResponseEntity.ok(Collections.singletonMap(MESSAGE, "Meeting created successfully."));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
+            log.error("Error creating meeting", e);
+            return ResponseEntity.internalServerError().body(Collections.singletonMap(ERROR, e.getMessage()));
         }
+    }
+
+    private Meeting convertToEntity(MeetingDto meetingDTO) {
+       modelMapper.getConfiguration().setSkipNullEnabled(true);
+       return modelMapper.map(meetingDTO, Meeting.class);
     }
 
     @Operation(summary = "Edit an Meeting.")
@@ -77,7 +105,7 @@ public class MeetingController {
 
     @Operation(summary = "Delete an meeting by id.")
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> deleteMeeting(@RequestParam("meetingId") Long meetingId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> deleteMeeting(@NotNull @RequestParam("meetingId") Long meetingId, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
         Optional<Meeting> existingMeeting = meetingService.findMeetingById(meetingId);
 
@@ -100,49 +128,27 @@ public class MeetingController {
 
     @Operation(summary = "Participate in meeting")
     @PutMapping("/participate")
-    public ResponseEntity<Map<String, Object>> participateInMeeting(@RequestParam("meetingId") Long meetingId,
+    public ResponseEntity<Map<String, Object>> participateInMeeting(@NotNull @RequestParam("meetingId") Long meetingId,
                                                                     Authentication authentication) {
-        Map<String, Object> response = new HashMap<>();
-        if (meetingId != null) {
-            try {
-                Optional<Meeting> meeting = meetingService.findById(meetingId);
-
-                if (meeting.isEmpty()) {
-                    response.put(ERROR, "Meeting not found.");
-                    return ResponseEntity.badRequest().body(response);
-                }
-
-                Long studentId = studentService.getAuthStudentId(authentication);
-                Optional<Student> student = studentService.findById(studentId);
-
-                if (student.isEmpty()) {
-                    response.put(ERROR, "Student not found.");
-                    return ResponseEntity.badRequest().body(response);
-                }
-
-                meeting.get().getParticipants().add(student.get());
-                meetingService.save(meeting.get());
-
-                response.put(MESSAGE, "Applied successfully");
-                return ResponseEntity.ok(response);
-            } catch (Exception ex) {
-                response.put(ERROR, "Error while applying to meeting: " + ex.getMessage());
-                return ResponseEntity.internalServerError().body(response);
-            }
-        } else {
-            response.put(ERROR, "No meeting id.");
-            return ResponseEntity.badRequest().body(response);
-        }
+        return processMeetingParticipation(meetingId, authentication, true);
     }
 
     @Operation(summary = "Cancel Participation in meeting")
     @PutMapping("/cancel-participation")
     public ResponseEntity<Map<String, Object>> cancelParticipation(@NotNull @RequestParam("meetingId") Long meetingId,
                                                                    Authentication authentication) {
+        return processMeetingParticipation(meetingId, authentication, false);
+    }
+
+    private ResponseEntity<Map<String, Object>> processMeetingParticipation(Long meetingId, Authentication authentication, boolean isParticipate) {
         Map<String, Object> response = new HashMap<>();
+        if (meetingId == null) {
+            response.put(ERROR, "No meeting id.");
+            return ResponseEntity.badRequest().body(response);
+        }
+
         try {
             Optional<Meeting> meeting = meetingService.findById(meetingId);
-
             if (meeting.isEmpty()) {
                 response.put(ERROR, "Meeting not found.");
                 return ResponseEntity.badRequest().body(response);
@@ -150,19 +156,24 @@ public class MeetingController {
 
             Long studentId = studentService.getAuthStudentId(authentication);
             Optional<Student> student = studentService.findById(studentId);
-
             if (student.isEmpty()) {
                 response.put(ERROR, "Student not found.");
                 return ResponseEntity.badRequest().body(response);
             }
 
-            meeting.get().getParticipants().remove(student.get());
-            meetingService.save(meeting.get());
+            if (isParticipate) {
+                meeting.get().getParticipants().add(student.get());
+                response.put(MESSAGE, "Applied successfully");
+            } else {
+                meeting.get().getParticipants().remove(student.get());
+                response.put(MESSAGE, "Canceled successfully");
+            }
 
-            response.put(MESSAGE, "Canceled successfully");
+            meetingService.save(meeting.get());
             return ResponseEntity.ok(response);
+
         } catch (Exception ex) {
-            response.put(ERROR, "Error while canceling participation in meeting: " + ex.getMessage());
+            response.put(ERROR, "Error while " + (isParticipate ? "applying to" : "canceling participation in") + " meeting: " + ex.getMessage());
             return ResponseEntity.internalServerError().body(response);
         }
     }

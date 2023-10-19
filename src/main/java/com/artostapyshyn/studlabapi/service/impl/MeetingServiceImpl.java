@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.MeetingDto;
 import com.artostapyshyn.studlabapi.entity.Meeting;
 import com.artostapyshyn.studlabapi.repository.MeetingRepository;
 import com.artostapyshyn.studlabapi.service.MeetingService;
@@ -34,8 +35,11 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public List<Meeting> findAllByAuthorId(Long id) {
-        return meetingRepository.findAllByAuthorId(id);
+    public List<MeetingDto> findAllByAuthorId(Long id) {
+        List<Meeting> meetings = meetingRepository.findAllByAuthorId(id);
+        return meetings.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Override
@@ -46,12 +50,21 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
-    public List<Meeting> findAll() {
-        return meetingRepository.findAll();
+    public List<MeetingDto> findAll() {
+        List<Meeting> meetings = meetingRepository.findAll();
+        return meetings.stream()
+                .map(this::convertToDTO)
+                .toList();
     }
 
     @Override
     public void deleteById(Long id) {
         meetingRepository.deleteById(id);
+    }
+
+    @Override
+    public MeetingDto convertToDTO(Meeting meeting) {
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        return modelMapper.map(meeting, MeetingDto.class);
     }
 }
