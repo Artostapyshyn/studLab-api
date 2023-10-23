@@ -19,6 +19,8 @@ public interface MeetingService {
 
     List<MeetingDto> findAll();
 
+    List<Meeting> findAllByParticipantsId(Long id);
+
     void deleteById(Long id);
 
     MeetingDto convertToDTO(Meeting meeting);

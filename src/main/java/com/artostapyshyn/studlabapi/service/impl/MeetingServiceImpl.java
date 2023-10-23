@@ -58,6 +58,11 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     @Override
+    public List<Meeting> findAllByParticipantsId(Long id) {
+        return meetingRepository.findAllByParticipantsId(id);
+    }
+
+    @Override
     public void deleteById(Long id) {
         meetingRepository.deleteById(id);
     }

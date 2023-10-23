@@ -48,6 +48,20 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+    @Operation(summary = "Get all event names")
+    @GetMapping("/all-names")
+    public ResponseEntity<List<Map<String, Object>>> getAllEventNames() {
+        List<Map<String, Object>> eventData = eventService.findAll().stream()
+                .map(student -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("nameOfEvent", student.getNameOfEvent());
+                    return data;
+                })
+                .toList();
+
+        return ResponseEntity.ok(eventData);
+    }
+
     @Operation(summary = "Get recommended events with pagination")
     @GetMapping("/recommended")
     public ResponseEntity<List<EventDto>> getRecommendedEvents(Authentication authentication,

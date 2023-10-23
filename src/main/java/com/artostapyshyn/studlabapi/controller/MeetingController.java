@@ -177,4 +177,23 @@ public class MeetingController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
+
+    @Operation(summary = "Get student participated meetings")
+    @GetMapping("/get")
+    public ResponseEntity<List<MeetingDto>> getGetParticipatedByStudentId(Authentication authentication) {
+        Long studentId = studentService.getAuthStudentId(authentication);
+        return getListResponseEntity(studentId);
+    }
+
+    private ResponseEntity<List<MeetingDto>> getListResponseEntity(Long studentId) {
+        if (studentId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Meeting> meetings = meetingService.findAllByParticipantsId(studentId);
+        List<MeetingDto> favMeetings = meetings.stream()
+                .map(meeting -> modelMapper.map(meeting, MeetingDto.class))
+                .toList();
+        return ResponseEntity.ok(favMeetings);
+    }
 }

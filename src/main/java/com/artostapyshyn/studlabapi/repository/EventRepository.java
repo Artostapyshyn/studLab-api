@@ -41,5 +41,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findEventByTags(@Param("tag") Tag tag,
                                 Pageable pageable);
 
+    @Query(value = "SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
+            "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 0 ELSE 1 END, e.endDate ASC, e.id ASC")
     Event findByNameOfEvent(String eventName);
 }
