@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -29,8 +28,4 @@ public class Tag {
     @JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private Set<Event> events;
-
-    @OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<SubTag> subTags = new HashSet<>();
-
 }

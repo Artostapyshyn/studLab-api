@@ -1,6 +1,5 @@
 package com.artostapyshyn.studlabapi.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,9 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "sub_tags", indexes = {
-        @Index(name = "idx_main_tag", columnList = "main_tag_id")
-})
+@Table(name = "sub_tags")
 public class SubTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +16,4 @@ public class SubTag {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "main_tag_id")
-    private Tag tag;
 }

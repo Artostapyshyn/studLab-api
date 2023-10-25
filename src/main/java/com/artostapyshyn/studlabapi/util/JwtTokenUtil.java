@@ -68,7 +68,6 @@ public class JwtTokenUtil implements Serializable {
         if (username.equals(userDetails.getUsername())) {
             if (!isTokenExpired(token)) {
                 String foundUsername = getUsernameFromToken(token);
-                log.info(foundUsername);
                 Student student = studentService.findByEmail(foundUsername);
                 student.setAuthStatus(OFFLINE);
             }

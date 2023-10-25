@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.exception.handler;
 
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -13,6 +14,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleNullPointerException(NullPointerException ex) {
         if (ex.getMessage() != null && ex.getMessage().contains("org.springframework.security.core.Authentication.getName()")) {
             return ResponseEntity.internalServerError().body("Authentication error");
+        }
+        throw ex;
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex) {
+        if (ex.getMessage() != null && ex.getMessage().contains("io.jsonwebtoken.MalformedJwtException: JWT strings must contain exactly 2 period characters. Found: 0")) {
+            return ResponseEntity.internalServerError().body("JWT error");
         }
         throw ex;
     }

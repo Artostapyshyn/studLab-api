@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.SubTag;
-import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.repository.SubTagRepository;
 import com.artostapyshyn.studlabapi.service.SubTagService;
 import lombok.AllArgsConstructor;
@@ -29,11 +28,6 @@ public class SubTagServiceImpl implements SubTagService {
     @Override
     public List<SubTag> findAll() {
         return subTagRepository.findAll();
-    }
-
-    @Override
-    public Optional<SubTag> findByNameAndTag(String name, Tag tag) {
-        return subTagRepository.findByNameAndTag(name, tag);
     }
 
     @Override
