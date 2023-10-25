@@ -21,7 +21,7 @@ public interface StudentService {
 
     List<Student> searchByNames(String firstName, String lastName);
 
-    List<Student> findByFirstNameAndLastName(String firstName, String lastName);
+    List<Student> findByFirstNameContainingAndLastNameContaining(String firstName, String lastName);
 
     Student findByFirstAndLastName(String firstName, String lastName);
 

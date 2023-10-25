@@ -19,9 +19,9 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("SELECT COUNT(s) FROM Student s WHERE s.enabled = :enabled AND s.registrationDate > :date")
     int countByEnabled(boolean enabled, LocalDateTime date);
 
-    List<Student> findByFirstName(String firstName);
+    List<Student> findByFirstNameContaining(String firstName);
 
-    List<Student> findByLastName(String lastName);
+    List<Student> findByLastNameContaining(String lastName);
 
-    List<Student> findByFirstNameAndLastName(String firstName, String lastName);
+    List<Student> findByFirstNameContainingAndLastNameContaining(String firstName, String lastName);
 }

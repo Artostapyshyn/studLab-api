@@ -30,7 +30,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SignatureException.class)
     public ResponseEntity<Object> handleSignatureException(SignatureException ex) throws SignatureException {
-        if (ex.getMessage() != null && ex.getMessage().contains("io.jsonwebtoken.security.SignatureException: JWT signature does not match locally computed signature.")) {
+        if (ex.getMessage() != null && ex.getMessage().contains("io.jsonwebtoken.security.SignatureException: " +
+                "JWT signature does not match locally computed signature. " +
+                "JWT validity cannot be asserted and should not be trusted.")) {
             return ResponseEntity.internalServerError().body("JWT expired and used again");
         }
         throw ex;
