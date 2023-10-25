@@ -57,7 +57,7 @@ public class StudentController {
     @PostMapping(value = "/profile")
     public ResponseEntity<Map<String, Object>> getProfile(@RequestBody Student student) {
         Map<String, Object> response = new HashMap<>();
-        Student existingStudent = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
+        Student existingStudent = studentService.findByFirstAndLastName(student.getFirstName(), student.getLastName());
 
         if (existingStudent != null) {
             StudentDto studentDto = convertToDto(existingStudent);
@@ -68,10 +68,13 @@ public class StudentController {
         }
     }
 
-    @Operation(summary = "Get all students")
-    @GetMapping("/all")
-    public ResponseEntity<List<Map<String, Object>>> getAllStudents() {
-        List<Map<String, Object>> studentData = studentService.findAll().stream()
+    @Operation(summary = "Search students by first and last name")
+    @GetMapping("/search")
+    public ResponseEntity<List<Map<String, Object>>> searchStudents(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName) {
+
+        List<Map<String, Object>> studentData = studentService.searchByNames(firstName, lastName).stream()
                 .map(student -> {
                     Map<String, Object> data = new HashMap<>();
                     data.put("firstName", student.getFirstName());

@@ -19,7 +19,11 @@ public interface StudentService {
 
     void deleteById(Long id);
 
-    Student findByFirstNameAndLastName(String firstName, String lastName);
+    List<Student> searchByNames(String firstName, String lastName);
+
+    List<Student> findByFirstNameAndLastName(String firstName, String lastName);
+
+    Student findByFirstAndLastName(String firstName, String lastName);
 
     Long getAuthStudentId(Authentication authentication);
 

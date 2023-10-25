@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
@@ -17,4 +18,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     @Query("SELECT COUNT(s) FROM Student s WHERE s.enabled = :enabled AND s.registrationDate > :date")
     int countByEnabled(boolean enabled, LocalDateTime date);
+
+    List<Student> findByFirstName(String firstName);
+
+    List<Student> findByLastName(String lastName);
+
+    List<Student> findByFirstNameAndLastName(String firstName, String lastName);
 }

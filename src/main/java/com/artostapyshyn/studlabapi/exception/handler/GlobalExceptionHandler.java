@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.security.SignatureException;
+
 @Log4j2
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -22,6 +24,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleMalformedJwtException(MalformedJwtException ex) {
         if (ex.getMessage() != null && ex.getMessage().contains("io.jsonwebtoken.MalformedJwtException: JWT strings must contain exactly 2 period characters. Found: 0")) {
             return ResponseEntity.internalServerError().body("JWT error");
+        }
+        throw ex;
+    }
+
+    @ExceptionHandler(SignatureException.class)
+    public ResponseEntity<Object> handleSignatureException(SignatureException ex) throws SignatureException {
+        if (ex.getMessage() != null && ex.getMessage().contains("io.jsonwebtoken.security.SignatureException: JWT signature does not match locally computed signature.")) {
+            return ResponseEntity.internalServerError().body("JWT expired and used again");
         }
         throw ex;
     }
