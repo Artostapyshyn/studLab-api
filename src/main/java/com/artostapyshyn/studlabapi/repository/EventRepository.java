@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -44,4 +45,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query(value = "SELECT e FROM Event e WHERE e.endDate > CURRENT_TIMESTAMP " +
             "ORDER BY CASE WHEN e.eventType = 'PARTNER_EVENT' THEN 0 ELSE 1 END, e.endDate ASC, e.id ASC")
     Event findByNameOfEvent(String eventName);
+
+    List<Event> findAllByTagsIn(Set<Tag> tags, Pageable pageable);
 }

@@ -97,11 +97,15 @@ public class StudentController {
 
         Student student = studentOptional.get();
 
-        for(Interest interest : interests) {
-            student.getInterests().add(interest);
-            interest.getInterestedStudents().add(student);
+        Set<Interest> persistentInterests = new HashSet<>();
+        for (Interest interest : interests) {
+            interestService.findById(interest.getId()).ifPresent(persistentInterests::add);
         }
 
+        for (Interest persistentInterest : persistentInterests) {
+            student.getInterests().add(persistentInterest);
+            persistentInterest.getInterestedStudents().add(student);
+        }
         studentService.save(student);
         response.put(MESSAGE, "Successfully added interests.");
         return ResponseEntity.ok(response);

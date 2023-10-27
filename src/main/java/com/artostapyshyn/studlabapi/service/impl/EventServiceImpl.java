@@ -2,9 +2,7 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.*;
-import com.artostapyshyn.studlabapi.repository.EventCounterRepository;
-import com.artostapyshyn.studlabapi.repository.EventRepository;
-import com.artostapyshyn.studlabapi.repository.FavouriteEventRepository;
+import com.artostapyshyn.studlabapi.repository.*;
 import com.artostapyshyn.studlabapi.service.EventService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +23,10 @@ public class EventServiceImpl implements EventService {
     private final FavouriteEventRepository favouriteEventRepository;
 
     private final EventCounterRepository eventCounterRepository;
+
+    private final TagRepository tagRepository;
+
+    private final StudentRepository studentRepository;
 
     private final ModelMapper modelMapper;
 
@@ -120,32 +123,22 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable) {
+        Student student = studentRepository.findById(studentId).orElse(null);
+        if (student == null) return Collections.emptyList();
+
+        Set<String> interestNames = student.getInterests().stream()
+                .map(Interest::getName)
+                .collect(Collectors.toSet());
+
+        Set<Tag> tagsMatchingInterests = tagRepository.findAllByNameIn(interestNames);
+        List<Event> eventsMatchingTags = eventRepository.findAllByTagsIn(tagsMatchingInterests, pageable);
+
         List<FavouriteEvent> favouriteEvents = favouriteEventRepository.findByStudentId(studentId);
-
-        Map<Tag, Integer> tagCount = new HashMap<>();
-        for (FavouriteEvent favouriteEvent : favouriteEvents) {
-            for (Tag tag : favouriteEvent.getEvent().getTags()) {
-                tagCount.put(tag, tagCount.getOrDefault(tag, 0) + 1);
-            }
-        }
-
-        List<Map.Entry<Tag, Integer>> sortedTags = new ArrayList<>(tagCount.entrySet());
-        sortedTags.sort(Map.Entry.<Tag, Integer>comparingByValue().reversed());
-
-        List<Event> recommendedEvents = new ArrayList<>();
-        for (Map.Entry<Tag, Integer> entry : sortedTags) {
-            Tag tag = entry.getKey();
-            Page<Event> eventsByTag = eventRepository.findEventByTags(tag, pageable);
-            recommendedEvents.addAll(eventsByTag.getContent());
-        }
-
         List<Event> favouriteEventsOnly = favouriteEvents.stream()
                 .map(FavouriteEvent::getEvent)
                 .toList();
+        eventsMatchingTags.removeAll(favouriteEventsOnly);
 
-        recommendedEvents.removeAll(favouriteEventsOnly);
-
-        return recommendedEvents.stream().map((element) -> modelMapper.map(element, EventDto.class)).toList();
+        return eventsMatchingTags.stream().map(element -> modelMapper.map(element, EventDto.class)).toList();
     }
-
 }
