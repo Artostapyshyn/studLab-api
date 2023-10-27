@@ -25,7 +25,7 @@ public class InterestController {
     private final ModelMapper modelMapper;
 
     @Operation(summary = "Get all interests.")
-    @RequestMapping("/all")
+    @GetMapping("/all")
     public ResponseEntity<List<InterestDto>> getAllInterests() {
         List<InterestDto> interests = interestService.findAll();
         return ResponseEntity.ok(interests);

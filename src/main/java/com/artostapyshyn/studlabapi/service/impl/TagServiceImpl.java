@@ -1,9 +1,11 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.TagDto;
 import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.repository.TagRepository;
 import com.artostapyshyn.studlabapi.service.TagService;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.util.Set;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+
+    private final ModelMapper modelMapper;
 
     @Override
     public Optional<Tag> findById(Long id) {
@@ -47,12 +51,20 @@ public class TagServiceImpl implements TagService {
 
 
     @Override
-    public List<Tag> findAll() {
-        return tagRepository.findAll();
+    public List<TagDto> findAll() {
+        return tagRepository.findAll().stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
     public void deleteById(Long id) {
         tagRepository.deleteById(id);
+    }
+
+    @Override
+    public TagDto convertToDto(Tag tag) {
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        return modelMapper.map(tag, TagDto.class);
     }
 }
