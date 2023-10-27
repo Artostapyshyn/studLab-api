@@ -1,9 +1,9 @@
 package com.artostapyshyn.studlabapi.repository;
 
-import com.artostapyshyn.studlabapi.entity.SubTag;
+import com.artostapyshyn.studlabapi.entity.Interest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SubTagRepository extends JpaRepository<SubTag, Long> {
+public interface InterestRepository extends JpaRepository<Interest, Long> {
 }

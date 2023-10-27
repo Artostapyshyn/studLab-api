@@ -33,9 +33,6 @@ public class Student {
     @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "birth_date")
-    private String birthDate;
-
     @Column(name = "major")
     private String major;
 
@@ -85,6 +82,9 @@ public class Student {
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private Set<Meeting> meetings = new HashSet<>();
 
+    @ManyToMany(mappedBy = "interestedStudents", fetch = FetchType.LAZY)
+    private Set<Interest> interests = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
 
@@ -123,7 +123,6 @@ public class Student {
                 && Objects.equals(getId(), student.getId())
                 && Objects.equals(getLastName(), student.getLastName())
                 && Objects.equals(getFirstName(), student.getFirstName())
-                && Objects.equals(getBirthDate(), student.getBirthDate())
                 && Objects.equals(getMajor(), student.getMajor())
                 && Objects.equals(getCourse(), student.getCourse())
                 && Objects.equals(getCity(), student.getCity())
@@ -137,6 +136,6 @@ public class Student {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getLastName(), getFirstName(), getBirthDate(), getMajor(), getCourse(), getCity(), getEmail(), getPassword(), isEnabled(), getHasNewMessages(), getBlockedUntil(), getRegistrationDate(), getUniversity());
+        return Objects.hash(getId(), getLastName(), getFirstName(), getMajor(), getCourse(), getCity(), getEmail(), getPassword(), isEnabled(), getHasNewMessages(), getBlockedUntil(), getRegistrationDate(), getUniversity());
     }
 }

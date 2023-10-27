@@ -3,10 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.dto.EditDto;
 import com.artostapyshyn.studlabapi.dto.StudentDto;
 import com.artostapyshyn.studlabapi.entity.*;
-import com.artostapyshyn.studlabapi.service.AlternateRegistrationStudentService;
-import com.artostapyshyn.studlabapi.service.CertificateService;
-import com.artostapyshyn.studlabapi.service.ResumeService;
-import com.artostapyshyn.studlabapi.service.StudentService;
+import com.artostapyshyn.studlabapi.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,6 +31,8 @@ public class StudentController {
     private final StudentService studentService;
 
     private final ModelMapper modelMapper;
+
+    private final InterestService interestService;
 
     private final AlternateRegistrationStudentService alternateRegistrationStudentService;
 
@@ -85,6 +84,27 @@ public class StudentController {
                 .toList();
 
         return ResponseEntity.ok(studentData);
+    }
+
+    @PostMapping("/add-interests")
+    public ResponseEntity<Map<String, Object>> addStudentInterests(Authentication authentication, @RequestBody Set<Interest> interests) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<Student> studentOptional = studentService.findById(studentService.getAuthStudentId(authentication));
+
+        if(studentOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Student student = studentOptional.get();
+
+        for(Interest interest : interests) {
+            student.getInterests().add(interest);
+            interest.getInterestedStudents().add(student);
+        }
+
+        studentService.save(student);
+        response.put(MESSAGE, "Successfully added interests.");
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Find student by id")

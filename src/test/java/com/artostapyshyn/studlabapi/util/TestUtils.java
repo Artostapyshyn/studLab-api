@@ -18,7 +18,6 @@ public class TestUtils {
         Student student = new Student();
         student.setLastName(RandomStringUtils.randomAlphabetic(10));
         student.setFirstName(RandomStringUtils.randomAlphabetic(10));
-        student.setBirthDate("1990-01-01");
 
         student.setMajor(RandomStringUtils.randomAlphabetic(10));
         student.setCourse("2");

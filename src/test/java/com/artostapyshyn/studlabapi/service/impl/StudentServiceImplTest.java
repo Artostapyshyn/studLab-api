@@ -100,7 +100,7 @@ class StudentServiceImplTest {
         Student student = createRandomStudent();
         studentRepository.save(student);
 
-        List<Student> result = studentService.findByFirstNameAndLastName(student.getFirstName(), student.getLastName());
+        List<Student> result = studentService.findByFirstNameContainingAndLastNameContaining(student.getFirstName(), student.getLastName());
 
         assertNotNull(result);
     }

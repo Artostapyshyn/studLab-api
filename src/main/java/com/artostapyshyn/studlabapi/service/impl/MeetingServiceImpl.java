@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.service.MeetingService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     private final ModelMapper modelMapper;
 
+    @Transactional
     @Override
     public Meeting save(Meeting meeting) {
         return meetingRepository.save(meeting);
@@ -42,6 +44,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public void updateMeeting(Meeting existingMeeting, Meeting updatedMeeting) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
