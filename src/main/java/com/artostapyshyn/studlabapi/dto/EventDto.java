@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class EventDto {
     private Long id;
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
     @JsonFormat(pattern="dd-MM HH:mm")
