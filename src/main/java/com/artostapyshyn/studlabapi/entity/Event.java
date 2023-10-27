@@ -40,7 +40,7 @@ public class Event {
     private Long id;
 
     @Column(name = "date_of_event", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dddd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
