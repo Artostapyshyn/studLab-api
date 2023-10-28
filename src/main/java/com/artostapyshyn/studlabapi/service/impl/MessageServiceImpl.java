@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
 
     private final StudentService studentService;
+
+    private final WebSocketMessageServiceImpl webSocketMessageService;
 
     @Transactional
     @Override
@@ -52,6 +55,8 @@ public class MessageServiceImpl implements MessageService {
         student.getMessages().add(message);
         messageRepository.save(message);
         studentService.save(student);
+
+        webSocketMessageService.sendMessages(Collections.singletonList(message), "/topic/messages");
         updateNewMessageStatus(studentId, true);
     }
 
