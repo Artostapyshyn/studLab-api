@@ -109,7 +109,7 @@ public class CommentController {
         }
     }
 
-    @Operation(summary = "Find comment by id.")
+    @Operation(summary = "Find reply by id.")
     @GetMapping("/reply/find-by-id")
     public ResponseEntity<ReplyDto> getReplyById(@RequestParam("replyId") Long replyId) {
         Reply reply = replyService.findById(replyId)

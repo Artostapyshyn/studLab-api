@@ -56,7 +56,7 @@ public class MessageServiceImpl implements MessageService {
         messageRepository.save(message);
         studentService.save(student);
 
-        webSocketMessageService.sendMessages(Collections.singletonList(message), "/topic/messages");
+        webSocketMessageService.sendPayloads(Collections.singletonList(message), "/topic/messages");
         updateNewMessageStatus(studentId, true);
     }
 

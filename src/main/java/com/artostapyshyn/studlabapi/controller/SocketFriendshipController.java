@@ -1,8 +1,8 @@
 package com.artostapyshyn.studlabapi.controller;
 
+import com.artostapyshyn.studlabapi.dto.FriendshipDTO;
 import com.artostapyshyn.studlabapi.dto.MessageRequest;
-import com.artostapyshyn.studlabapi.entity.Message;
-import com.artostapyshyn.studlabapi.service.MessageService;
+import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.WebSocketMessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,15 +13,15 @@ import java.util.List;
 
 @Controller
 @AllArgsConstructor
-public class SocketMessageController {
-    private final MessageService messageService;
+public class SocketFriendshipController {
+    private final FriendshipService friendshipService;
 
     private final WebSocketMessageService webSocketMessageService;
 
-    @MessageMapping("/all")
+    @MessageMapping("/all-friends")
     public void getAllMessages(@Payload MessageRequest messageRequest) {
-        List<Message> messages = messageService.findAllMessagesByStudentId(messageRequest.getStudentId());
-        webSocketMessageService.sendPayloads(messages, "/topic/messages");
+        List<FriendshipDTO> friends = friendshipService.findAllByStudentId(messageRequest.getStudentId());
+        webSocketMessageService.sendPayloads(friends, "/topic/friends");
     }
 
 }
