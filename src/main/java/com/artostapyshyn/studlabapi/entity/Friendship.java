@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class Friendship {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "student_id")
     private Student student;
 

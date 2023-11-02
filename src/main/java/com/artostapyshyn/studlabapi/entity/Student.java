@@ -76,6 +76,7 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     private Set<Friendship> friendships = new HashSet<>();
 

@@ -29,10 +29,11 @@ public class SocketCommentController {
 
     private final ReplyService replyService;
 
-    private final ModelMapper modelMapper;
-
     @MessageMapping("/all-replies")
     public void getAllRepliesForComment(@Payload CommentMessageRequest commentMessageRequest) {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
         List<Reply> replies = replyService.findReplyByCommentId(commentMessageRequest.getCommentId());
         List<ReplyDto> replyDtoList = replies.stream()
                 .map(reply -> modelMapper.map(reply, ReplyDto.class))
@@ -42,6 +43,9 @@ public class SocketCommentController {
 
     @MessageMapping("/all-comments")
     public void getCommentsForEvent(@Payload EventMessageRequest eventMessageRequest) {
+        ModelMapper modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
         Optional<Event> optionalEvent = eventService.findEventById(eventMessageRequest.getEventId());
         if (optionalEvent.isPresent()) {
             List<Comment> commentList = getCommentsForEvent(optionalEvent.get());

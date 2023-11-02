@@ -40,7 +40,7 @@ public class Comment {
     private int likes;
 
     @JsonBackReference
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Reply> replies;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -59,7 +59,7 @@ public class Comment {
     private Long eventId;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id")
     private Student student;
 

@@ -75,7 +75,7 @@ public class Event {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
-    @OneToMany(mappedBy = "eventId", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "eventId", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private Set<Comment> eventComments;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
