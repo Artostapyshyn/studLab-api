@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,8 @@ public class ReplyServiceImpl implements ReplyService {
     private final StudentService studentService;
 
     private final MessageService messageService;
+
+    private final WebSocketMessageServiceImpl webSocketMessageService;
 
     @Override
     public List<Reply> findReplyByCommentId(Long commentId) {
@@ -61,6 +64,7 @@ public class ReplyServiceImpl implements ReplyService {
 
             messageService.addMessageToStudent(studentId, messageText);
             messageService.updateNewMessageStatus(studentId, true);
+            webSocketMessageService.sendPayloads(Collections.singletonList(reply), "/topic/replies");
         }
     }
 

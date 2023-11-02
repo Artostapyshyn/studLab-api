@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ public class CommentServiceImpl implements CommentService {
     private final ReplyRepository replyRepository;
 
     private final ModelMapper modelMapper;
+
+    private final WebSocketMessageServiceImpl webSocketMessageService;
 
     @Transactional
     @Override
@@ -49,6 +52,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setStudent(student);
         event.addComment(comment);
         commentRepository.save(comment);
+        webSocketMessageService.sendPayloads(Collections.singletonList(comment), "/topic/comments");
         return comment;
     }
 
