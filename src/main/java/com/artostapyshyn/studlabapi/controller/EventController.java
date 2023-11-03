@@ -4,6 +4,7 @@ import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.Tag;
 import com.artostapyshyn.studlabapi.service.EventService;
+import com.artostapyshyn.studlabapi.service.ImageService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import com.artostapyshyn.studlabapi.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,8 @@ public class EventController {
     private final StudentService studentService;
 
     private final ModelMapper modelMapper;
+
+    private final ImageService imageService;
 
     @Operation(summary = "Get all events")
     @GetMapping("/all")
@@ -131,6 +134,9 @@ public class EventController {
 
             Set<Tag> resolvedTags = tagService.resolveAndAddTags(eventDto.getTags());
             event.setTags(resolvedTags);
+
+            byte [] compressedImageData = imageService.compressImage(event.getEventPhoto());
+            event.setEventPhoto(compressedImageData);
 
             Event savedEvent = eventService.save(event);
             return ResponseEntity.ok(savedEvent);
