@@ -128,7 +128,6 @@ public class EventController {
 
         try {
             Event event = modelMapper.map(eventDto, Event.class);
-
             Set<Tag> resolvedTags = tagService.resolveAndAddTags(eventDto.getTags());
             event.setTags(resolvedTags);
 
@@ -140,7 +139,9 @@ public class EventController {
     }
 
     private boolean isValidEventDto(EventDto eventDto) {
-        return !eventDto.getDate().isAfter(eventDto.getEndDate()) && eventDto.getEventPhoto() != null;
+        boolean dateValid = !eventDto.getDate().isAfter(eventDto.getEndDate());
+        boolean photoValid = eventDto.getEventPhoto() != null && eventDto.getEventPhoto().length > 0;
+        return dateValid && photoValid;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")

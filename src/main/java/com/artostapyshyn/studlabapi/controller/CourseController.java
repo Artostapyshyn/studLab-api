@@ -54,8 +54,12 @@ public class CourseController {
     @Operation(summary = "Add a course.")
     @PostMapping("/add")
     public ResponseEntity<Course> addCourse(@RequestBody @NonNull Course course, Authentication authentication) {
-        byte[] imageBytes = course.getCoursePhoto();
-        course.setCoursePhoto(imageBytes);
+        if (course.getCoursePhoto() != null && course.getCoursePhoto().length > 0){
+            byte[] imageBytes = course.getCoursePhoto();
+            course.setCoursePhoto(imageBytes);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
 
         try {
             Course savedCourse = courseService.save(course);

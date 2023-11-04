@@ -3,6 +3,8 @@ package com.artostapyshyn.studlabapi.entity;
 import com.artostapyshyn.studlabapi.enums.AuthStatus;
 import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.util.CustomLocalDateTimeDeserializer;
+import com.artostapyshyn.studlabapi.validation.Password;
+import com.artostapyshyn.studlabapi.validation.ValidCourse;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
@@ -36,6 +38,7 @@ public class Student {
     @Column(name = "major")
     private String major;
 
+    @ValidCourse
     @Column(name = "course")
     private String course;
 
@@ -50,6 +53,7 @@ public class Student {
     @Column(name = "email", unique = true)
     private String email;
 
+    @Password
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password")
     private String password;
