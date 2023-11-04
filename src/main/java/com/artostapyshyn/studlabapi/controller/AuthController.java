@@ -322,8 +322,17 @@ public class AuthController {
             Map<String, Object> responseMap = new HashMap<>();
 
             boolean isValid = checkSignUpDto(signUpDto);
-            if (!isValid) {
-                return handleBadRequest("Required fields are missing");
+            if (!isValid && signUpDto.getPassword() == null || signUpDto.getPassword().length() < 8) {
+                return handleBadRequest("Password must be at least 8 characters long.");
+            }
+
+            try {
+                int courseNumber = Integer.parseInt(signUpDto.getCourse());
+                if (courseNumber < 1 || courseNumber > 6) {
+                    return handleBadRequest("Course must be a number between 1 and 6.");
+                }
+            } catch (NumberFormatException e) {
+                return handleBadRequest("Course must be a valid number between 1 and 6.");
             }
 
             studentService.signUpStudent(signUpDto, existingStudent);
