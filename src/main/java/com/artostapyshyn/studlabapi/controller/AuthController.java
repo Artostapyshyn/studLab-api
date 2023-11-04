@@ -93,6 +93,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
         Student student = modelMapper.map(verificationDto, Student.class);
 
         if (isValidEmailDomain(email, student)) {
