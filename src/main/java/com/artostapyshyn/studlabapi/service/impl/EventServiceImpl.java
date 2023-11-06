@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,8 +124,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventDto> getRecommendedEvents(Long studentId, Pageable pageable) {
-        Student student = studentRepository.findById(studentId).orElse(null);
-        if (student == null) return Collections.emptyList();
+        Student student = studentRepository.findById(studentId).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
 
         Set<String> interestNames = student.getInterests().stream()
                 .map(Interest::getName)

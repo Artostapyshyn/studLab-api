@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
@@ -157,6 +158,8 @@ public class StudentController {
 
         if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
             Student student = studentOptional.get();
+            student.setLastActiveDateTime(LocalDateTime.now());
+
             String originalFilename = file.getOriginalFilename();
             String uniqueFilename = originalFilename;
 
@@ -189,6 +192,8 @@ public class StudentController {
 
         if (studentOptional.isPresent() && file != null && !file.isEmpty()) {
             Student student = studentOptional.get();
+            student.setLastActiveDateTime(LocalDateTime.now());
+
             String originalFilename = file.getOriginalFilename();
             String uniqueFilename = originalFilename;
 
@@ -322,6 +327,7 @@ public class StudentController {
 
         if (optionalStudent.isPresent()) {
             Student existingStudent = optionalStudent.get();
+            existingStudent.setLastActiveDateTime(LocalDateTime.now());
             studentService.updateStudent(existingStudent, student);
             studentService.save(existingStudent);
             StudentDto studentDto = modelMapper.map(existingStudent, StudentDto.class);

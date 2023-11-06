@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +46,7 @@ public class ReplyServiceImpl implements ReplyService {
         Long id = studentService.getAuthStudentId(authentication);
         Optional<Student> student = studentService.findById(id);
         if (student.isPresent()) {
+            student.get().setLastActiveDateTime(LocalDateTime.now());
             Reply reply = new Reply();
             reply.setReplyText(replyDto.getReplyText());
 

@@ -7,6 +7,7 @@ import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
 
 @Service
 @AllArgsConstructor
@@ -113,5 +116,17 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setPassword(encodedPassword);
 
         studentRepository.save(existingStudent);
+    }
+
+    @Scheduled(fixedRate = 300000)
+    public void updateOfflineUsersStatus() {
+        LocalDateTime inactiveThreshold = LocalDateTime.now().minusMinutes(30);
+
+        List<Student> inactiveStudents = studentRepository.findInactiveStudentsSince(inactiveThreshold);
+
+        inactiveStudents.forEach(student -> {
+            student.setAuthStatus(OFFLINE);
+            studentRepository.save(student);
+        });
     }
 }

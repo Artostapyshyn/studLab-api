@@ -2,6 +2,7 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.FriendRequestDto;
 import com.artostapyshyn.studlabapi.entity.FriendRequest;
+import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,10 @@ public class FriendRequestController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> sendFriendRequest(@RequestBody FriendRequest request, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
+
+        Student student = studentService.findById(studentId).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
+
         Long receiverId = request.getReceiver().getId();
 
         FriendRequest savedRequest = friendRequestService.sendFriendRequest(studentId, receiverId);
@@ -53,6 +59,9 @@ public class FriendRequestController {
     @GetMapping("/received")
     public ResponseEntity<?> getAllFriendRequests(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
+
+        Student student = studentService.findById(studentId).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
 
         Map<String, Object> response = new HashMap<>();
         if (studentId != null && authentication != null) {

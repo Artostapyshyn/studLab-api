@@ -71,6 +71,7 @@ public class ComplaintServiceImpl implements ComplaintService {
             Student author = studentService.findById(comment.getStudent().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + comment.getStudent().getId()));
             savedComplaint.setStudentId(author.getId());
+            author.setLastActiveDateTime(LocalDateTime.now());
         }
 
         if (complaintDto.getStudentId() != null) {

@@ -3,6 +3,7 @@ package com.artostapyshyn.studlabapi.controller;
 import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
 import com.artostapyshyn.studlabapi.entity.FavouriteEvent;
+import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
@@ -37,6 +39,10 @@ public class FavouriteEventController {
     @PostMapping("/add-to-favorites")
     public ResponseEntity<Object> addFavouriteEvent(@RequestParam("eventId") Long eventId, Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
+
+        Student student = studentService.findById(studentId).orElseThrow();
+                student.setLastActiveDateTime(LocalDateTime.now());
+
         Optional<Event> event = eventService.findEventById(eventId);
 
         if (event.isPresent()) {
@@ -59,6 +65,9 @@ public class FavouriteEventController {
     public ResponseEntity<Map<String, Object>> removeFavouriteEvent(Authentication authentication, @RequestParam("eventId") Long eventId) {
         Map<String, Object> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
+        Student student = studentService.findById(studentId).orElseThrow();
+            student.setLastActiveDateTime(LocalDateTime.now());
+
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
         if (favouriteEvent.isPresent()) {
             favouriteEventService.delete(favouriteEvent.get());

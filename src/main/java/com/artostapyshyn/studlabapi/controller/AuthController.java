@@ -69,6 +69,7 @@ public class AuthController {
             }
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
             foundStudent.setAuthStatus(ONLINE);
+            foundStudent.setLastActiveDateTime(LocalDateTime.now());
             studentService.save(foundStudent);
         } catch (BadCredentialsException e) {
             return handleUnauthorized("Invalid Credentials");
@@ -340,6 +341,7 @@ public class AuthController {
             String token = jwtTokenUtil.generateToken(userDetails, signUpDto.getId());
 
             existingStudent.setAuthStatus(ONLINE);
+            existingStudent.setLastActiveDateTime(LocalDateTime.now());
             studentService.save(existingStudent);
 
             responseMap.put("email", signUpDto.getEmail());

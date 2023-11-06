@@ -1,6 +1,7 @@
 package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.FriendshipDTO;
+import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.service.FriendRequestService;
 import com.artostapyshyn.studlabapi.service.FriendshipService;
 import com.artostapyshyn.studlabapi.service.StudentService;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +47,9 @@ public class FriendshipController {
         Map<String, Object> response = new HashMap<>();
         Long authStudentId = studentService.getAuthStudentId(authentication);
 
+        Student student = studentService.findById(authStudentId).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
+
         List<FriendshipDTO> friendships = friendshipService.findAllByStudentId(authStudentId);
 
         boolean isFriend = friendships.stream().anyMatch(friendship -> friendship.getFriendId().equals(studentId));
@@ -67,6 +72,10 @@ public class FriendshipController {
 
         try {
             Long studentId = studentService.getAuthStudentId(authentication);
+
+            Student student = studentService.findById(studentId).orElseThrow();
+            student.setLastActiveDateTime(LocalDateTime.now());
+
             if (friendId != null && studentId != null) {
                 friendshipService.deleteByFriendId(friendId);
                 response.put(MESSAGE, "Friend deleted successfully");

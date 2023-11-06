@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
@@ -58,6 +59,8 @@ public class MeetingController {
     public ResponseEntity<Map<String, String>> addMeeting(@RequestBody @NotNull MeetingDto meetingDTO, Authentication authentication) {
         try {
             Long studentId = studentService.getAuthStudentId(authentication);
+            Student student = studentService.findById(studentId).orElseThrow();
+            student.setLastActiveDateTime(LocalDateTime.now());
             if(studentId == null) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap(ERROR, "Invalid student."));
             }
@@ -93,6 +96,9 @@ public class MeetingController {
         Optional<Meeting> existingMeetingOpt = meetingService.findMeetingById(updatedMeeting.getId());
         Long authorId = studentService.getAuthStudentId(authentication);
 
+        Student student = studentService.findById(authorId ).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
+
         if (existingMeetingOpt.isPresent()
                 && Objects.equals(existingMeetingOpt.get().getAuthor().getId(), authorId)) {
             Meeting existingMeeting = existingMeetingOpt.get();
@@ -110,6 +116,8 @@ public class MeetingController {
         Optional<Meeting> existingMeeting = meetingService.findMeetingById(meetingId);
 
         Long authorId = studentService.getAuthStudentId(authentication);
+        Student student = studentService.findById(authorId ).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
 
         if (existingMeeting.isPresent()
                 && Objects.equals(existingMeeting.get().getAuthor().getId(), authorId)) {
@@ -156,10 +164,7 @@ public class MeetingController {
 
             Long studentId = studentService.getAuthStudentId(authentication);
             Optional<Student> student = studentService.findById(studentId);
-            if (student.isEmpty()) {
-                response.put(ERROR, "Student not found.");
-                return ResponseEntity.badRequest().body(response);
-            }
+            student.get().setLastActiveDateTime(LocalDateTime.now());
 
             if (isParticipate) {
                 meeting.get().getParticipants().add(student.get());
@@ -182,6 +187,8 @@ public class MeetingController {
     @GetMapping("/get")
     public ResponseEntity<List<MeetingDto>> getGetParticipatedByStudentId(Authentication authentication) {
         Long studentId = studentService.getAuthStudentId(authentication);
+        Student student = studentService.findById(studentId).orElseThrow();
+        student.setLastActiveDateTime(LocalDateTime.now());
         return getListResponseEntity(studentId);
     }
 

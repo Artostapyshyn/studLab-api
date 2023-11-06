@@ -24,4 +24,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByLastNameContaining(String lastName);
 
     List<Student> findByFirstNameContainingAndLastNameContaining(String firstName, String lastName);
+
+    @Query("SELECT s FROM Student s WHERE s.lastActiveDateTime < :dateTime AND s.authStatus = 'ONLINE'")
+    List<Student> findInactiveStudentsSince(LocalDateTime dateTime);
 }

@@ -1,10 +1,13 @@
 package com.artostapyshyn.studlabapi.dto;
 import com.artostapyshyn.studlabapi.entity.University;
+import com.artostapyshyn.studlabapi.enums.AuthStatus;
 import com.artostapyshyn.studlabapi.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -21,4 +24,6 @@ public class StudentDto {
     private University university;
     private String email;
     private Role role;
+    private AuthStatus authStatus;
+    private LocalDateTime lastActiveDateTime;
 }

@@ -66,6 +66,11 @@ public class Student {
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 
+    @Column(name = "last_active_date_time")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    private LocalDateTime lastActiveDateTime;
+
     @Column(name = "registration_date")
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)

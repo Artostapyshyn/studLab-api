@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         Student sender = studentRepository.findById(senderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sender not found!"));
+        sender.setLastActiveDateTime(LocalDateTime.now());
 
         Student receiver = studentRepository.findById(receiverId)
                 .orElseThrow(() -> new ResourceNotFoundException("Receiver not found!"));
@@ -54,6 +56,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
         request.setSender(sender);
         request.setReceiver(receiver);
         request.setStatus(RequestStatus.PENDING);
+
         messageService.addMessageToStudent(receiverId, "У вас нові сповіщення у профілі.");
         messageService.updateNewMessageStatus(receiverId, true);
         return friendRequestRepository.save(request);
@@ -109,6 +112,7 @@ public class FriendRequestServiceImpl implements FriendRequestService {
 
         Friendship secondFriendship = new Friendship();
         secondFriendship.setStudent(request.getReceiver());
+        request.getReceiver().setLastActiveDateTime(LocalDateTime.now());
         secondFriendship.setFriend(request.getSender());
         friendshipRepository.save(secondFriendship);
     }
