@@ -89,8 +89,7 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaintRepository.delete(complaint);
     }
 
-    @Override
-    @Scheduled(fixedRate = 86400000)
+    @Scheduled(fixedRate = 300000)
     public void removeExpiredTickets() {
         List<Complaint> complaints = complaintRepository.findAll();
             for(Complaint complaint : complaints){

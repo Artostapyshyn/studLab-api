@@ -23,6 +23,4 @@ public interface ComplaintService {
     Complaint saveComplaint(ComplaintDto complaintDto);
 
     void delete(Complaint complaint);
-
-    void removeExpiredTickets();
 }
