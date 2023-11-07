@@ -2,8 +2,12 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.EditDto;
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
+import com.artostapyshyn.studlabapi.entity.Major;
 import com.artostapyshyn.studlabapi.entity.Student;
+import com.artostapyshyn.studlabapi.entity.University;
+import com.artostapyshyn.studlabapi.repository.MajorRepository;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
+import com.artostapyshyn.studlabapi.repository.UniversityRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,6 +27,10 @@ import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+
+    private final UniversityRepository universityRepository;
+
+    private final MajorRepository majorRepository;
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -102,20 +110,40 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     @Override
     public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
-        existingStudent.setFirstName(signUpDto.getFirstName());
-        existingStudent.setLastName(signUpDto.getLastName());
-        existingStudent.setHasNewMessages(false);
-        existingStudent.setCity(signUpDto.getCity());
-        existingStudent.setMajor(signUpDto.getMajor());
-        existingStudent.setCourse(signUpDto.getCourse());
-        existingStudent.setPhotoBytes(signUpDto.getPhotoBytes());
-        existingStudent.setRegistrationDate(LocalDateTime.now());
-
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
-        existingStudent.setPassword(encodedPassword);
-
+        updateStudentDetails(existingStudent, signUpDto);
+        setMajor(existingStudent,signUpDto.getMajor());
+        setUniversity(existingStudent, signUpDto.getUniversityName());
+        existingStudent.setPassword(encodePassword(signUpDto.getPassword()));
         studentRepository.save(existingStudent);
+    }
+
+    private void updateStudentDetails(Student student, SignUpDto signUpDto) {
+        student.setFirstName(signUpDto.getFirstName());
+        student.setLastName(signUpDto.getLastName());
+        student.setHasNewMessages(false);
+        student.setCity(signUpDto.getCity());
+        student.setCourse(signUpDto.getCourse());
+        student.setPhotoBytes(signUpDto.getPhotoBytes());
+        student.setRegistrationDate(LocalDateTime.now());
+    }
+
+    private void setUniversity(Student student, String universityName) {
+        if(universityName != null) {
+            University university = universityRepository.findByName(universityName);
+            student.setUniversity(university);
+        }
+    }
+
+    private void setMajor(Student student, String majorName) {
+        if(majorName != null) {
+            Major major = majorRepository.findByName(majorName);
+            student.setMajor(major.getName());
+        }
+    }
+
+    private String encodePassword(String password) {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode(password);
     }
 
     @Scheduled(fixedRate = 300000)

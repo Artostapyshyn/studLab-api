@@ -22,11 +22,6 @@ public class UniversityServiceImpl implements UniversityService {
     }
 
     @Override
-    public University findByDomain(String domain) {
-        return universityRepository.findByDomain(domain);
-    }
-
-    @Override
     public List<University> findAll() {
         return universityRepository.findAll();
     }
@@ -34,5 +29,15 @@ public class UniversityServiceImpl implements UniversityService {
     @Override
     public int countRegistered(LocalDateTime date) {
         return universityRepository.countRegistered(date);
+    }
+
+    @Override
+    public List<University> findActiveUniversities(LocalDateTime dateTime) {
+        return universityRepository.findActiveUniversities(dateTime);
+    }
+
+    @Override
+    public University findByName(String name) {
+        return universityRepository.findByName(name);
     }
 }

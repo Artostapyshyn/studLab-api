@@ -21,4 +21,5 @@ public class SignUpDto {
     private String major;
     private String course;
     private byte[] photoBytes;
+    private String universityName;
 }

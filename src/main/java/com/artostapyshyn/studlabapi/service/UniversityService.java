@@ -9,9 +9,11 @@ import java.util.Optional;
 public interface UniversityService {
     Optional <University> findById(Long id);
 
-    University findByDomain(String domain);
-
     List<University> findAll();
 
     int countRegistered(LocalDateTime date);
+
+    List<University> findActiveUniversities(LocalDateTime dateTime);
+
+    University findByName(String name);
 }

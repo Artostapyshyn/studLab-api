@@ -48,8 +48,6 @@ public class AuthController {
 
     private final EmailService emailService;
 
-    private final UniversityService universityService;
-
     private final AuthenticationManager authenticationManager;
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -97,7 +95,7 @@ public class AuthController {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         Student student = modelMapper.map(verificationDto, Student.class);
 
-        if (isValidEmailDomain(email, student)) {
+        if (email != null) {
             student.setEnabled(false);
             student.setRole(Role.ROLE_STUDENT);
 
@@ -275,20 +273,6 @@ public class AuthController {
         }
 
         response.put(MESSAGE, "Email sent successfully");
-    }
-
-    public boolean isValidEmailDomain(String email, Student student) {
-        String domain;
-        domain = Arrays.stream(new String[]{email.split("@")[1]})
-                .findFirst()
-                .orElse("");
-
-        University university = universityService.findByDomain(domain);
-        if (university != null) {
-            student.setUniversity(university);
-            return true;
-        }
-        return false;
     }
 
     private ResponseEntity<Map<String, Object>> verify(VerificationCode code) {
