@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MajorRepository extends JpaRepository<Major, Long> {
 
-    Major findByName(String name);
+    Major findByNameOrderByNameAsc(String name);
 }

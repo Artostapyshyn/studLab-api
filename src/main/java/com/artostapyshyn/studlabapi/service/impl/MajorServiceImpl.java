@@ -16,7 +16,7 @@ public class MajorServiceImpl implements MajorService {
 
     @Override
     public Major findByName(String name) {
-        return majorRepository.findByName(name);
+        return majorRepository.findByNameOrderByNameAsc(name);
     }
 
     @Override

@@ -136,7 +136,7 @@ public class StudentServiceImpl implements StudentService {
 
     private void setMajor(Student student, String majorName) {
         if(majorName != null) {
-            Major major = majorRepository.findByName(majorName);
+            Major major = majorRepository.findByNameOrderByNameAsc(majorName);
             student.setMajor(major.getName());
         }
     }

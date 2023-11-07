@@ -17,7 +17,7 @@ public interface UniversityRepository extends JpaRepository<University, Long> {
     @Query("SELECT COUNT(u) FROM University u WHERE u.registrationDate > :date")
     int countRegistered(LocalDateTime date);
 
-    @Query("SELECT u FROM University u WHERE u.registrationDate > :date")
+    @Query("SELECT u FROM University u WHERE u.registrationDate > :date ORDER BY u.name ASC")
     List<University> findActiveUniversities(@Param("date") LocalDateTime date);
 
     University findByName(String name);
