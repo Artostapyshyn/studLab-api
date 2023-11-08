@@ -54,6 +54,18 @@ public class MeetingController {
         return ResponseEntity.ok(meetings);
     }
 
+    @Operation(summary = "Get all friends created meetings")
+    @GetMapping("/friends")
+    public ResponseEntity<Set<MeetingDto>> getFriendsMeetings(Authentication authentication) {
+        Long studentId = studentService.getAuthStudentId(authentication);
+        if (studentId == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+
+        Set<MeetingDto> friendsMeetings = meetingService.findMeetingsByStudentFriends(studentId);
+        return ResponseEntity.ok(friendsMeetings);
+    }
+
     @Operation(summary = "Add an meeting.")
     @PostMapping("/add")
     public ResponseEntity<Map<String, String>> addMeeting(@RequestBody @NotNull MeetingDto meetingDTO, Authentication authentication) {
@@ -61,14 +73,14 @@ public class MeetingController {
             Long studentId = studentService.getAuthStudentId(authentication);
             Student student = studentService.findById(studentId).orElseThrow();
             student.setLastActiveDateTime(LocalDateTime.now());
-            if(studentId == null) {
+            if (studentId == null) {
                 return ResponseEntity.badRequest().body(Collections.singletonMap(ERROR, "Invalid student."));
             }
 
             Student author = studentService.findById(studentId).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-            if(meetingDTO.getMeetingType().equals(EVENT_BASED)) {
+            if (meetingDTO.getMeetingType().equals(EVENT_BASED)) {
                 Event event = eventService.findByNameOfEvent(meetingDTO.getEventName());
-                if(event == null){
+                if (event == null) {
                     return ResponseEntity.badRequest().body(Collections.singletonMap(ERROR, "Event not found"));
                 }
                 meetingDTO.setEventName(event.getNameOfEvent());
@@ -86,8 +98,8 @@ public class MeetingController {
     }
 
     private Meeting convertToEntity(MeetingDto meetingDTO) {
-       modelMapper.getConfiguration().setSkipNullEnabled(true);
-       return modelMapper.map(meetingDTO, Meeting.class);
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        return modelMapper.map(meetingDTO, Meeting.class);
     }
 
     @Operation(summary = "Edit an Meeting.")
@@ -96,7 +108,7 @@ public class MeetingController {
         Optional<Meeting> existingMeetingOpt = meetingService.findMeetingById(updatedMeeting.getId());
         Long authorId = studentService.getAuthStudentId(authentication);
 
-        Student student = studentService.findById(authorId ).orElseThrow();
+        Student student = studentService.findById(authorId).orElseThrow();
         student.setLastActiveDateTime(LocalDateTime.now());
 
         if (existingMeetingOpt.isPresent()
@@ -116,7 +128,7 @@ public class MeetingController {
         Optional<Meeting> existingMeeting = meetingService.findMeetingById(meetingId);
 
         Long authorId = studentService.getAuthStudentId(authentication);
-        Student student = studentService.findById(authorId ).orElseThrow();
+        Student student = studentService.findById(authorId).orElseThrow();
         student.setLastActiveDateTime(LocalDateTime.now());
 
         if (existingMeeting.isPresent()

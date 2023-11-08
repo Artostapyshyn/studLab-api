@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -50,6 +52,14 @@ public class MeetingServiceImpl implements MeetingService {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedMeeting, existingMeeting);
         meetingRepository.save(existingMeeting);
+    }
+
+    @Override
+    public Set<MeetingDto> findMeetingsByStudentFriends(Long studentId) {
+        Set<Meeting> meetings = meetingRepository.findMeetingsByStudentFriends(studentId);
+        return meetings.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toSet());
     }
 
     @Override
