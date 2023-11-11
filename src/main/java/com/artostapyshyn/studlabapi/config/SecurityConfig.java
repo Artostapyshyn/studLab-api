@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("api/v1/**", "api/v1/auth/**", "api/v1/auth/alternative/**", "/ws/**").permitAll()
                         .requestMatchers("api/v1/vacancies/**", "api/v1/achievements/**", "api/v1/meetings/**",
                                 "api/v1/comments/**", "api/v1/favourites/**",
-                                "api/v1/messages/**", "api/v1/events/**",
+                                "api/v1/messages/**", "api/v1/events/**", "api/v1/services/**",
                                 "api/v1/friends/**", "api/v1/friend-request", "api/v1/tags/**", "api/v1/majors/**",
                                 "api/v1/course/**", "api/v1/student/**", "api/v1/interests/**", "api/v1/universities/**")
                         .hasAnyRole(STUDENT, ADMIN, MODERATOR)

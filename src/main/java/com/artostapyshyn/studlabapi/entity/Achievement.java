@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,4 +34,18 @@ public class Achievement {
 
     @Column(name = "student_id", nullable = false)
     private Long studentId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Achievement that)) return false;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getName(), that.getName()) && Arrays.equals(getData(), that.getData());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getId(), getName());
+        result = 31 * result + Arrays.hashCode(getData());
+        return result;
+    }
 }

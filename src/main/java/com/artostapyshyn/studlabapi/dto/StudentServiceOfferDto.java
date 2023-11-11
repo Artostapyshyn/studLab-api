@@ -9,12 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditDto {
+public class StudentServiceOfferDto {
     private Long id;
-    private String lastName;
-    private String firstName;
-    private String major;
-    private String course;
-    private String city;
+    private String description;
+    private String name;
+    private String price;
+    private double rating;
     private byte[] photoBytes;
+    private StudentDto provider;
 }

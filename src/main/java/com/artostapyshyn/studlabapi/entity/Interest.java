@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -32,4 +33,16 @@ public class Interest {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     private Set<Student> interestedStudents = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Interest interest)) return false;
+        return Objects.equals(getId(), interest.getId()) && Objects.equals(getName(), interest.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName());
+    }
 }

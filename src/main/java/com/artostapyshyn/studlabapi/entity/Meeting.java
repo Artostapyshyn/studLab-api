@@ -12,6 +12,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -59,4 +60,16 @@ public class Meeting {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     private Set<Student> participants = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Meeting meeting)) return false;
+        return Objects.equals(getId(), meeting.getId()) && Objects.equals(getName(), meeting.getName()) && Objects.equals(getDate(), meeting.getDate()) && Objects.equals(getVenue(), meeting.getVenue()) && Objects.equals(getDescription(), meeting.getDescription()) && getMeetingType() == meeting.getMeetingType() && Objects.equals(getEventName(), meeting.getEventName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getDate(), getVenue(), getDescription(), getMeetingType(), getEventName());
+    }
 }

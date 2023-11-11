@@ -54,9 +54,6 @@ public class Student {
     @Column(name = "password")
     private String password;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Message> messages;
-
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
@@ -76,10 +73,21 @@ public class Student {
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime registrationDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_status")
+    private AuthStatus authStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
     @JsonIgnore
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "student"})
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Message> messages;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
@@ -88,19 +96,14 @@ public class Student {
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private Set<Meeting> meetings = new HashSet<>();
 
+    @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
+    private Set<StudentServiceOffer> studentServiceOffers = new HashSet<>();
+
     @ManyToMany(mappedBy = "interestedStudents", fetch = FetchType.LAZY)
     private Set<Interest> interests = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     private University university;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "auth_status")
-    private AuthStatus authStatus;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Role role;
 
     @JsonProperty("university")
     public Map<String, Object> getUniversityData() {

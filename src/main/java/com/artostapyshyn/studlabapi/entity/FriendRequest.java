@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -34,4 +36,16 @@ public class FriendRequest {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private RequestStatus status;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FriendRequest that)) return false;
+        return Objects.equals(getId(), that.getId()) && getStatus() == that.getStatus();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getStatus());
+    }
 }

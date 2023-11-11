@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -30,4 +33,18 @@ public class Resume {
 
     @Column(name = "student_id", nullable = false)
     private Long studentId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Resume resume)) return false;
+        return Objects.equals(getId(), resume.getId()) && Objects.equals(getName(), resume.getName()) && Arrays.equals(getData(), resume.getData()) && Objects.equals(getStudentId(), resume.getStudentId());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getId(), getName(), getStudentId());
+        result = 31 * result + Arrays.hashCode(getData());
+        return result;
+    }
 }

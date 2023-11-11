@@ -22,7 +22,6 @@ public class EventDto {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime date;
-
     @JsonFormat(pattern="dd-MM HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime endDate;
