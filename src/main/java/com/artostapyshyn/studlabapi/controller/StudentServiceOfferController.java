@@ -47,10 +47,28 @@ public class StudentServiceOfferController {
         return ResponseEntity.ok(serviceOffers);
     }
 
+    @Operation(summary = "Add service offer.")
+    @PostMapping("/add")
+    public ResponseEntity<StudentServiceOfferDto> addStudent(@RequestBody StudentServiceOffer studentServiceOffer,
+                                                             Authentication authentication) {
+        Student student = studentService.findById(studentService.getAuthStudentId(authentication))
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        if (!Objects.equals(student.getId(), studentServiceOffer.getProvider().getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        StudentServiceOffer studentOffer = studentOfferService.save(studentServiceOffer);
+        StudentServiceOfferDto studentServiceOfferDto = modelMapper.map(studentOffer, StudentServiceOfferDto.class);
+
+        return ResponseEntity.ok(studentServiceOfferDto);
+    }
+
+
     @Operation(summary = "Edit service offer.")
     @PutMapping("/edit")
     public ResponseEntity<StudentServiceOfferDto> editStudent(@RequestParam("serviceId") Long serviceId, @RequestBody StudentOfferEditDto studentOfferEditDto,
-                                                  Authentication authentication) {
+                                                              Authentication authentication) {
         Student student = studentService.findById(studentService.getAuthStudentId(authentication))
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
@@ -62,9 +80,26 @@ public class StudentServiceOfferController {
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
         student.setLastActiveDateTime(LocalDateTime.now());
-        studentOfferService.updateStudentServices(studentOffer , studentOfferEditDto);
+        studentOfferService.updateStudentServices(studentOffer, studentOfferEditDto);
         StudentServiceOfferDto studentServiceOfferDto = modelMapper.map(studentOffer, StudentServiceOfferDto.class);
 
         return ResponseEntity.ok(studentServiceOfferDto);
+    }
+
+    @Operation(summary = "Delete service offer.")
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteStudent(@RequestParam("serviceId") Long serviceId, Authentication authentication) {
+        Student student = studentService.findById(studentService.getAuthStudentId(authentication))
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+
+        StudentServiceOffer studentOffer = this.studentOfferService.findById(serviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
+
+        if (!Objects.equals(student.getId(), studentOffer.getProvider().getId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        studentOfferService.deleteById(serviceId);
+        return ResponseEntity.ok().build();
     }
 }
