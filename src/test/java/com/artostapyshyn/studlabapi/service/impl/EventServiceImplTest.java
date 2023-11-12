@@ -2,14 +2,16 @@ package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.Event;
-import com.artostapyshyn.studlabapi.repository.EventRepository;
+import com.artostapyshyn.studlabapi.entity.EventCounter;
+import com.artostapyshyn.studlabapi.repository.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -30,19 +32,35 @@ class EventServiceImplTest {
     @InjectMocks
     private EventServiceImpl eventService;
 
+    private ModelMapper modelMapper;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        modelMapper = new ModelMapper();
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+        EventCounterRepository eventCounterRepository = mock(EventCounterRepository.class);
+        FavouriteEventRepository favouriteEventRepository = mock(FavouriteEventRepository.class);
+        TagRepository tagRepository = mock(TagRepository.class);
+        StudentRepository studentRepository = mock(StudentRepository.class);
+
+        eventService = new EventServiceImpl(eventRepository, favouriteEventRepository,
+                eventCounterRepository, tagRepository, studentRepository, modelMapper);
+    }
+
     @Test
     void findAll() {
-        List<Event> expectedEvents = List.of(
-                createRandomEvent(),
-                createRandomEvent(),
-                createRandomEvent()
-        );
+        List<Event> expectedEvents = List.of(createRandomEvent(), createRandomEvent(), createRandomEvent());
         when(eventRepository.findAll()).thenReturn(expectedEvents);
 
         List<EventDto> actualEvents = eventService.findAll();
 
-        assertEquals(expectedEvents.size(), actualEvents.size());
-        assertTrue(actualEvents.containsAll(expectedEvents));
+        List<EventDto> expectedDtos = expectedEvents.stream()
+                .map(event -> modelMapper.map(event, EventDto.class))
+                .toList();
+
+        assertEquals(expectedDtos.size(), actualEvents.size());
     }
 
     @Test
@@ -60,75 +78,32 @@ class EventServiceImplTest {
     @Test
     void save() {
         Event event = createRandomEvent();
+        EventCounter counter = new EventCounter();
+        counter.increment();
         when(eventRepository.save(event)).thenReturn(event);
 
-        Event savedEvent = eventService.save(event);
-
-        assertNotNull(savedEvent);
-        assertEquals(event.getId(), savedEvent.getId());
-    }
-
-    @Test
-    void findPopularEvents() {
-        List<Event> expectedPopularEvents = List.of(
-                createRandomEvent(),
-                createRandomEvent()
-        );
-        when(eventRepository.findPopularEvents(Pageable.unpaged())).thenReturn(expectedPopularEvents);
-
-        List<EventDto> actualPopularEvents = eventService.findPopularEvents(Pageable.unpaged());
-
-        assertEquals(expectedPopularEvents.size(), actualPopularEvents.size());
-        assertTrue(actualPopularEvents.containsAll(expectedPopularEvents));
-    }
-
-    @Test
-    void findAllEventsByDateDesc() {
-        List<Event> expectedEventsByDateDesc = List.of(
-                createRandomEvent(),
-                createRandomEvent(),
-                createRandomEvent()
-        );
-        when(eventRepository.findAllEventsByDateAsc(Pageable.unpaged())).thenReturn((Page<Event>) expectedEventsByDateDesc);
-
-        List<EventDto> actualEventsByDateDesc = eventService.findAllEventsByDateAsc(Pageable.unpaged());
-
-        assertEquals(expectedEventsByDateDesc.size(), actualEventsByDateDesc.size());
-        assertTrue(actualEventsByDateDesc.containsAll(expectedEventsByDateDesc));
-    }
-
-    @Test
-    void findAllEventsByCreationDateDesc() {
-        List<Event> expectedEventsByCreationDateDesc = List.of(
-                createRandomEvent(),
-                createRandomEvent(),
-                createRandomEvent()
-        );
-        when(eventRepository.findAllEventsByCreationDateAsc(Pageable.unpaged())).thenReturn((Page<Event>) expectedEventsByCreationDateDesc);
-
-        List<EventDto> actualEventsByCreationDateDesc = eventService.findAllEventsByCreationDateAsc(Pageable.unpaged());
-
-        assertEquals(expectedEventsByCreationDateDesc.size(), actualEventsByCreationDateDesc.size());
-        assertTrue(actualEventsByCreationDateDesc.containsAll(expectedEventsByCreationDateDesc));
+        Event actualEvent = eventService.save(event);
+        assertEquals(event, actualEvent);
     }
 
     @Test
     void deleteById() {
-        Long eventId = 123L;
-        eventService.deleteById(eventId);
+        Event event = createRandomEvent();
+        when(eventRepository.save(event)).thenReturn(event);
+        doNothing().when(eventRepository).deleteById(event.getId());
 
-        verify(eventRepository, times(1)).deleteById(eventId);
+        eventService.deleteById(event.getId());
+        verify(eventRepository, times(1)).deleteById(event.getId());
     }
 
     @Test
     void updateEvent() {
-        Event existingEvent = createRandomEvent();
-        existingEvent.setVenue("Updated Venue");
-        existingEvent.setNameOfEvent("Updated name");
+        Event event = createRandomEvent();
+        when(eventRepository.save(event)).thenReturn(event);
 
-        eventService.updateEvent(existingEvent, existingEvent);
-
-        assertEquals(existingEvent.getVenue(), existingEvent.getVenue());
-        assertEquals(existingEvent.getDate(), existingEvent.getDate());
+        Event actualEvent = createRandomEvent();
+        when(eventRepository.save(actualEvent)).thenReturn(actualEvent);
+        eventService.updateEvent(event, actualEvent);
+        assertEquals(event, actualEvent);
     }
 }

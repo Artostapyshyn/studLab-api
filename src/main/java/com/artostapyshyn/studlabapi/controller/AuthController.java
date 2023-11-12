@@ -365,3 +365,10 @@ public class AuthController {
                 signUpDto.getCourse() != null;
     }
 }
+// write test for this controller AuthController
+
+// Path: src/main/java/com/artostapyshyn/studlabapi/controller/AuthController.java
+
+// write test for this controller AuthController
+
+

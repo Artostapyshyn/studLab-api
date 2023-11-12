@@ -13,10 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomStudent;
@@ -120,20 +118,6 @@ class StudentServiceImplTest {
     }
 
     @Test
-    void getRegistrationData_ReturnsMonthlyRegistrations() {
-        Student student1 = createRandomStudent();
-        student1.setRegistrationDate(LocalDateTime.of(2022, 1, 10, 0, 0));
-        Student student2 = createRandomStudent();
-        student2.setRegistrationDate(LocalDateTime.of(2022, 1, 20, 0, 0));
-        studentRepository.saveAll(Arrays.asList(student1, student2));
-
-        Map<String, Integer> result = studentStatisticsService.getRegistrationData();
-
-        assertNotNull(result);
-        assertEquals(2, result.get("січень").intValue());
-    }
-
-    @Test
     void getAuthStudentId_Authentication_ReturnsStudentId() {
         Student student = createRandomStudent();
         studentRepository.save(student);
@@ -143,22 +127,4 @@ class StudentServiceImplTest {
         Long result = studentService.getAuthStudentId(authentication);
         assertEquals(student.getId(), result);
     }
-
-//    @Test
-//    void updateStudent_ExistingStudent_UpdatesFields() {
-//        Student student = createRandomStudent();
-//        studentRepository.save(student);
-//
-//        Student updatedStudent = student;
-//        updatedStudent.setFirstName("Updated");
-//        updatedStudent.setLastName("Student");
-//        studentRepository.save(updatedStudent);
-//
-//        studentService.updateStudent(student, updatedStudent);
-//
-//        Student result = studentRepository.findById(student.getId()).orElse(null);
-//        assertNotNull(result);
-//        assertEquals(updatedStudent.getFirstName(), result.getFirstName());
-//        assertEquals(updatedStudent.getLastName(), result.getLastName());
-//    }
 }

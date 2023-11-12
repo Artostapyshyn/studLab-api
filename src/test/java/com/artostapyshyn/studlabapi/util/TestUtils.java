@@ -32,6 +32,7 @@ public class TestUtils {
         student.setEnabled(true);
         student.setHasNewMessages(false);
         student.setRegistrationDate(LocalDateTime.now());
+        student.setBlockedUntil(null);
         student.setRole(Role.ROLE_STUDENT);
 
         return student;

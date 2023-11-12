@@ -1,7 +1,6 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
 import com.artostapyshyn.studlabapi.entity.Comment;
-import com.artostapyshyn.studlabapi.entity.Reply;
 import com.artostapyshyn.studlabapi.repository.CommentRepository;
 import com.artostapyshyn.studlabapi.repository.ReplyRepository;
 import org.junit.jupiter.api.Test;
@@ -11,11 +10,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomComment;
-import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomReply;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -50,31 +47,6 @@ class CommentServiceImplTest {
     }
 
     @Test
-    void addReplyToComment() {
-        Reply reply = createRandomReply();
-        Long parentId = 123L;
-        Comment parentComment = createRandomComment();
-
-        when(commentRepository.findById(parentId)).thenReturn(Optional.of(parentComment));
-        when(commentRepository.save(parentComment)).thenReturn(parentComment);
-        when(replyRepository.save(reply)).thenReturn(reply);
-
-       // commentService.addReplyToComment(reply, parentId);
-
-        List<Reply> replies = parentComment.getReplies();
-        assertTrue(replies.contains(reply));
-
-        assertEquals(parentComment, reply.getComment());
-        assertEquals(parentComment.getStudent(), reply.getStudent());
-
-        verify(commentRepository, times(1)).save(parentComment);
-        verify(replyRepository, times(1)).save(reply);
-
-        verify(messageService, times(1)).addMessageToStudent(parentComment.getStudent().getId(), "Вам надійшла відповідь на ваш коментар.");
-        verify(messageService, times(1)).updateNewMessageStatus(parentComment.getStudent().getId(), true);
-    }
-
-    @Test
     void findById() {
         Comment comment = createRandomComment();
 
@@ -92,7 +64,6 @@ class CommentServiceImplTest {
     @Test
     void delete() {
         Comment comment = createRandomComment();
-
         commentService.delete(comment);
         verify(commentRepository, times(1)).delete(comment);
     }

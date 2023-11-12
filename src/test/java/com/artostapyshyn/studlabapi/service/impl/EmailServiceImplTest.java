@@ -1,20 +1,15 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
-import com.artostapyshyn.studlabapi.entity.Student;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.*;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 
-import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomStudent;
-import static com.artostapyshyn.studlabapi.util.TestUtils.createRandomVerificationCode;
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -23,31 +18,28 @@ import static org.mockito.Mockito.*;
 @AutoConfigureTestDatabase
 class EmailServiceImplTest {
 
-    @Autowired
+    @InjectMocks
     private EmailServiceImpl emailService;
 
     @Mock
     private JavaMailSender mailSender;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    @Captor
+    private ArgumentCaptor<SimpleMailMessage> messageCaptor;
 
     @Test
-    void sendVerificationCode() {
-        Student student = createRandomStudent();
-        int code = createRandomVerificationCode().getCode();
+    void sendVerificationCodeTest() {
+        String toEmail = "test@example.com";
+        int code = 123456;
 
-        emailService.sendVerificationCode(student.getEmail(), code);
+        emailService.sendVerificationCode(toEmail, code);
 
-        String expectedMessageText = "Верифікаційний код: " + code;
-        ArgumentCaptor<SimpleMailMessage> messageCaptor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-
-        verify(emailService, times(1)).sendVerificationCode(student.getEmail(), code);
-        verify(mailSender, times(1)).send(messageCaptor.capture());
-
+        verify(mailSender).send(messageCaptor.capture());
         SimpleMailMessage sentMessage = messageCaptor.getValue();
-        assertEquals(expectedMessageText, sentMessage.getText());
+
+        assertEquals("studlabbot@gmail.com", sentMessage.getFrom());
+        assertEquals(toEmail, Objects.requireNonNull(sentMessage.getTo())[0]);
+        assertEquals("Код підтвердження", sentMessage.getSubject());
+        assertEquals("Верифікаційни код: " + code, sentMessage.getText());
     }
 }

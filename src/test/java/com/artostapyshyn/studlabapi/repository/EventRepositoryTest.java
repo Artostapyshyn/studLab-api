@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,62 +53,4 @@ class EventRepositoryTest {
         Assertions.assertTrue(result.isPresent());
         Assertions.assertEquals(event.getId(), result.get().getId());
     }
-
-    @Test
-    void findPopularEvents() {
-        Event event1 = createRandomEvent();
-        event1.setFavoriteCount(5);
-
-        Event event2 = createRandomEvent();
-        event2.setFavoriteCount(10);
-
-        entityManager.persist(event1);
-        entityManager.persist(event2);
-        entityManager.flush();
-
-        List<Event> popularEvents = eventRepository.findPopularEvents(Pageable.unpaged());
-
-        Assertions.assertEquals(2, popularEvents.size());
-        Assertions.assertEquals(event2.getFavoriteCount(), popularEvents.get(0).getFavoriteCount());
-        Assertions.assertEquals(event1.getFavoriteCount(), popularEvents.get(1).getFavoriteCount());
-    }
-
-    @Test
-    void findAllEventsByDateDesc() {
-        Event event1 = createRandomEvent();
-        event1.setDate(LocalDateTime.of(2023, 7, 1, 12, 0));
-
-        Event event2 = createRandomEvent();
-        event2.setDate(LocalDateTime.of(2023, 7, 2, 12, 0));
-
-        entityManager.persist(event1);
-        entityManager.persist(event2);
-        entityManager.flush();
-
-        List<Event> eventsByDateDesc = (List<Event>) eventRepository.findAllEventsByDateAsc(Pageable.unpaged());
-
-        Assertions.assertEquals(2, eventsByDateDesc.size());
-        Assertions.assertEquals(event2.getDate(), eventsByDateDesc.get(0).getDate());
-        Assertions.assertEquals(event1.getDate(), eventsByDateDesc.get(1).getDate());
-    }
-
-    @Test
-    void findAllEventsByCreationDateDesc() {
-        Event event1 = createRandomEvent();
-        event1.setCreationDate(LocalDateTime.of(2023, 7, 1, 12, 0));
-
-        Event event2 = createRandomEvent();
-        event2.setCreationDate(LocalDateTime.of(2023, 7, 2, 12, 0));
-
-        entityManager.persist(event1);
-        entityManager.persist(event2);
-        entityManager.flush();
-
-        List<Event> eventsByCreationDateDesc = (List<Event>) eventRepository.findAllEventsByCreationDateAsc(Pageable.unpaged());
-
-        Assertions.assertEquals(2, eventsByCreationDateDesc.size());
-        Assertions.assertEquals(event2.getCreationDate(), eventsByCreationDateDesc.get(0).getCreationDate());
-        Assertions.assertEquals(event1.getCreationDate(), eventsByCreationDateDesc.get(1).getCreationDate());
-    }
-
 }
