@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -141,5 +142,17 @@ public class EventServiceImpl implements EventService {
         eventsMatchingTags.removeAll(favouriteEventsOnly);
 
         return eventsMatchingTags.stream().map(element -> modelMapper.map(element, EventDto.class)).toList();
+    }
+
+    @Scheduled(fixedRate = 86400000)
+    @Transactional
+    public void removeEventImages(){
+        List<Event> events = eventRepository.findAll();
+        for (Event event : events) {
+            if(event.getEndDate().isBefore(LocalDateTime.now())) {
+                event.setEventPhoto(null);
+                event.setEventComments(null);
+            }
+        }
     }
 }

@@ -63,7 +63,7 @@ public class Event {
     private EventType eventType;
 
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "event_photo", nullable = false)
+    @Column(name = "event_photo")
     private byte[] eventPhoto;
 
     @Column(name = "favorite_count")
