@@ -31,6 +31,8 @@ public class EventDto {
     private String nameOfEvent;
     private byte[] eventPhoto;
     private int favoriteCount;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime creationDate;
     private Set<Tag> tags;
 }
