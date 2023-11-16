@@ -44,6 +44,18 @@ public class StudentServiceOffer {
     @JoinColumn(name = "provider_id")
     private Student provider;
 
+    @Column(name = "telegram")
+    private String telegram;
+
+    @Column(name = "viber")
+    private String viber;
+
+    @Column(name = "whatsapp")
+    private String whatsapp;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

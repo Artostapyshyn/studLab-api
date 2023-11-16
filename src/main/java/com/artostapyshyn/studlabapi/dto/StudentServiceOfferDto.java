@@ -17,4 +17,8 @@ public class StudentServiceOfferDto {
     private double rating;
     private byte[] photoBytes;
     private StudentDto provider;
+    private String telegram;
+    private String viber;
+    private String whatsapp;
+    private String phoneNumber;
 }

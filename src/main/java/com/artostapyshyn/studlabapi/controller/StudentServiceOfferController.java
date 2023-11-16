@@ -59,6 +59,7 @@ public class StudentServiceOfferController {
         }
 
         StudentServiceOffer studentOffer = studentOfferService.save(studentServiceOffer);
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
         StudentServiceOfferDto studentServiceOfferDto = modelMapper.map(studentOffer, StudentServiceOfferDto.class);
 
         return ResponseEntity.ok(studentServiceOfferDto);
