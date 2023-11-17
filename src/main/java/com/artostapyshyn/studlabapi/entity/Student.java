@@ -60,6 +60,11 @@ public class Student {
     @Column(name = "has_new_messages")
     private Boolean hasNewMessages;
 
+    @Column(name = "birthday")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    @JsonFormat(pattern="dd-MM-yyyy")
+    private LocalDateTime birthDate;
+
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 
