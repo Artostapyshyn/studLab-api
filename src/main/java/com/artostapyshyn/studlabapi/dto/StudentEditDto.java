@@ -25,4 +25,5 @@ public class StudentEditDto {
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime birthDate;
+    private String universityName;
 }

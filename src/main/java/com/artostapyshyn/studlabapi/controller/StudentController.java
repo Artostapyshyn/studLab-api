@@ -329,7 +329,6 @@ public class StudentController {
             Student existingStudent = optionalStudent.get();
             existingStudent.setLastActiveDateTime(LocalDateTime.now());
             studentService.updateStudent(existingStudent, student);
-            studentService.save(existingStudent);
             StudentDto studentDto = modelMapper.map(existingStudent, StudentDto.class);
 
             return ResponseEntity.ok(studentDto);

@@ -1,7 +1,7 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
-import com.artostapyshyn.studlabapi.dto.StudentEditDto;
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
+import com.artostapyshyn.studlabapi.dto.StudentEditDto;
 import com.artostapyshyn.studlabapi.entity.Major;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.entity.University;
@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
 
@@ -31,6 +32,8 @@ public class StudentServiceImpl implements StudentService {
     private final UniversityRepository universityRepository;
 
     private final MajorRepository majorRepository;
+
+    private final ModelMapper modelMapper;
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -101,16 +104,17 @@ public class StudentServiceImpl implements StudentService {
     @Transactional
     @Override
     public void updateStudent(Student existingStudent, StudentEditDto updatedStudent) {
-        ModelMapper modelMapper = new ModelMapper();
+        setUniversity(existingStudent, updatedStudent.getUniversityName());
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedStudent, existingStudent);
+        studentRepository.save(existingStudent);
     }
 
     @Transactional
     @Override
     public void signUpStudent(SignUpDto signUpDto, Student existingStudent) {
         updateStudentDetails(existingStudent, signUpDto);
-        setMajor(existingStudent,signUpDto.getMajor());
+        setMajor(existingStudent, signUpDto.getMajor());
         setUniversity(existingStudent, signUpDto.getUniversityName());
         existingStudent.setPassword(encodePassword(signUpDto.getPassword()));
         studentRepository.save(existingStudent);
@@ -127,14 +131,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     private void setUniversity(Student student, String universityName) {
-        if(universityName != null) {
+        if (universityName != null) {
             University university = universityRepository.findByName(universityName);
             student.setUniversity(university);
         }
     }
 
     private void setMajor(Student student, String majorName) {
-        if(majorName != null) {
+        if (majorName != null) {
             Major major = majorRepository.findByName(majorName);
             student.setMajor(major.getName());
         }
