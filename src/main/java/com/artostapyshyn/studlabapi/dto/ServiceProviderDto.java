@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentOfferEditDto {
-    private String name;
-    private String description;
-    private String price;
+public class ServiceProviderDto {
+    private Long id;
+    private String lastName;
+    private String firstName;
     private byte[] photoBytes;
-    private ServiceProviderDto provider;
 }

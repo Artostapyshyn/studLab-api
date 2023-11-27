@@ -35,8 +35,6 @@ public class StudentController {
 
     private final InterestService interestService;
 
-    private final AlternateRegistrationStudentService alternateRegistrationStudentService;
-
     private final ResumeService resumeService;
 
     private final CertificateService certificateService;
@@ -79,7 +77,6 @@ public class StudentController {
                     Map<String, Object> data = new HashMap<>();
                     data.put("firstName", student.getFirstName());
                     data.put("lastName", student.getLastName());
-                    data.put("photoBytes", student.getPhotoBytes());
                     return data;
                 })
                 .toList();
@@ -118,13 +115,6 @@ public class StudentController {
         Optional<Student> student = studentService.findById(id);
 
         return ResponseEntity.of(student);
-    }
-
-    @Operation(summary = "Find alternate registration student by code")
-    @GetMapping("/alternate/find-by-id")
-    public ResponseEntity<AlternateRegistrationStudent> getAlternateStudentByCode(@RequestParam("code") String code) {
-        Optional<AlternateRegistrationStudent> student = alternateRegistrationStudentService.findByCode(code);
-        return student.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Get student resumes by token")
