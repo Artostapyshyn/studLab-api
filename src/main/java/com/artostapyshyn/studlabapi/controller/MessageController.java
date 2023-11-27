@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.artostapyshyn.studlabapi.constant.ControllerConstants.*;
+import static io.micrometer.core.instrument.binder.BaseUnits.MESSAGES;
 
 @Log4j2
 @RestController
@@ -26,6 +27,13 @@ public class MessageController {
     private final MessageService messageService;
 
     private final StudentService studentService;
+
+    @GetMapping("/all")
+    public ResponseEntity<Map<String, Object>> getAllMessages(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(MESSAGES, messageService.findAllMessagesByStudentId(studentService.getAuthStudentId(authentication)));
+        return ResponseEntity.ok(response);
+    }
 
     @Operation(summary = "Mark messages as read")
     @PostMapping("/mark-as-read")
