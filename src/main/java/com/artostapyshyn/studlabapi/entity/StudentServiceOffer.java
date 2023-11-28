@@ -40,7 +40,7 @@ public class StudentServiceOffer {
     @Column(name = "service_photo")
     private byte[] photoBytes;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "provider_id")
     private Student provider;
 

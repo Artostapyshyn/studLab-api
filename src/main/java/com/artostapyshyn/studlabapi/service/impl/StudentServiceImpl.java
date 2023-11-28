@@ -37,6 +37,7 @@ public class StudentServiceImpl implements StudentService {
     private final MajorRepository majorRepository;
 
     private final ModelMapper modelMapper;
+
     private final InterestRepository interestRepository;
 
     @Override
