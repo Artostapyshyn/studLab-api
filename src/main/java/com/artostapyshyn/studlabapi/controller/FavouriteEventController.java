@@ -2,6 +2,7 @@ package com.artostapyshyn.studlabapi.controller;
 
 import com.artostapyshyn.studlabapi.dto.EventDto;
 import com.artostapyshyn.studlabapi.entity.*;
+import com.artostapyshyn.studlabapi.service.InterestService;
 import com.artostapyshyn.studlabapi.service.impl.EventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.FavouriteEventServiceImpl;
 import com.artostapyshyn.studlabapi.service.impl.StudentServiceImpl;
@@ -30,6 +31,8 @@ public class FavouriteEventController {
 
     private final StudentServiceImpl studentService;
 
+    private final InterestService interestService;
+
     private final EventServiceImpl eventService;
 
     private final ModelMapper modelMapper;
@@ -40,7 +43,7 @@ public class FavouriteEventController {
         Long studentId = studentService.getAuthStudentId(authentication);
 
         Student student = studentService.findById(studentService.getAuthStudentId(authentication)).orElseThrow();
-                student.setLastActiveDateTime(LocalDateTime.now());
+        student.setLastActiveDateTime(LocalDateTime.now());
 
         Optional<Event> event = eventService.findEventById(eventId);
 
@@ -49,16 +52,17 @@ public class FavouriteEventController {
                 return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Event already added"));
             }
 
-            Set<Tag> eventTags = event.get().getTags();
-            Set<Interest> interestsToAdd = eventTags.stream()
-                    .map(tag -> {
-                        Interest interest = new Interest();
-                        interest.setName(tag.getName());
-                        return interest;
-                    })
-                    .collect(Collectors.toSet());
+            Set<String> tagsNames = event.get().getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+            Set<Interest> currentInterests = student.getInterests();
 
-            student.getInterests().addAll(interestsToAdd);
+            for (String tagName : tagsNames) {
+                Interest interest = interestService.findByName(tagName);
+                if (interest != null && currentInterests.stream().noneMatch(i -> i.getName().equals(interest.getName()))) {
+                    interest.getInterestedStudents().add(student);
+                }
+            }
+            studentService.save(student);
+
             FavouriteEvent favouriteEvent = createFavouriteEvent(event.get(), studentId);
             favouriteEventService.addToFavorites(eventId);
             favouriteEventService.save(favouriteEvent);
@@ -75,7 +79,7 @@ public class FavouriteEventController {
         Map<String, Object> response = new HashMap<>();
         Long studentId = studentService.getAuthStudentId(authentication);
         Student student = studentService.findById(studentId).orElseThrow();
-            student.setLastActiveDateTime(LocalDateTime.now());
+        student.setLastActiveDateTime(LocalDateTime.now());
 
         Optional<FavouriteEvent> favouriteEvent = favouriteEventService.findByStudentIdAndEventId(studentId, eventId);
         if (favouriteEvent.isPresent()) {

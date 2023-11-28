@@ -33,7 +33,7 @@ public class InterestController {
 
     @Operation(summary = "Add interest.")
     @PostMapping("/add")
-    public ResponseEntity<Interest> addEvent(@RequestBody @NotNull InterestDto interestDto) {
+    public ResponseEntity<Interest> addInterests(@RequestBody @NotNull InterestDto interestDto) {
         try {
             Interest interest = modelMapper.map(interestDto, Interest.class);
 

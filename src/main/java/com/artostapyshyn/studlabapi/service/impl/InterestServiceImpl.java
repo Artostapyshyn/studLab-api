@@ -44,4 +44,9 @@ public class InterestServiceImpl implements InterestService {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         return modelMapper.map(interest, InterestDto.class);
     }
+
+    @Override
+    public Interest findByName(String name) {
+        return interestRepository.findByName(name);
+    }
 }

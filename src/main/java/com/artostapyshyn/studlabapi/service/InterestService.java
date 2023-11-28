@@ -14,4 +14,6 @@ public interface InterestService {
     Interest save(Interest interest);
 
     InterestDto convertToDTO(Interest interest);
+
+    Interest findByName(String name);
 }
