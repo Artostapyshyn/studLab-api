@@ -60,6 +60,6 @@ public class StudentStatisticServiceImpl implements StudentStatisticsService {
 
     @Override
     public int getAllTimeStatistics() {
-        return studentStatisticsRepository.getAllTimeStatistics();
+        return studentStatisticsRepository.getAllTimeStatistics(LocalDateTime.of(2023, 8, 1, 0, 0));
     }
 }

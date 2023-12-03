@@ -16,7 +16,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     List<Meeting> findAllByAuthorId(Long id);
 
-    @Query("SELECT m FROM Meeting m WHERE m.author IN (SELECT f FROM Student s JOIN s.friendships f WHERE s.id = :studentId)")
+    @Query("SELECT m FROM Meeting m JOIN m.author a JOIN a.friendships f WHERE a.id = :studentId")
     Set<Meeting> findMeetingsByStudentFriends(@Param("studentId") Long studentId);
 
     List<Meeting> findAllByParticipantsId(Long id);

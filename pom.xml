@@ -5,17 +5,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.10</version>
+        <version>3.1.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.artostapyshyn</groupId>
     <artifactId>studLab-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>studLab-api</name>
-    <description>Demo project for Spring Boot</description>
+
     <properties>
         <java.version>17</java.version>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -25,6 +26,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.3.0.CR1</version></dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
