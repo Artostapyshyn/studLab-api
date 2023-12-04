@@ -110,7 +110,11 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void updateStudent(Student existingStudent, StudentEditDto updatedStudent) {
         setUniversity(existingStudent, updatedStudent.getUniversityName());
-        setInterests(existingStudent, updatedStudent.getInterests());
+        Set<String> updatedInterests = updatedStudent.getInterests();
+
+        if (updatedInterests != null) {
+            setInterests(existingStudent, updatedInterests);
+        }
         modelMapper.getConfiguration().setSkipNullEnabled(true);
         modelMapper.map(updatedStudent, existingStudent);
         studentRepository.save(existingStudent);
@@ -136,7 +140,7 @@ public class StudentServiceImpl implements StudentService {
         student.setRegistrationDate(LocalDateTime.now());
     }
 
-    private void setInterests(Student student, List<String> interests) {
+    private void setInterests(Student student, Set<String> interests) {
        for (String interestName : interests) {
            Interest interest = interestRepository.findByName(interestName);
            student.setInterests(Set.of(interest));

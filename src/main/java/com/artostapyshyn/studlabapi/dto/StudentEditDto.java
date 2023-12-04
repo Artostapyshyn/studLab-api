@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,5 +27,5 @@ public class StudentEditDto {
     @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime birthDate;
     private String universityName;
-    private List<String> interests;
+    private Set<String> interests;
 }
