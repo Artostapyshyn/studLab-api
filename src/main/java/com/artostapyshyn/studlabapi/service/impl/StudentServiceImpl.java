@@ -145,6 +145,7 @@ public class StudentServiceImpl implements StudentService {
            Interest interest = interestRepository.findByName(interestName);
            Set<Interest> studentInterests = student.getInterests();
            studentInterests.add(interest);
+           interest.getInterestedStudents().add(student);
         }
     }
 
