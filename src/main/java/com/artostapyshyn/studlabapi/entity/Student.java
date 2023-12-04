@@ -61,20 +61,18 @@ public class Student {
     private Boolean hasNewMessages;
 
     @Column(name = "birthday")
-    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
-    @JsonFormat(pattern="dd-MM-yyyy")
-    private LocalDateTime birthDate;
+    private String birthDate;
 
     @Column(name = "blocked_until")
     private LocalDateTime blockedUntil;
 
     @Column(name = "last_active_date_time")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime lastActiveDateTime;
 
     @Column(name = "registration_date")
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
     private LocalDateTime registrationDate;
 
