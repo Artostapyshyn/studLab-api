@@ -112,7 +112,7 @@ public class StudentServiceImpl implements StudentService {
         setUniversity(existingStudent, updatedStudent.getUniversityName());
         Set<String> updatedInterests = updatedStudent.getInterests();
 
-        if (updatedInterests != null) {
+        if (updatedInterests != null && !updatedInterests.isEmpty()) {
             setInterests(existingStudent, updatedInterests);
         }
         modelMapper.getConfiguration().setSkipNullEnabled(true);
@@ -143,7 +143,8 @@ public class StudentServiceImpl implements StudentService {
     private void setInterests(Student student, Set<String> interests) {
        for (String interestName : interests) {
            Interest interest = interestRepository.findByName(interestName);
-           student.setInterests(Set.of(interest));
+           Set<Interest> studentInterests = student.getInterests();
+           studentInterests.add(interest);
         }
     }
 
