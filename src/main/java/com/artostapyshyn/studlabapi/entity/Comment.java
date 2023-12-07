@@ -11,10 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -41,7 +38,7 @@ public class Comment {
 
     @JsonBackReference
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Reply> replies;
+    private List<Reply> replies = new LinkedList<>();
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JsonIdentityReference(alwaysAsId = true)

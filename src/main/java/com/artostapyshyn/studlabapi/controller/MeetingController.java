@@ -176,6 +176,10 @@ public class MeetingController {
 
             Long studentId = studentService.getAuthStudentId(authentication);
             Optional<Student> student = studentService.findById(studentId);
+            if (student.isEmpty()) {
+                response.put(ERROR, "Student not found.");
+                return ResponseEntity.badRequest().body(response);
+            }
             student.get().setLastActiveDateTime(LocalDateTime.now());
 
             if (isParticipate) {

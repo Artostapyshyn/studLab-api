@@ -46,6 +46,7 @@ public class ComplaintServiceImpl implements ComplaintService {
                     case "week" -> student.setBlockedUntil(LocalDateTime.now().plusWeeks(1));
                     case "month" -> student.setBlockedUntil(LocalDateTime.now().plusMonths(1));
                     case "forever" -> student.setBlockedUntil(LocalDateTime.now().plusYears(10));
+                    default -> throw new IllegalArgumentException("Invalid block duration");
                 }
             }
 

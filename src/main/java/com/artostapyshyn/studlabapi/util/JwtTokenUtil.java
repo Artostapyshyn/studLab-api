@@ -6,8 +6,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,14 +22,14 @@ import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
 
 @Component
 @Log4j2
+@AllArgsConstructor
 public class JwtTokenUtil implements Serializable {
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60L;
 
-    Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
