@@ -17,6 +17,8 @@ jobs:
       MAIL_HOST: ${{ secrets.MAIL_HOST }}
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
       MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
     steps:
       - name: Pull Docker Image
         run: sudo docker pull ghcr.io/artostapyshyn/stud-lab-api:latest
@@ -32,4 +34,6 @@ jobs:
           -e spring.mail.host=${{ env.MAIL_HOST }} \
           -e spring.mail.username=${{ env.MAIL_USERNAME }} \
           -e spring.mail.password=${{ env.MAIL_PASSWORD }} \
+          -e spring.security.oauth2.client.registration.google.client-id=${{ env.CLIENT_ID }} \
+          -e spring.security.oauth2.client.registration.google.client-secret=${{ env.CLIENT_SECRET }} \
           --name stud-lab-api-container ghcr.io/artostapyshyn/stud-lab-api
