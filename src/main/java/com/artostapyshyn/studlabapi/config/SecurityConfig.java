@@ -56,7 +56,7 @@ public class SecurityConfig {
                 ).
                 sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .headers().frameOptions().disable();
+                .oauth2Login(withDefaults());
         return http.build();
     }
 

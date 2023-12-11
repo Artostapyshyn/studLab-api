@@ -23,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -118,6 +119,38 @@ public class AuthController {
 
         response.put(MESSAGE, "Invalid email");
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @GetMapping("/google/callback")
+    public ResponseEntity<Map<String, Object>> googleLoginCallback(Authentication authentication) {
+        OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
+        String email = oauthUser.getAttribute("email");
+
+        Student student = studentService.findByEmail(email); // припускаємо, що цей метод існує
+
+        if (student == null) {
+            student = new Student();
+            student.setEmail(email);
+            student.setFirstName("RandomFirstName");
+            student.setLastName("RandomLastName");
+            student.setRole(Role.ROLE_STUDENT);
+            student.setEnabled(true);
+            student.setAuthStatus(ONLINE);
+            student.setLastActiveDateTime(LocalDateTime.now());
+            student.setPassword("RandomPassword");
+
+            student = studentService.save(student);
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        String token = jwtTokenUtil.generateToken(userDetails, student.getId());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", student);
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 
 
