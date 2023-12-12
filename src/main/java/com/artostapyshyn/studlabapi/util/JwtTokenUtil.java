@@ -1,7 +1,5 @@
 package com.artostapyshyn.studlabapi.util;
 
-import com.artostapyshyn.studlabapi.entity.Student;
-import com.artostapyshyn.studlabapi.service.StudentService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,14 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
-
 @Component
 @Log4j2
 @AllArgsConstructor
 public class JwtTokenUtil implements Serializable {
-
-    private final StudentService studentService;
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60L;
 
@@ -63,16 +57,18 @@ public class JwtTokenUtil implements Serializable {
                 .signWith(key).compact();
     }
 
+    public String generateTokenByEmail(String email, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+
+        return Jwts.builder().setClaims(claims).setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+                .signWith(key).compact();
+    }
+
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = getUsernameFromToken(token);
-        if (username.equals(userDetails.getUsername())) {
-            if (!isTokenExpired(token)) {
-                String foundUsername = getUsernameFromToken(token);
-                Student student = studentService.findByEmail(foundUsername);
-                student.setAuthStatus(OFFLINE);
-            }
-            return true;
-        }
-        return false;
+        return username.equals(userDetails.getUsername());
     }
 }

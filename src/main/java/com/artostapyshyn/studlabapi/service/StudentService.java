@@ -1,5 +1,6 @@
 package com.artostapyshyn.studlabapi.service;
 
+import com.artostapyshyn.studlabapi.dto.IdTokenRequestDto;
 import com.artostapyshyn.studlabapi.dto.StudentEditDto;
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
 import com.artostapyshyn.studlabapi.entity.Student;
@@ -14,6 +15,8 @@ public interface StudentService {
     Student findByEmail(String email);
 
     Student save(Student student);
+
+    String loginOAuthGoogle(IdTokenRequestDto requestBody);
 
     List<Student> findAll();
 

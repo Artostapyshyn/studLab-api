@@ -1,17 +1,23 @@
 package com.artostapyshyn.studlabapi.service.impl;
 
+import com.artostapyshyn.studlabapi.dto.IdTokenRequestDto;
 import com.artostapyshyn.studlabapi.dto.SignUpDto;
 import com.artostapyshyn.studlabapi.dto.StudentEditDto;
 import com.artostapyshyn.studlabapi.entity.Interest;
 import com.artostapyshyn.studlabapi.entity.Major;
 import com.artostapyshyn.studlabapi.entity.Student;
 import com.artostapyshyn.studlabapi.entity.University;
+import com.artostapyshyn.studlabapi.enums.Role;
 import com.artostapyshyn.studlabapi.repository.InterestRepository;
 import com.artostapyshyn.studlabapi.repository.MajorRepository;
 import com.artostapyshyn.studlabapi.repository.StudentRepository;
 import com.artostapyshyn.studlabapi.repository.UniversityRepository;
 import com.artostapyshyn.studlabapi.service.StudentService;
+import com.artostapyshyn.studlabapi.util.JwtTokenUtil;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -19,13 +25,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.artostapyshyn.studlabapi.enums.AuthStatus.OFFLINE;
+import static com.artostapyshyn.studlabapi.enums.AuthStatus.ONLINE;
 
+@Log4j2
 @Service
 @AllArgsConstructor
 public class StudentServiceImpl implements StudentService {
@@ -39,6 +49,10 @@ public class StudentServiceImpl implements StudentService {
     private final ModelMapper modelMapper;
 
     private final InterestRepository interestRepository;
+
+    private final GoogleIdTokenVerifier verifier;
+
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Override
     public Optional<Student> findById(Long id) {
@@ -178,5 +192,51 @@ public class StudentServiceImpl implements StudentService {
             student.setAuthStatus(OFFLINE);
             studentRepository.save(student);
         });
+    }
+
+    @Override
+    public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
+        Student student = verifyIDToken(requestBody.getIdToken());
+        if (student == null) {
+            throw new IllegalArgumentException();
+        }
+        student = createOrUpdateStudent(student);
+        log.warn("Student: " + student.getEmail());
+
+        return jwtTokenUtil.generateTokenByEmail(student.getEmail(), student.getId());
+    }
+
+    private Student verifyIDToken(String idToken) {
+        try {
+            GoogleIdToken idTokenObj = verifier.verify(idToken);
+            if (idTokenObj == null) {
+                return null;
+            }
+            GoogleIdToken.Payload payload = idTokenObj.getPayload();
+            String email = payload.getEmail();
+
+            Student student = new Student();
+            student.setEmail(email);
+
+            return student;
+        } catch (GeneralSecurityException | IOException e) {
+            return null;
+        }
+    }
+
+    public Student createOrUpdateStudent(Student student) {
+        Student existingAccount = studentRepository.findByEmail(student.getEmail());
+        if (existingAccount == null) {
+            student.setRole(Role.ROLE_STUDENT);
+
+            student.setEnabled(true);
+            studentRepository.save(student);
+            return student;
+        }
+        student.setEmail(existingAccount.getEmail());
+        student.setAuthStatus(ONLINE);
+        student.setLastActiveDateTime(LocalDateTime.now());
+        studentRepository.save(existingAccount);
+        return existingAccount;
     }
 }

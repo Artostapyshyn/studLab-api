@@ -42,7 +42,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable).cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/v1/**", "api/v1/auth/**", "api/v1/auth/alternative/**", "/ws/**").permitAll()
+                        .requestMatchers("api/v1/**", "api/v1/auth/**", "api/v1/auth/oauth/**", "/ws/**").permitAll()
                         .requestMatchers("api/v1/vacancies/**", "api/v1/achievements/**", "api/v1/meetings/**",
                                 "api/v1/comments/**", "api/v1/favourites/**",
                                 "api/v1/messages/**", "api/v1/events/**", "api/v1/services/**",
@@ -55,8 +55,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 ).
                 sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(withDefaults());
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
